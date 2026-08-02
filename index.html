@@ -64,6 +64,14 @@
   .add-bar .b-rem { background: #444c5c; color: #fff; }
   .card.illegal img { filter: grayscale(.85) brightness(.55); }
   #loadState { padding: 40px; text-align: center; color: var(--text-dim); grid-column: 1/-1; font-size: 14px; }
+  .gridhead { grid-column: 1/-1; font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 2px; padding: 10px 2px 2px; border-bottom: 2px solid var(--border); margin-bottom: 2px; }
+  .gh-Red { color: var(--red); border-color: var(--red); }
+  .gh-Green { color: var(--green); border-color: var(--green); }
+  .gh-Blue { color: var(--blue); border-color: var(--blue); }
+  .gh-Purple { color: var(--purple); border-color: var(--purple); }
+  .gh-Black { color: #aab4c4; border-color: var(--black); }
+  .gh-Yellow { color: var(--yellow); border-color: var(--yellow); }
+  .gh-Other { color: var(--text-dim); }
   .spinner { display: inline-block; width: 22px; height: 22px; border: 3px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin .8s linear infinite; vertical-align: middle; margin-right: 10px; }
   @keyframes spin { to { transform: rotate(360deg); } }
 
@@ -176,6 +184,7 @@
       <button id="btnFilters" class="paneltoggle" title="Filters">☰</button>
       <input type="text" id="search" placeholder="Search name, effect text, type… (e.g. Luffy, Blocker, Straw Hat)">
       <select id="sort">
+        <option value="color">Sort: Color / Cost</option>
         <option value="id">Sort: Set / Number</option>
         <option value="cost">Sort: Cost</option>
         <option value="power">Sort: Power</option>
@@ -243,6 +252,9 @@ const COLORS = ['Red','Green','Blue','Purple','Black','Yellow'];
 const TYPES = ['Leader','Character','Event','Stage'];
 const KEYWORDS = ['Blocker','Rush','Double Attack','Banish','Trigger','On Play','When Attacking','On K.O.','On Block','Activate: Main','Counter','Once Per Turn','On Your Opponent\'s Attack'];
 const RARITIES = ['L','C','UC','R','SR','SEC','P','SP'];
+const TYPE_ORDER = { Leader: 0, Character: 1, Event: 2, Stage: 3 };
+function colorIdx(c) { return c.colors.length ? COLORS.indexOf(c.colors[0]) : COLORS.length; }
+function colorGroup(c) { return c.colors.length ? c.colors[0] : 'Other'; }
 
 let cards = [];            // deduped card list
 let byId = new Map();      // card_set_id -> card
@@ -413,7 +425,12 @@ function applyFilters() {
   if (sort === 'cost') filtered.sort((a,b) => (a.cost ?? -1) - (b.cost ?? -1) || a.id.localeCompare(b.id));
   else if (sort === 'power') filtered.sort((a,b) => (b.power ?? -1) - (a.power ?? -1) || a.id.localeCompare(b.id));
   else if (sort === 'name') filtered.sort((a,b) => a.name.localeCompare(b.name));
-  else filtered.sort((a,b) => a.id.localeCompare(b.id, undefined, {numeric:true}));
+  else if (sort === 'id') filtered.sort((a,b) => a.id.localeCompare(b.id, undefined, {numeric:true}));
+  else filtered.sort((a,b) =>
+    colorIdx(a) - colorIdx(b) ||
+    (TYPE_ORDER[a.type] ?? 9) - (TYPE_ORDER[b.type] ?? 9) ||
+    (a.cost ?? -1) - (b.cost ?? -1) ||
+    a.id.localeCompare(b.id, undefined, {numeric:true}));
   document.getElementById('count').textContent = filtered.length + ' cards';
   renderGridReset();
 }
@@ -427,9 +444,22 @@ function renderGridReset() {
   renderMore();
 }
 function renderMore() {
+  const byColor = document.getElementById('sort').value === 'color';
   const frag = document.createDocumentFragment();
   const end = Math.min(renderIdx + RENDER_BATCH, filtered.length);
-  for (; renderIdx < end; renderIdx++) frag.appendChild(cardEl(filtered[renderIdx]));
+  for (; renderIdx < end; renderIdx++) {
+    const c = filtered[renderIdx];
+    if (byColor) {
+      const g = colorGroup(c);
+      if (renderIdx === 0 || colorGroup(filtered[renderIdx - 1]) !== g) {
+        const h = document.createElement('div');
+        h.className = 'gridhead gh-' + g;
+        h.textContent = g;
+        frag.appendChild(h);
+      }
+    }
+    frag.appendChild(cardEl(c));
+  }
   grid.appendChild(frag);
   if (!filtered.length) grid.innerHTML = '<div id="loadState">No cards match these filters.</div>';
 }
