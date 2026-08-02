@@ -1,0 +1,844 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OPTCG Deck Builder</title>
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'unsafe-inline'; img-src 'self' https://optcgapi.com data: blob:; connect-src https://optcgapi.com; manifest-src 'self'; base-uri 'none'; form-action 'none'; object-src 'none'; frame-src 'none'">
+<meta name="referrer" content="no-referrer">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon-192.png">
+<meta name="theme-color" content="#171c26">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<style>
+  :root {
+    --bg: #0f1218;
+    --bg2: #171c26;
+    --bg3: #1f2634;
+    --border: #2c3547;
+    --text: #e8ecf3;
+    --text-dim: #93a0b4;
+    --accent: #e3b341;
+    --red: #d64545; --green: #3f9e63; --blue: #3f77c9; --purple: #8455c9; --black: #555f70; --yellow: #d6b83a;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', system-ui, sans-serif; height: 100vh; overflow: hidden; }
+  #app { display: flex; height: 100vh; }
+
+  /* ===== Sidebar filters ===== */
+  #sidebar { width: 250px; min-width: 250px; background: var(--bg2); border-right: 1px solid var(--border); overflow-y: auto; padding: 14px; }
+  #sidebar h1 { font-size: 17px; margin-bottom: 12px; color: var(--accent); letter-spacing: .5px; }
+  .fgroup { margin-bottom: 14px; }
+  .fgroup > label { display: block; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: var(--text-dim); margin-bottom: 6px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 5px; }
+  .chip { padding: 4px 9px; border-radius: 14px; background: var(--bg3); border: 1px solid var(--border); font-size: 12px; cursor: pointer; user-select: none; transition: all .12s; }
+  .chip:hover { border-color: var(--text-dim); }
+  .chip.on { background: var(--accent); color: #1a1a1a; border-color: var(--accent); font-weight: 600; }
+  .chip.c-Red.on { background: var(--red); color: #fff; border-color: var(--red); }
+  .chip.c-Green.on { background: var(--green); color: #fff; border-color: var(--green); }
+  .chip.c-Blue.on { background: var(--blue); color: #fff; border-color: var(--blue); }
+  .chip.c-Purple.on { background: var(--purple); color: #fff; border-color: var(--purple); }
+  .chip.c-Black.on { background: var(--black); color: #fff; border-color: var(--black); }
+  .chip.c-Yellow.on { background: var(--yellow); color: #1a1a1a; border-color: var(--yellow); }
+  select, input[type=text], textarea { width: 100%; background: var(--bg3); border: 1px solid var(--border); color: var(--text); border-radius: 6px; padding: 7px 9px; font-size: 13px; outline: none; }
+  select:focus, input:focus, textarea:focus { border-color: var(--accent); }
+  #btnClear { width: 100%; padding: 7px; background: none; border: 1px solid var(--border); color: var(--text-dim); border-radius: 6px; cursor: pointer; font-size: 12px; }
+  #btnClear:hover { color: var(--text); border-color: var(--text-dim); }
+
+  /* ===== Main grid ===== */
+  #main { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+  #topbar { padding: 10px 14px; background: var(--bg2); border-bottom: 1px solid var(--border); display: flex; gap: 10px; align-items: center; }
+  #search { flex: 1; max-width: 480px; }
+  #count { font-size: 12px; color: var(--text-dim); white-space: nowrap; }
+  #sort { width: auto; }
+  #grid { flex: 1; overflow-y: auto; padding: 14px; display: grid; grid-template-columns: repeat(auto-fill, minmax(138px, 1fr)); gap: 10px; align-content: start; }
+  .card { position: relative; cursor: pointer; border-radius: 7px; transition: transform .1s; }
+  .card:hover { transform: translateY(-3px); }
+  .card img { width: 100%; border-radius: 7px; display: block; background: var(--bg3); aspect-ratio: 600/838; }
+  .card .qty-badge { position: absolute; top: 5px; right: 5px; background: var(--accent); color: #1a1a1a; font-size: 12px; font-weight: 700; min-width: 22px; height: 22px; border-radius: 11px; display: flex; align-items: center; justify-content: center; box-shadow: 0 1px 4px rgba(0,0,0,.6); }
+  .card .add-bar { position: absolute; bottom: 0; left: 0; right: 0; display: none; gap: 4px; padding: 5px; background: linear-gradient(transparent, rgba(0,0,0,.85)); border-radius: 0 0 7px 7px; }
+  .card:hover .add-bar { display: flex; }
+  .add-bar button { flex: 1; border: none; border-radius: 5px; padding: 5px 0; font-size: 14px; font-weight: 700; cursor: pointer; }
+  .add-bar .b-add { background: var(--accent); color: #1a1a1a; }
+  .add-bar .b-rem { background: #444c5c; color: #fff; }
+  .card.illegal img { filter: grayscale(.85) brightness(.55); }
+  #loadState { padding: 40px; text-align: center; color: var(--text-dim); grid-column: 1/-1; font-size: 14px; }
+  .spinner { display: inline-block; width: 22px; height: 22px; border: 3px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin .8s linear infinite; vertical-align: middle; margin-right: 10px; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ===== Deck panel ===== */
+  #deckpanel { width: 320px; min-width: 320px; background: var(--bg2); border-left: 1px solid var(--border); display: flex; flex-direction: column; }
+  #deckhead { padding: 12px 14px; border-bottom: 1px solid var(--border); }
+  #deckbar { display: flex; gap: 6px; margin-bottom: 10px; }
+  #deckbar select { flex: 1; font-weight: 600; }
+  #deckbar button { background: var(--bg3); border: 1px solid var(--border); color: var(--text-dim); border-radius: 6px; width: 32px; cursor: pointer; font-size: 13px; }
+  #deckbar button:hover { color: var(--text); border-color: var(--text-dim); }
+  #deckhead h2 { font-size: 15px; display: flex; justify-content: space-between; align-items: center; }
+  #deckcount { font-size: 14px; }
+  #deckcount.full { color: #5fd68a; }
+  #deckcount.over { color: #ff6b6b; }
+  #leaderbox { margin-top: 10px; display: flex; gap: 10px; align-items: center; background: var(--bg3); border: 1px dashed var(--border); border-radius: 8px; padding: 8px; min-height: 74px; }
+  #leaderbox img { width: 42px; border-radius: 4px; cursor: pointer; }
+  #leaderbox .linfo { flex: 1; font-size: 12px; }
+  #leaderbox .lname { font-weight: 600; font-size: 13px; }
+  #leaderbox .lsub { color: var(--text-dim); margin-top: 2px; }
+  #leaderbox .lx { background: none; border: none; color: var(--text-dim); cursor: pointer; font-size: 16px; padding: 4px; }
+  #leaderbox .lx:hover { color: #ff6b6b; }
+  #curve { display: flex; gap: 3px; align-items: flex-end; height: 44px; margin-top: 10px; padding: 0 2px; }
+  .cbar { flex: 1; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; gap: 2px; height: 100%; }
+  .cbar .bar { width: 100%; background: var(--accent); border-radius: 2px 2px 0 0; min-height: 1px; opacity: .85; }
+  .cbar .lbl { font-size: 9px; color: var(--text-dim); }
+  .cbar .num { font-size: 9px; color: var(--text); }
+  #decklist { flex: 1; overflow-y: auto; padding: 8px 10px; }
+  .dsection { font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: var(--text-dim); margin: 10px 4px 4px; }
+  .drow { display: flex; align-items: center; gap: 8px; padding: 4px 6px; border-radius: 6px; cursor: pointer; }
+  .drow:hover { background: var(--bg3); }
+  .drow img { width: 30px; border-radius: 3px; }
+  .drow .dname { flex: 1; font-size: 12.5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .drow .dcost { font-size: 11px; color: var(--text-dim); width: 16px; text-align: center; }
+  .drow .dqty { font-size: 12px; font-weight: 700; color: var(--accent); width: 22px; text-align: center; }
+  .drow button { background: var(--bg3); border: 1px solid var(--border); color: var(--text); width: 21px; height: 21px; border-radius: 5px; cursor: pointer; font-size: 12px; line-height: 1; }
+  .drow button:hover { border-color: var(--accent); }
+  #deckfoot { padding: 10px 14px; border-top: 1px solid var(--border); display: flex; flex-direction: column; gap: 7px; }
+  .btnrow { display: flex; gap: 7px; }
+  .btn { flex: 1; padding: 8px 0; border: none; border-radius: 7px; cursor: pointer; font-size: 13px; font-weight: 600; }
+  .btn-gold { background: var(--accent); color: #1a1a1a; }
+  .btn-gold:hover { filter: brightness(1.1); }
+  .btn-dim { background: var(--bg3); color: var(--text); border: 1px solid var(--border); }
+  .btn-dim:hover { border-color: var(--text-dim); }
+  #warns { font-size: 11.5px; color: #ffb35c; padding: 0 2px; }
+
+  /* ===== Modal ===== */
+  #modal { position: fixed; inset: 0; background: rgba(0,0,0,.75); display: none; align-items: center; justify-content: center; z-index: 50; }
+  #modal.open { display: flex; }
+  #modalbox { background: var(--bg2); border: 1px solid var(--border); border-radius: 12px; max-width: 780px; width: 92%; max-height: 90vh; overflow-y: auto; display: flex; gap: 18px; padding: 20px; }
+  #modalbox img { width: 300px; max-width: 42%; border-radius: 10px; align-self: flex-start; }
+  #modalinfo { flex: 1; font-size: 14px; }
+  #modalinfo h3 { font-size: 19px; margin-bottom: 4px; }
+  #modalinfo .mid { color: var(--text-dim); font-size: 12px; margin-bottom: 12px; }
+  .mtag { display: inline-block; background: var(--bg3); border: 1px solid var(--border); border-radius: 5px; padding: 3px 8px; font-size: 12px; margin: 0 5px 6px 0; }
+  #modaltext { margin-top: 10px; line-height: 1.55; color: #cdd6e4; white-space: pre-wrap; }
+  #modalbtns { margin-top: 16px; display: flex; gap: 8px; }
+  #modalbtns .btn { flex: none; padding: 9px 18px; }
+
+  /* export modal */
+  #expbox { background: var(--bg2); border: 1px solid var(--border); border-radius: 12px; max-width: 460px; width: 92%; padding: 20px; }
+  #expbox h3 { margin-bottom: 10px; font-size: 16px; }
+  #expbox textarea { height: 260px; font-family: Consolas, monospace; font-size: 12.5px; resize: vertical; }
+  #expbox .btnrow { margin-top: 10px; }
+  #expmsg { font-size: 12px; color: #5fd68a; height: 16px; margin-top: 6px; }
+
+  /* ===== mobile layout ===== */
+  .paneltoggle { display: none; background: var(--bg3); border: 1px solid var(--border); color: var(--text); border-radius: 7px; padding: 7px 11px; font-size: 15px; cursor: pointer; white-space: nowrap; }
+  #scrim { position: fixed; inset: 0; background: rgba(0,0,0,.55); z-index: 39; display: none; }
+  #scrim.on { display: block; }
+  @media (max-width: 900px) {
+    .paneltoggle { display: inline-block; }
+    #deckMini { color: var(--accent); font-weight: 700; }
+    #sidebar { position: fixed; left: 0; top: 0; bottom: 0; z-index: 40; width: min(300px, 85vw); transform: translateX(-105%); transition: transform .2s; }
+    #sidebar.open { transform: none; box-shadow: 6px 0 30px rgba(0,0,0,.5); }
+    #deckpanel { position: fixed; right: 0; top: 0; bottom: 0; z-index: 40; width: min(340px, 92vw); min-width: 0; transform: translateX(105%); transition: transform .2s; }
+    #deckpanel.open { transform: none; box-shadow: -6px 0 30px rgba(0,0,0,.5); }
+    #grid { grid-template-columns: repeat(auto-fill, minmax(102px, 1fr)); gap: 7px; padding: 8px; }
+    #topbar { padding: 8px; gap: 6px; }
+    #count { display: none; }
+    #modalbox { flex-direction: column; align-items: center; gap: 12px; }
+    #modalbox img { width: min(260px, 70vw); max-width: none; }
+    .card .add-bar { display: flex; opacity: .95; }
+  }
+
+  ::-webkit-scrollbar { width: 9px; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 5px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+</style>
+</head>
+<body>
+<div id="app">
+
+  <div id="sidebar">
+    <h1>⚓ OPTCG Builder</h1>
+    <div class="fgroup"><label>Color</label><div class="chips" id="fColor"></div></div>
+    <div class="fgroup"><label>Card Type</label><div class="chips" id="fType"></div></div>
+    <div class="fgroup"><label>Cost</label><div class="chips" id="fCost"></div></div>
+    <div class="fgroup"><label>Keywords / Effects</label><div class="chips" id="fKw"></div></div>
+    <div class="fgroup"><label>Attribute</label><div class="chips" id="fAttr"></div></div>
+    <div class="fgroup"><label>Counter</label><div class="chips" id="fCounter"></div></div>
+    <div class="fgroup"><label>Character Type</label><select id="fSub"><option value="">Any</option></select></div>
+    <div class="fgroup"><label>Set</label><select id="fSet"><option value="">All sets</option></select></div>
+    <div class="fgroup"><label>Rarity</label><div class="chips" id="fRarity"></div></div>
+    <div class="fgroup"><label><input type="checkbox" id="fLegal" style="width:auto;vertical-align:-2px"> only cards legal for my leader</label></div>
+    <button id="btnClear">✕ Clear all filters</button>
+  </div>
+
+  <div id="main">
+    <div id="topbar">
+      <button id="btnFilters" class="paneltoggle" title="Filters">☰</button>
+      <input type="text" id="search" placeholder="Search name, effect text, type… (e.g. Luffy, Blocker, Straw Hat)">
+      <select id="sort">
+        <option value="id">Sort: Set / Number</option>
+        <option value="cost">Sort: Cost</option>
+        <option value="power">Sort: Power</option>
+        <option value="name">Sort: Name</option>
+      </select>
+      <span id="count"></span>
+      <button id="btnDeckPanel" class="paneltoggle" title="Deck">🃏 <span id="deckMini">0</span></button>
+    </div>
+    <div id="grid"><div id="loadState"><span class="spinner"></span>Loading card database…</div></div>
+  </div>
+
+  <div id="deckpanel">
+    <div id="deckhead">
+      <div id="deckbar">
+        <select id="deckSel" title="Switch deck"></select>
+        <button id="btnRename" title="Rename deck">✎</button>
+        <button id="btnDelete" title="Delete deck">🗑</button>
+      </div>
+      <h2>Deck <span id="deckcount">0 / 50</span></h2>
+      <div id="leaderbox"><div class="linfo" style="color:var(--text-dim)">No leader selected — click a Leader card to set it.</div></div>
+      <div id="curve"></div>
+    </div>
+    <div id="decklist"></div>
+    <div id="deckfoot">
+      <div id="warns"></div>
+      <div class="btnrow">
+        <button class="btn btn-gold" id="btnExport">Export ⇪</button>
+        <button class="btn btn-dim" id="btnImport">Import</button>
+        <button class="btn btn-dim" id="btnNew">New</button>
+      </div>
+      <div class="btnrow">
+        <button class="btn btn-dim" id="btnBackup" title="Download all decks as a file">💾 Backup all</button>
+        <button class="btn btn-dim" id="btnRestore" title="Load decks from a backup file">📂 Restore</button>
+        <input type="file" id="restoreFile" accept=".json" style="display:none">
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div id="scrim"></div>
+<div id="modal"><div id="modalbox"></div></div>
+<div id="modal2" style="position:fixed;inset:0;background:rgba(0,0,0,.75);display:none;align-items:center;justify-content:center;z-index:60">
+  <div id="expbox">
+    <h3 id="exptitle">Export deck</h3>
+    <textarea id="exptext" spellcheck="false"></textarea>
+    <div id="expmsg"></div>
+    <div class="btnrow">
+      <button class="btn btn-gold" id="expAction">Copy to clipboard</button>
+      <button class="btn btn-dim" id="expClose">Close</button>
+    </div>
+  </div>
+</div>
+
+<script src="custom-cards.js"></script>
+<script>
+'use strict';
+const API = 'https://optcgapi.com/api/';
+const CACHE_KEY = 'optcg_cards_v1';
+const CACHE_TTL = 24 * 3600 * 1000; // refresh daily
+const DECK_KEY = 'optcg_deck_v1';        // legacy single-deck key (migrated)
+const STORE_KEY = 'optcg_decks_v2';      // multi-deck store
+
+const COLORS = ['Red','Green','Blue','Purple','Black','Yellow'];
+const TYPES = ['Leader','Character','Event','Stage'];
+const KEYWORDS = ['Blocker','Rush','Double Attack','Banish','Trigger','On Play','When Attacking','On K.O.','On Block','Activate: Main','Counter','Once Per Turn','On Your Opponent\'s Attack'];
+const RARITIES = ['L','C','UC','R','SR','SEC','P','SP'];
+
+let cards = [];            // deduped card list
+let byId = new Map();      // card_set_id -> card
+let filtered = [];
+let renderIdx = 0;
+const RENDER_BATCH = 80;
+
+// deck state: store holds all saved decks; `deck` points at the current one
+let store = { decks: {}, cur: null };
+let deck = { name: 'My Deck', leader: null, cards: {} }; // cards: { id: qty }
+
+// filter state
+const F = { colors: new Set(), types: new Set(), costs: new Set(), kws: new Set(), attrs: new Set(), counters: new Set(), rarities: new Set(), sub: '', set: '', q: '', legalOnly: false };
+
+/* ================= data loading ================= */
+async function loadCards() {
+  // try cache
+  try {
+    const raw = localStorage.getItem(CACHE_KEY);
+    if (raw) {
+      const c = JSON.parse(raw);
+      if (Date.now() - c.t < CACHE_TTL && Array.isArray(c.d) && c.d.length) { finishLoad(c.d); return; }
+    }
+  } catch (e) {}
+  const [setCards, stCards] = await Promise.all([
+    fetch(API + 'allSetCards/').then(r => r.json()),
+    fetch(API + 'allSTCards/').then(r => r.json()),
+  ]);
+  const all = [...setCards, ...stCards];
+  // dedupe: keep base printing (image id === card id), else first seen
+  const map = new Map();
+  for (const c of all) {
+    const id = c.card_set_id;
+    if (!id) continue;
+    const isBase = c.card_image_id === id;
+    if (!map.has(id) || (isBase && map.get(id).card_image_id !== id)) map.set(id, c);
+  }
+  // slim objects for cache
+  const slim = [...map.values()].map(c => ({
+    id: c.card_set_id, name: c.card_name, text: c.card_text || '', set: c.set_name, setId: c.set_id,
+    rarity: c.rarity, color: c.card_color || '', type: c.card_type, life: c.life,
+    cost: c.card_cost != null ? +c.card_cost : null, power: c.card_power != null ? +c.card_power : null,
+    subs: c.sub_types || '', counter: c.counter_amount != null ? +c.counter_amount : null,
+    attr: c.attribute || '', img: c.card_image
+  }));
+  slim.sort((a, b) => a.id.localeCompare(b.id, undefined, { numeric: true }));
+  try { localStorage.setItem(CACHE_KEY, JSON.stringify({ t: Date.now(), d: slim })); } catch (e) {}
+  finishLoad(slim);
+}
+
+function finishLoad(list) {
+  cards = list;
+  // merge custom/spoiler cards (custom-cards.js) not already in the API data
+  if (Array.isArray(window.CUSTOM_CARDS)) {
+    const have = new Set(cards.map(c => c.id));
+    for (const c of window.CUSTOM_CARDS) if (!have.has(c.id)) cards.push(c);
+  }
+  byId = new Map(cards.map(c => [c.id, c]));
+  for (const c of cards) {
+    c.colors = c.color.split(/[\s\/]+/).map(s => s.trim()).filter(col => COLORS.includes(col));
+    if (!c.attr || c.attr === 'NULL' || c.attr === '?') c.attr = '';
+    c.kws = KEYWORDS.filter(k => c.text.includes('[' + k + ']'));
+    c.search = (c.name + ' ' + c.text + ' ' + c.subs + ' ' + c.id).toLowerCase();
+  }
+  buildFilterOptions();
+  loadDeck();
+  applyFilters();
+  renderDeck();
+}
+
+/* ================= filters UI ================= */
+function chipGroup(elId, values, set, cls) {
+  const el = document.getElementById(elId);
+  el.innerHTML = '';
+  for (const v of values) {
+    const d = document.createElement('div');
+    d.className = 'chip' + (cls ? ' ' + cls + v : '');
+    d.textContent = v;
+    d.onclick = () => { set.has(v) ? set.delete(v) : set.add(v); d.classList.toggle('on'); applyFilters(); };
+    el.appendChild(d);
+  }
+}
+
+function buildFilterOptions() {
+  chipGroup('fColor', COLORS, F.colors, 'c-');
+  chipGroup('fType', TYPES, F.types);
+  chipGroup('fCost', ['0','1','2','3','4','5','6','7','8','9','10+'], F.costs);
+  chipGroup('fKw', KEYWORDS, F.kws);
+  const attrs = [...new Set(cards.map(c => c.attr).filter(Boolean))].sort();
+  chipGroup('fAttr', attrs, F.attrs);
+  chipGroup('fCounter', ['None','1000','2000'], F.counters);
+  chipGroup('fRarity', RARITIES.filter(r => cards.some(c => c.rarity === r)), F.rarities);
+  // sub types: strings are space-concatenated with no delimiter ("Animal Straw Hat Crew"),
+  // so derive atomic type names = full strings that don't phrase-contain another known full string.
+  // Word-boundary matching keeps truncated junk entries ("Straw Hat Cre") from eating real types,
+  // and single-use prefixes of longer atoms are dropped as data typos.
+  const counts = new Map();
+  for (const c of cards) { const s = c.subs.trim(); if (s) counts.set(s, (counts.get(s) || 0) + 1); }
+  const fulls = [...counts.keys()];
+  let atoms = fulls.filter(s => !fulls.some(t => t !== s && phraseIn(s, t)));
+  atoms = atoms.filter(s => !(counts.get(s) <= 1 && atoms.some(t => t !== s && t.startsWith(s))));
+  atoms = atoms.filter(s => /[A-Za-z]{2,}/.test(s));
+  const subSel = document.getElementById('fSub');
+  atoms.sort().forEach(s => { const o = document.createElement('option'); o.value = o.textContent = s; subSel.appendChild(o); });
+  subSel.onchange = () => { F.sub = subSel.value; applyFilters(); };
+  // sets
+  const sets = new Map();
+  for (const c of cards) if (!sets.has(c.setId)) sets.set(c.setId, c.set);
+  const setSel = document.getElementById('fSet');
+  [...sets.entries()].sort((a,b) => a[0].localeCompare(b[0], undefined, {numeric:true}))
+    .forEach(([id, name]) => { const o = document.createElement('option'); o.value = id; o.textContent = id + ' — ' + name; setSel.appendChild(o); });
+  setSel.onchange = () => { F.set = setSel.value; applyFilters(); };
+
+  document.getElementById('search').oninput = e => { F.q = e.target.value.toLowerCase().trim(); applyFilters(); };
+  document.getElementById('sort').onchange = applyFilters;
+  document.getElementById('fLegal').onchange = e => { F.legalOnly = e.target.checked; applyFilters(); };
+  document.getElementById('btnClear').onclick = () => {
+    F.colors.clear(); F.types.clear(); F.costs.clear(); F.kws.clear(); F.attrs.clear(); F.counters.clear(); F.rarities.clear();
+    F.sub = ''; F.set = ''; F.q = ''; F.legalOnly = false;
+    document.getElementById('fSub').value = ''; document.getElementById('fSet').value = '';
+    document.getElementById('search').value = ''; document.getElementById('fLegal').checked = false;
+    document.querySelectorAll('.chip.on').forEach(c => c.classList.remove('on'));
+    applyFilters();
+  };
+}
+
+// does `haystack` contain `phrase` aligned to word boundaries?
+function phraseIn(haystack, phrase) {
+  const i = haystack.indexOf(phrase);
+  if (i < 0) return false;
+  const before = i === 0 || haystack[i - 1] === ' ';
+  const j = i + phrase.length;
+  const after = j === haystack.length || haystack[j] === ' ';
+  return before && after;
+}
+
+function leaderColors() { return deck.leader ? byId.get(deck.leader)?.colors || [] : []; }
+function cardLegal(c) {
+  if (c.type === 'Leader') return false;
+  const lc = leaderColors();
+  if (!lc.length || !c.colors.length) return true; // unknown color (spoilers) = assume legal
+  return c.colors.some(col => lc.includes(col));
+}
+
+function applyFilters() {
+  filtered = cards.filter(c => {
+    if (F.q && !c.search.includes(F.q)) return false;
+    if (F.colors.size && !c.colors.some(col => F.colors.has(col))) return false;
+    if (F.types.size && !F.types.has(c.type)) return false;
+    if (F.costs.size) {
+      const v = c.type === 'Leader' ? null : c.cost;
+      const key = v == null ? null : (v >= 10 ? '10+' : String(v));
+      if (!key || !F.costs.has(key)) return false;
+    }
+    if (F.kws.size && ![...F.kws].every(k => c.kws.includes(k))) return false;
+    if (F.attrs.size && !F.attrs.has(c.attr)) return false;
+    if (F.counters.size) {
+      const key = !c.counter ? 'None' : String(c.counter);
+      if (!F.counters.has(key)) return false;
+    }
+    if (F.rarities.size && !F.rarities.has(c.rarity)) return false;
+    if (F.sub && !phraseIn(c.subs, F.sub)) return false;
+    if (F.set && c.setId !== F.set) return false;
+    if (F.legalOnly && deck.leader && c.type !== 'Leader' && !cardLegal(c)) return false;
+    return true;
+  });
+  const sort = document.getElementById('sort').value;
+  if (sort === 'cost') filtered.sort((a,b) => (a.cost ?? -1) - (b.cost ?? -1) || a.id.localeCompare(b.id));
+  else if (sort === 'power') filtered.sort((a,b) => (b.power ?? -1) - (a.power ?? -1) || a.id.localeCompare(b.id));
+  else if (sort === 'name') filtered.sort((a,b) => a.name.localeCompare(b.name));
+  else filtered.sort((a,b) => a.id.localeCompare(b.id, undefined, {numeric:true}));
+  document.getElementById('count').textContent = filtered.length + ' cards';
+  renderGridReset();
+}
+
+/* ================= grid rendering ================= */
+const grid = document.getElementById('grid');
+function renderGridReset() {
+  grid.innerHTML = '';
+  renderIdx = 0;
+  grid.scrollTop = 0;
+  renderMore();
+}
+function renderMore() {
+  const frag = document.createDocumentFragment();
+  const end = Math.min(renderIdx + RENDER_BATCH, filtered.length);
+  for (; renderIdx < end; renderIdx++) frag.appendChild(cardEl(filtered[renderIdx]));
+  grid.appendChild(frag);
+  if (!filtered.length) grid.innerHTML = '<div id="loadState">No cards match these filters.</div>';
+}
+grid.addEventListener('scroll', () => {
+  if (grid.scrollTop + grid.clientHeight > grid.scrollHeight - 900) renderMore();
+});
+
+function cardEl(c) {
+  const d = document.createElement('div');
+  d.className = 'card';
+  d.dataset.id = c.id;
+  if (deck.leader && c.type !== 'Leader' && !cardLegal(c)) d.classList.add('illegal');
+  const img = document.createElement('img');
+  img.loading = 'lazy';
+  img.src = c.img;
+  img.alt = c.name;
+  img.onerror = () => { img.style.opacity = .3; };
+  d.appendChild(img);
+  const q = qtyOf(c.id);
+  if (q || deck.leader === c.id) {
+    const b = document.createElement('div');
+    b.className = 'qty-badge';
+    b.textContent = deck.leader === c.id ? 'L' : q;
+    d.appendChild(b);
+  }
+  const bar = document.createElement('div');
+  bar.className = 'add-bar';
+  if (c.type === 'Leader') {
+    bar.innerHTML = '<button class="b-add" title="Set as leader">👑 Leader</button>';
+    bar.firstChild.onclick = e => { e.stopPropagation(); setLeader(c.id); };
+  } else {
+    const badd = document.createElement('button'); badd.className = 'b-add'; badd.textContent = '+'; badd.title = 'Add to deck';
+    badd.onclick = e => { e.stopPropagation(); addCard(c.id); };
+    const brem = document.createElement('button'); brem.className = 'b-rem'; brem.textContent = '−'; brem.title = 'Remove';
+    brem.onclick = e => { e.stopPropagation(); removeCard(c.id); };
+    bar.append(badd, brem);
+  }
+  d.appendChild(bar);
+  d.onclick = () => openModal(c);
+  return d;
+}
+
+function refreshCardBadges() {
+  document.querySelectorAll('#grid .card').forEach(el => {
+    const c = byId.get(el.dataset.id);
+    el.querySelector('.qty-badge')?.remove();
+    el.classList.toggle('illegal', !!deck.leader && c.type !== 'Leader' && !cardLegal(c));
+    const q = qtyOf(c.id);
+    if (q || deck.leader === c.id) {
+      const b = document.createElement('div');
+      b.className = 'qty-badge';
+      b.textContent = deck.leader === c.id ? 'L' : q;
+      el.appendChild(b);
+    }
+  });
+}
+
+/* ================= deck logic ================= */
+function qtyOf(id) { return deck.cards[id] || 0; }
+function deckSize() { return Object.values(deck.cards).reduce((a,b) => a+b, 0); }
+
+function setLeader(id) {
+  deck.leader = deck.leader === id ? null : id;
+  saveDeck(); renderDeck();
+  if (F.legalOnly) applyFilters(); else refreshCardBadges();
+}
+function addCard(id) {
+  const c = byId.get(id);
+  if (!c || c.type === 'Leader') return;
+  if (qtyOf(id) >= 4) return flashWarn('Max 4 copies of ' + id);
+  if (deckSize() >= 50) return flashWarn('Deck already has 50 cards');
+  deck.cards[id] = qtyOf(id) + 1;
+  saveDeck(); renderDeck(); refreshCardBadges();
+}
+function removeCard(id) {
+  if (!qtyOf(id)) return;
+  deck.cards[id]--;
+  if (!deck.cards[id]) delete deck.cards[id];
+  saveDeck(); renderDeck(); refreshCardBadges();
+}
+function genId() { return 'd' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
+function saveDeck() {
+  deck.updated = Date.now();
+  try { localStorage.setItem(STORE_KEY, JSON.stringify(store)); } catch(e){}
+}
+function loadDeck() {
+  try {
+    const s = JSON.parse(localStorage.getItem(STORE_KEY));
+    if (s && s.decks && typeof s.decks === 'object') store = s;
+  } catch(e){}
+  if (!Object.keys(store.decks).length) {
+    // first run: migrate the old single-deck save if present
+    let old = null;
+    try { old = JSON.parse(localStorage.getItem(DECK_KEY)); } catch(e){}
+    const id = genId();
+    store.decks[id] = { name: 'My Deck', leader: old?.leader || null, cards: old?.cards || {}, updated: Date.now() };
+    store.cur = id;
+  }
+  if (!store.cur || !store.decks[store.cur]) store.cur = Object.keys(store.decks)[0];
+  deck = store.decks[store.cur];
+}
+
+function switchDeck(id) {
+  if (!store.decks[id]) return;
+  store.cur = id;
+  deck = store.decks[id];
+  saveDeck(); renderDeck(); refreshCardBadges();
+}
+function createDeck(name) {
+  const id = genId();
+  store.decks[id] = { name: name || 'New Deck', leader: null, cards: {}, updated: Date.now() };
+  switchDeck(id);
+}
+
+function renderDeckSel() {
+  const sel = document.getElementById('deckSel');
+  sel.innerHTML = '';
+  const entries = Object.entries(store.decks).sort((a,b) => a[1].name.localeCompare(b[1].name));
+  for (const [id, d] of entries) {
+    const o = document.createElement('option');
+    const L = d.leader && byId.get(d.leader);
+    const n = Object.values(d.cards).reduce((s,q) => s+q, 0);
+    o.value = id;
+    o.textContent = d.name + '  (' + (L ? L.name.replace(/\s*\(.*\)$/, '') + ', ' : '') + n + '/50)';
+    if (id === store.cur) o.selected = true;
+    sel.appendChild(o);
+  }
+}
+document.getElementById('deckSel').onchange = e => switchDeck(e.target.value);
+document.getElementById('btnRename').onclick = () => {
+  const name = prompt('Deck name:', deck.name);
+  if (name && name.trim()) { deck.name = name.trim(); saveDeck(); renderDeck(); }
+};
+document.getElementById('btnDelete').onclick = () => {
+  if (!confirm('Delete deck "' + deck.name + '"? This cannot be undone.')) return;
+  delete store.decks[store.cur];
+  if (!Object.keys(store.decks).length) {
+    const id = genId();
+    store.decks[id] = { name: 'My Deck', leader: null, cards: {}, updated: Date.now() };
+  }
+  store.cur = Object.keys(store.decks)[0];
+  deck = store.decks[store.cur];
+  saveDeck(); renderDeck(); refreshCardBadges();
+};
+
+let warnTimer = null;
+function flashWarn(msg) {
+  const w = document.getElementById('warns');
+  w.textContent = '⚠ ' + msg;
+  clearTimeout(warnTimer);
+  warnTimer = setTimeout(renderWarns, 2500);
+}
+
+function renderWarns() {
+  const w = document.getElementById('warns');
+  const probs = [];
+  if (!deck.leader) probs.push('No leader selected');
+  const n = deckSize();
+  if (n < 50) probs.push((50 - n) + ' more card' + (n === 49 ? '' : 's') + ' needed');
+  if (n > 50) probs.push('Deck is over 50 cards');
+  const lc = leaderColors();
+  if (lc.length) {
+    const bad = Object.keys(deck.cards).filter(id => { const c = byId.get(id); return c && c.colors.length && !c.colors.some(col => lc.includes(col)); });
+    if (bad.length) probs.push('Off-color for leader: ' + bad.join(', '));
+  }
+  w.textContent = probs.length ? '⚠ ' + probs.join(' · ') : '✔ Deck is legal — ready to export!';
+  w.style.color = probs.length ? '' : '#5fd68a';
+}
+
+function renderDeck() {
+  renderDeckSel();
+  const n = deckSize();
+  document.getElementById('deckMini').textContent = n;
+  const dc = document.getElementById('deckcount');
+  dc.textContent = n + ' / 50';
+  dc.className = n === 50 ? 'full' : n > 50 ? 'over' : '';
+
+  // leader box
+  const lb = document.getElementById('leaderbox');
+  if (deck.leader && byId.has(deck.leader)) {
+    const L = byId.get(deck.leader);
+    lb.innerHTML = '';
+    const img = document.createElement('img'); img.src = L.img; img.onclick = () => openModal(L);
+    const info = document.createElement('div'); info.className = 'linfo';
+    info.innerHTML = '<div class="lname">' + esc(L.name) + '</div><div class="lsub">' + esc(L.id) + ' · ' + esc(L.color) + ' · ' + esc(L.subs) + '</div>';
+    const x = document.createElement('button'); x.className = 'lx'; x.textContent = '✕'; x.title = 'Remove leader';
+    x.onclick = () => setLeader(deck.leader);
+    lb.append(img, info, x);
+  } else {
+    lb.innerHTML = '<div class="linfo" style="color:var(--text-dim)">No leader selected — hover a Leader card and click 👑.</div>';
+  }
+
+  // cost curve
+  const curve = document.getElementById('curve');
+  curve.innerHTML = '';
+  const buckets = Array(11).fill(0);
+  for (const [id, q] of Object.entries(deck.cards)) {
+    const c = byId.get(id); if (!c) continue;
+    buckets[Math.min(c.cost ?? 0, 10)] += q;
+  }
+  const max = Math.max(...buckets, 1);
+  buckets.forEach((v, i) => {
+    const cb = document.createElement('div'); cb.className = 'cbar';
+    cb.innerHTML = '<div class="num">' + (v || '') + '</div><div class="bar" style="height:' + (v / max * 26) + 'px"></div><div class="lbl">' + (i === 10 ? '10+' : i) + '</div>';
+    curve.appendChild(cb);
+  });
+
+  // list grouped by type
+  const dl = document.getElementById('decklist');
+  dl.innerHTML = '';
+  const groups = { Character: [], Event: [], Stage: [] };
+  for (const id of Object.keys(deck.cards)) {
+    const c = byId.get(id);
+    if (c) (groups[c.type] || (groups[c.type] = [])).push(c);
+  }
+  for (const [type, list] of Object.entries(groups)) {
+    if (!list.length) continue;
+    list.sort((a,b) => (a.cost ?? 0) - (b.cost ?? 0) || a.id.localeCompare(b.id));
+    const total = list.reduce((s,c) => s + qtyOf(c.id), 0);
+    const h = document.createElement('div'); h.className = 'dsection'; h.textContent = type + 's (' + total + ')';
+    dl.appendChild(h);
+    for (const c of list) {
+      const row = document.createElement('div'); row.className = 'drow';
+      row.innerHTML = '<img loading="lazy" src="' + esc(c.img) + '"><span class="dcost">' + (c.cost ?? '–') + '</span><span class="dname">' + esc(c.name) + '</span><span class="dqty">×' + qtyOf(c.id) + '</span>';
+      const bm = document.createElement('button'); bm.textContent = '−'; bm.onclick = e => { e.stopPropagation(); removeCard(c.id); };
+      const bp = document.createElement('button'); bp.textContent = '+'; bp.onclick = e => { e.stopPropagation(); addCard(c.id); };
+      row.append(bm, bp);
+      row.onclick = () => openModal(c);
+      dl.appendChild(row);
+    }
+  }
+  renderWarns();
+}
+
+/* ================= card modal ================= */
+const modal = document.getElementById('modal');
+const modalbox = document.getElementById('modalbox');
+function openModal(c) {
+  modalbox.innerHTML = '';
+  const img = document.createElement('img'); img.src = c.img; img.alt = c.name;
+  const info = document.createElement('div'); info.id = 'modalinfo';
+  const tags = [
+    c.type, c.color,
+    c.cost != null ? 'Cost ' + c.cost : null,
+    c.power != null ? 'Power ' + c.power : null,
+    c.counter ? 'Counter +' + c.counter : null,
+    c.life != null && c.type === 'Leader' ? 'Life ' + c.life : null,
+    c.attr || null, c.rarity,
+    c.spoiler ? '⚠ Spoiler — some stats unconfirmed' : null
+  ].filter(Boolean);
+  info.innerHTML =
+    '<h3>' + esc(c.name) + '</h3>' +
+    '<div class="mid">' + esc(c.id) + ' · ' + esc(c.set) + '</div>' +
+    tags.map(t => '<span class="mtag">' + esc(String(t)) + '</span>').join('') +
+    (c.subs ? '<div style="margin-top:8px;color:var(--text-dim);font-size:13px">Types: ' + esc(c.subs) + '</div>' : '') +
+    '<div id="modaltext">' + esc(c.text || '(no effect text)') + '</div>';
+  const btns = document.createElement('div'); btns.id = 'modalbtns';
+  if (c.type === 'Leader') {
+    const b = document.createElement('button'); b.className = 'btn btn-gold';
+    b.textContent = deck.leader === c.id ? 'Remove as leader' : '👑 Set as leader';
+    b.onclick = () => { setLeader(c.id); closeModal(); };
+    btns.appendChild(b);
+  } else {
+    const b1 = document.createElement('button'); b1.className = 'btn btn-gold'; b1.textContent = '+ Add to deck';
+    b1.onclick = () => { addCard(c.id); openModal(c); };
+    const b2 = document.createElement('button'); b2.className = 'btn btn-dim'; b2.textContent = '− Remove';
+    b2.onclick = () => { removeCard(c.id); openModal(c); };
+    const q = document.createElement('span'); q.style.cssText = 'align-self:center;color:var(--text-dim);font-size:13px';
+    q.textContent = 'In deck: ' + qtyOf(c.id) + ' / 4';
+    btns.append(b1, b2, q);
+  }
+  info.appendChild(btns);
+  modalbox.append(img, info);
+  modal.classList.add('open');
+}
+function closeModal() { modal.classList.remove('open'); }
+modal.onclick = e => { if (e.target === modal) closeModal(); };
+document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeModal(); closeExp(); } });
+
+/* ================= export / import ================= */
+const modal2 = document.getElementById('modal2');
+const exptext = document.getElementById('exptext');
+const expmsg = document.getElementById('expmsg');
+let expMode = 'export';
+
+function deckString() {
+  const lines = [];
+  if (deck.leader) lines.push('1x' + deck.leader);
+  const ids = Object.keys(deck.cards).sort((a,b) => a.localeCompare(b, undefined, {numeric:true}));
+  for (const id of ids) lines.push(deck.cards[id] + 'x' + id);
+  return lines.join('\n');
+}
+
+document.getElementById('btnExport').onclick = () => {
+  expMode = 'export';
+  document.getElementById('exptitle').textContent = 'Export deck (OPTCG Sim format)';
+  document.getElementById('expAction').textContent = 'Copy to clipboard';
+  exptext.value = deckString();
+  exptext.readOnly = true;
+  expmsg.textContent = deck.leader ? '' : 'Note: no leader set — the sim expects the leader as the first line.';
+  modal2.style.display = 'flex';
+  exptext.select();
+};
+document.getElementById('btnImport').onclick = () => {
+  expMode = 'import';
+  document.getElementById('exptitle').textContent = 'Import deck string';
+  document.getElementById('expAction').textContent = 'Import';
+  exptext.value = '';
+  exptext.readOnly = false;
+  expmsg.textContent = '';
+  modal2.style.display = 'flex';
+  exptext.focus();
+};
+document.getElementById('expAction').onclick = async () => {
+  if (expMode === 'export') {
+    try { await navigator.clipboard.writeText(exptext.value); expmsg.textContent = '✔ Copied! Paste it into OPTCG Sim → Deck Editor → Import.'; }
+    catch (e) { exptext.select(); document.execCommand('copy'); expmsg.textContent = '✔ Copied (fallback).'; }
+  } else {
+    const res = importDeck(exptext.value);
+    expmsg.textContent = res.msg;
+    if (res.ok) { saveDeck(); renderDeck(); refreshCardBadges(); setTimeout(closeExp, 900); }
+  }
+};
+document.getElementById('expClose').onclick = closeExp;
+modal2.onclick = e => { if (e.target === modal2) closeExp(); };
+function closeExp() { modal2.style.display = 'none'; }
+
+function importDeck(text) {
+  const lines = text.split(/[\n\r,;]+/).map(s => s.trim()).filter(Boolean);
+  const nd = { leader: null, cards: {} };
+  const unknown = [];
+  for (const line of lines) {
+    const m = line.match(/^(\d+)\s*[xn]\s*([A-Za-z0-9]+-\d+[A-Za-z0-9_]*)$/i) || line.match(/^([A-Za-z0-9]+-\d+)$/);
+    if (!m) { unknown.push(line); continue; }
+    const qty = m[2] ? parseInt(m[1]) : 1;
+    const id = (m[2] || m[1]).toUpperCase().replace(/_P\d+$/i, '');
+    const c = byId.get(id);
+    if (!c) { unknown.push(line); continue; }
+    if (c.type === 'Leader') { nd.leader = id; }
+    else nd.cards[id] = Math.min((nd.cards[id] || 0) + qty, 4);
+  }
+  if (!nd.leader && !Object.keys(nd.cards).length) return { ok: false, msg: '✕ Could not parse any cards. Expected lines like "4xOP01-016".' };
+  deck.leader = nd.leader; deck.cards = nd.cards; // import into the current deck, keep its name
+  return { ok: true, msg: '✔ Imported ' + Object.values(nd.cards).reduce((a,b)=>a+b,0) + ' cards' + (nd.leader ? ' + leader ' + nd.leader : '') + (unknown.length ? ' (skipped: ' + unknown.slice(0,5).join(', ') + ')' : '') };
+}
+
+document.getElementById('btnNew').onclick = () => {
+  const name = prompt('Name for the new deck:', 'New Deck');
+  if (name === null) return;
+  createDeck(name.trim() || 'New Deck');
+};
+
+function esc(s) { return String(s).replace(/[&<>"']/g, m => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m])); }
+
+/* ================= mobile panel toggles ================= */
+const scrim = document.getElementById('scrim');
+function togglePanel(id) {
+  const el = document.getElementById(id);
+  const opening = !el.classList.contains('open');
+  closePanels();
+  if (opening) { el.classList.add('open'); scrim.classList.add('on'); }
+}
+function closePanels() {
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('deckpanel').classList.remove('open');
+  scrim.classList.remove('on');
+}
+document.getElementById('btnFilters').onclick = () => togglePanel('sidebar');
+document.getElementById('btnDeckPanel').onclick = () => togglePanel('deckpanel');
+scrim.onclick = closePanels;
+
+/* ================= backup / restore all decks ================= */
+document.getElementById('btnBackup').onclick = () => {
+  const payload = { app: 'optcg-deckbuilder', version: 2, exported: new Date().toISOString(), decks: store.decks };
+  const blob = new Blob([JSON.stringify(payload, null, 1)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'optcg-decks-' + new Date().toISOString().slice(0,10) + '.json';
+  a.click();
+  URL.revokeObjectURL(a.href);
+};
+document.getElementById('btnRestore').onclick = () => document.getElementById('restoreFile').click();
+document.getElementById('restoreFile').onchange = async e => {
+  const file = e.target.files[0];
+  e.target.value = '';
+  if (!file) return;
+  try {
+    const data = JSON.parse(await file.text());
+    const decks = data.decks || data; // accept raw {id:deck} too
+    let added = 0;
+    for (const [id, d] of Object.entries(decks)) {
+      if (!d || typeof d !== 'object' || !d.cards) continue;
+      store.decks[id] = { name: d.name || 'Restored deck', leader: d.leader || null, cards: d.cards, updated: d.updated || Date.now() };
+      added++;
+    }
+    if (!added) return alert('No decks found in that file.');
+    if (!store.decks[store.cur]) store.cur = Object.keys(store.decks)[0];
+    deck = store.decks[store.cur];
+    saveDeck(); renderDeck(); refreshCardBadges();
+    alert('Restored ' + added + ' deck' + (added > 1 ? 's' : '') + '.');
+  } catch (err) {
+    alert('Could not read that backup file: ' + err.message);
+  }
+};
+
+/* ================= boot ================= */
+loadCards().catch(err => {
+  document.getElementById('loadState').innerHTML = '⚠ Failed to load card data from optcgapi.com.<br><small>' + esc(err.message) + '</small><br><br><button class="btn btn-gold" onclick="location.reload()">Retry</button>';
+});
+</script>
+</body>
+</html>
