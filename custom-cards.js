@@ -1,5 +1,5 @@
-// Auto-generated OP17 spoiler cards (source: opdeckguide.com, 2026-08-02)
-window.CUSTOM_CARDS = [
+// Auto-generated OP17 spoiler cards (source: opdeckguide.com, 2026-08-07)
+window.CUSTOM_CARDS = (window.CUSTOM_CARDS || []).concat([
  {
   "id": "OP17-001",
   "name": "Edward Newgate",
@@ -145,6 +145,42 @@ window.CUSTOM_CARDS = [
   "spoiler": true
  },
  {
+  "id": "OP17-010",
+  "name": "Fossa",
+  "text": "[Activate:Main] [Once Per Turn] If your opponent has a Character with 10000 power or more, and you do not have [Fossa], this Character gains [Blocker] and +2000 power until the end of your opponent&#39;s next End Phase.",
+  "set": "The World’s Strongest Warriors (spoilers)",
+  "setId": "OP-17",
+  "rarity": "C",
+  "color": "Red",
+  "type": "Character",
+  "life": null,
+  "cost": null,
+  "power": null,
+  "subs": "",
+  "counter": null,
+  "attr": "",
+  "img": "op17/OP17-010.jpg",
+  "spoiler": true
+ },
+ {
+  "id": "OP17-011",
+  "name": "Blamenco",
+  "text": "[DON!! x2] [When Attacking] Give up to 1 of your opponent&#39;s Characters -4000 power during this turn.",
+  "set": "The World’s Strongest Warriors (spoilers)",
+  "setId": "OP-17",
+  "rarity": "C",
+  "color": "Red",
+  "type": "Character",
+  "life": null,
+  "cost": null,
+  "power": null,
+  "subs": "",
+  "counter": null,
+  "attr": "",
+  "img": "op17/OP17-011.jpg",
+  "spoiler": true
+ },
+ {
   "id": "OP17-012",
   "name": "Blenheim",
   "text": "[Blocker] (After your opponent declares an attack, you may rest this card to make it the new target of the attack.) [On K.O.] Play up to 1 card with a cost of 1 and a type including &quot;Whitebeard Pirates&quot; from your hand.",
@@ -181,6 +217,24 @@ window.CUSTOM_CARDS = [
   "spoiler": true
  },
  {
+  "id": "OP17-014",
+  "name": "Whitey Bay",
+  "text": "[On Play] K.O. up to 1 of your opponent&#39;s Characters with base power of 2000 or less. [On Your Opponent's Attack] You may trash this Character: Up to 1 of your Leader gains +1000 power during this battle.",
+  "set": "The World’s Strongest Warriors (spoilers)",
+  "setId": "OP-17",
+  "rarity": "C",
+  "color": "Red",
+  "type": "Character",
+  "life": null,
+  "cost": null,
+  "power": null,
+  "subs": "",
+  "counter": null,
+  "attr": "",
+  "img": "op17/OP17-014.jpg",
+  "spoiler": true
+ },
+ {
   "id": "OP17-015",
   "name": "Marco",
   "text": "If one of your Characters would be removed from the field by your opponent&#39;s effect, you may K.O. this Character instead. [On K.O.] You may trash 1 card with a type including &quot;Whitebeard Pirates&quot; from your hand: Play this Character card from your trash.",
@@ -196,6 +250,24 @@ window.CUSTOM_CARDS = [
   "counter": null,
   "attr": "",
   "img": "op17/OP17-015.jpg",
+  "spoiler": true
+ },
+ {
+  "id": "OP17-017",
+  "name": "HAS THE POWER TO DESTROY THE WORLD!!",
+  "text": "[Main] You may rest 2 of your DON!! cards: K.O. up to 1 of your opponent&#39;s Stages. [Counter] If you have 2 or more Characters with 8000 power, up to 1 of your Leader or Character cards gains +4000 power during this battle.",
+  "set": "The World’s Strongest Warriors (spoilers)",
+  "setId": "OP-17",
+  "rarity": "UC",
+  "color": "Red",
+  "type": "Event",
+  "life": null,
+  "cost": null,
+  "power": null,
+  "subs": "",
+  "counter": null,
+  "attr": "",
+  "img": "op17/OP17-017.jpg",
   "spoiler": true
  },
  {
@@ -235,6 +307,24 @@ window.CUSTOM_CARDS = [
   "spoiler": true
  },
  {
+  "id": "OP17-021",
+  "name": "Crone Oli",
+  "text": "If your Character with a type including &quot;Red-Haired Pirates&quot; would be removed from the field by your opponent&#39;s effect, you may rest 1 of your cards instead.",
+  "set": "The World’s Strongest Warriors (spoilers)",
+  "setId": "OP-17",
+  "rarity": "C",
+  "color": "Green",
+  "type": "Character",
+  "life": null,
+  "cost": null,
+  "power": null,
+  "subs": "",
+  "counter": null,
+  "attr": "",
+  "img": "op17/OP17-021.jpg",
+  "spoiler": true
+ },
+ {
   "id": "OP17-022",
   "name": "Shanks",
   "text": "[Rush] [On Play] Set up to 2 of your DON!! cards as active. Then, rest all of your opponent&#39;s Characters.",
@@ -250,6 +340,24 @@ window.CUSTOM_CARDS = [
   "counter": null,
   "attr": "",
   "img": "op17/OP17-022.jpg",
+  "spoiler": true
+ },
+ {
+  "id": "OP17-023",
+  "name": "Nami",
+  "text": "If your {East Blue} or {Straw Hat Crew} Character would be K.O.&#39;d, you may rest this Character instead.",
+  "set": "The World’s Strongest Warriors (spoilers)",
+  "setId": "OP-17",
+  "rarity": "UC",
+  "color": "Green",
+  "type": "Character",
+  "life": null,
+  "cost": null,
+  "power": null,
+  "subs": "",
+  "counter": null,
+  "attr": "",
+  "img": "op17/OP17-023.jpg",
   "spoiler": true
  },
  {
@@ -469,6 +577,24 @@ window.CUSTOM_CARDS = [
   "spoiler": true
  },
  {
+  "id": "OP17-036",
+  "name": "Withdraw Now And Allow Me To Save Face",
+  "text": "[Main] You may rest 6 of your DON!! cards: Rest up to 1 of your opponent&#39;s Characters. Then, K.O. up to 2 of your opponent&#39;s rested Characters with a cost of 6 or less. [Counter] Up to 1 of your [Shanks] gains +4000 power during this battle.",
+  "set": "The World’s Strongest Warriors (spoilers)",
+  "setId": "OP-17",
+  "rarity": "UC",
+  "color": "Green",
+  "type": "Event",
+  "life": null,
+  "cost": null,
+  "power": null,
+  "subs": "",
+  "counter": null,
+  "attr": "",
+  "img": "op17/OP17-036.jpg",
+  "spoiler": true
+ },
+ {
   "id": "OP17-037",
   "name": "Are You That Afraid of the New Era?!!",
   "text": "[Main] Look at 5 cards from the top of your deck; reveal up to 1 card with a type including &quot;Red-Haired Pirates&quot; and add it to your hand. Then, place the rest at the bottom of your deck in any order. [Counter] You may rest 1 of your cards: Up to 1 of your Leader or Characters gains +3000 power during this battle.",
@@ -628,6 +754,24 @@ window.CUSTOM_CARDS = [
   "counter": null,
   "attr": "",
   "img": "op17/OP17-046.jpg",
+  "spoiler": true
+ },
+ {
+  "id": "OP17-047",
+  "name": "Shiki",
+  "text": "[End of Your Turn] If you have 2 or less cards in your hand, your opponent places 1 card from their hand at the bottom of their deck.",
+  "set": "The World’s Strongest Warriors (spoilers)",
+  "setId": "OP-17",
+  "rarity": "C",
+  "color": "Purple Blue",
+  "type": "Character",
+  "life": null,
+  "cost": null,
+  "power": null,
+  "subs": "",
+  "counter": null,
+  "attr": "",
+  "img": "op17/OP17-047.jpg",
   "spoiler": true
  },
  {
@@ -955,6 +1099,42 @@ window.CUSTOM_CARDS = [
   "spoiler": true
  },
  {
+  "id": "OP17-067",
+  "name": "Kurozumi Kanjuro",
+  "text": "[On Play] DON!! -1: If you have a Character with a cost of 10 or more, rest up to 1 of your opponent&#39;s Characters.",
+  "set": "The World’s Strongest Warriors (spoilers)",
+  "setId": "OP-17",
+  "rarity": "C",
+  "color": "Purple",
+  "type": "Character",
+  "life": null,
+  "cost": null,
+  "power": null,
+  "subs": "",
+  "counter": null,
+  "attr": "",
+  "img": "op17/OP17-067.jpg",
+  "spoiler": true
+ },
+ {
+  "id": "OP17-070",
+  "name": "Scratchmen Apoo",
+  "text": "",
+  "set": "The World’s Strongest Warriors (spoilers)",
+  "setId": "OP-17",
+  "rarity": "C",
+  "color": "Purple",
+  "type": "Character",
+  "life": null,
+  "cost": null,
+  "power": null,
+  "subs": "",
+  "counter": null,
+  "attr": "",
+  "img": "op17/OP17-070.jpg",
+  "spoiler": true
+ },
+ {
   "id": "OP17-071",
   "name": "Who&#39;s.Who",
   "text": "[On Play] DON!! -1: K.O. up to 2 of your opponent&#39;s Characters with a cost of 2 or less. [Trigger] Play this card.",
@@ -1006,6 +1186,24 @@ window.CUSTOM_CARDS = [
   "counter": null,
   "attr": "",
   "img": "op17/OP17-074.jpg",
+  "spoiler": true
+ },
+ {
+  "id": "OP17-076",
+  "name": "X.Drake",
+  "text": "[On Play] DON!! -2: Trash 1 card from your opponent&#39;s hand.",
+  "set": "The World’s Strongest Warriors (spoilers)",
+  "setId": "OP-17",
+  "rarity": "C",
+  "color": "Purple",
+  "type": "Character",
+  "life": null,
+  "cost": null,
+  "power": null,
+  "subs": "",
+  "counter": null,
+  "attr": "",
+  "img": "op17/OP17-076.jpg",
   "spoiler": true
  },
  {
@@ -1171,6 +1369,24 @@ window.CUSTOM_CARDS = [
   "spoiler": true
  },
  {
+  "id": "OP17-088",
+  "name": "Hajrudin",
+  "text": "",
+  "set": "The World’s Strongest Warriors (spoilers)",
+  "setId": "OP-17",
+  "rarity": "C",
+  "color": "Black",
+  "type": "Character",
+  "life": null,
+  "cost": null,
+  "power": null,
+  "subs": "",
+  "counter": null,
+  "attr": "",
+  "img": "op17/OP17-088.jpg",
+  "spoiler": true
+ },
+ {
   "id": "OP17-089",
   "name": "Jaguar D. Saul",
   "text": "This Character gains +12 cost. [On Play] Look at 3 cards from the top of your deck; reveal up to 1 {Elbaph} type card and add it to your hand. Then, trash the rest.",
@@ -1297,6 +1513,42 @@ window.CUSTOM_CARDS = [
   "spoiler": true
  },
  {
+  "id": "OP17-096",
+  "name": "I&#39;m Luffy!! The Man Who&#39;s Gonna Become the King of the Pirates!!",
+  "text": "[Counter] If you have a Character with a cost of 12 or more, up to 1 of your Leader or Character cards gains +4000 power during this battle. [Trigger] Add up to 1 {Elbaph} type card from your trash to your hand.",
+  "set": "The World’s Strongest Warriors (spoilers)",
+  "setId": "OP-17",
+  "rarity": "R",
+  "color": "Yellow",
+  "type": "Event",
+  "life": null,
+  "cost": null,
+  "power": null,
+  "subs": "",
+  "counter": null,
+  "attr": "",
+  "img": "op17/OP17-096.jpg",
+  "spoiler": true
+ },
+ {
+  "id": "OP17-097",
+  "name": "Instead I&#39;ll Feed on this Rage!! And Use It to Bring the World to Ruin!!",
+  "text": "[Main] Give all of your opponent&#39;s Characters -1 cost during this turn. [Counter] Your Leader gains +3000 power during this battle.",
+  "set": "The World’s Strongest Warriors (spoilers)",
+  "setId": "OP-17",
+  "rarity": "C",
+  "color": "Yellow Black",
+  "type": "Event",
+  "life": null,
+  "cost": null,
+  "power": null,
+  "subs": "",
+  "counter": null,
+  "attr": "",
+  "img": "op17/OP17-097.jpg",
+  "spoiler": true
+ },
+ {
   "id": "OP17-098",
   "name": "Gum-Gum Kong Pistol",
   "text": "[Main] You may rest 6 of your DON!! cards: If there is a Character with a cost of 12 or more, K.O. up to 2 of your opponent&#39;s Characters with a cost of 6 or less. [Counter] Your Leader gains +3000 power during this battle.",
@@ -1330,6 +1582,24 @@ window.CUSTOM_CARDS = [
   "counter": null,
   "attr": "",
   "img": "op17/OP17-099.jpg",
+  "spoiler": true
+ },
+ {
+  "id": "OP17-100",
+  "name": "Capone &quot;Gang&quot; Bege",
+  "text": "",
+  "set": "The World’s Strongest Warriors (spoilers)",
+  "setId": "OP-17",
+  "rarity": "C",
+  "color": "Yellow",
+  "type": "Character",
+  "life": null,
+  "cost": null,
+  "power": null,
+  "subs": "",
+  "counter": null,
+  "attr": "",
+  "img": "op17/OP17-100.jpg",
   "spoiler": true
  },
  {
@@ -1584,4 +1854,4 @@ window.CUSTOM_CARDS = [
   "img": "op17/OP17-119.png",
   "spoiler": true
  }
-];
+]);
