@@ -247,6 +247,7 @@
         <button class="btn btn-dim" id="btnNew">New</button>
       </div>
       <div class="btnrow">
+        <button class="btn btn-dim" id="btnTcg" title="Buy this deck — TCGplayer Mass Entry">🛒 TCGplayer</button>
         <button class="btn btn-dim" id="btnBackup" title="Download all decks as a file">💾 Backup all</button>
         <button class="btn btn-dim" id="btnRestore" title="Load decks from a backup file">📂 Restore</button>
         <input type="file" id="restoreFile" accept=".json" style="display:none">
@@ -282,6 +283,7 @@
     <div id="expmsg"></div>
     <div class="btnrow">
       <button class="btn btn-gold" id="expAction">Copy to clipboard</button>
+      <button class="btn btn-dim" id="expAlt" style="display:none">Copy</button>
       <button class="btn btn-dim" id="expClose">Close</button>
     </div>
   </div>
@@ -361,7 +363,7 @@ function finishLoad(list) {
   // merge custom/spoiler cards (custom-cards.js) not already in the API data
   if (Array.isArray(window.CUSTOM_CARDS)) {
     const have = new Set(cards.map(c => c.id));
-    for (const c of window.CUSTOM_CARDS) if (!have.has(c.id)) cards.push(c);
+    for (const c of window.CUSTOM_CARDS) if (!have.has(c.id)) { c.custom = true; cards.push(c); }
   }
   byId = new Map(cards.map(c => [c.id, c]));
   for (const c of cards) {
@@ -824,8 +826,47 @@ function deckString() {
   return lines.join('\n');
 }
 
+/* ---- TCGplayer Mass Entry ---- */
+const TCG_MASSENTRY = 'https://www.tcgplayer.com/massentry?productline=One%20Piece%20Card%20Game';
+
+// "4 Nami (016) [Romance Dawn]" — the API mirrors TCGplayer's own product/set names.
+function tcgLines() {
+  const lines = [], skipped = [];
+  const push = (id, qty) => {
+    const c = byId.get(id);
+    if (!c) return;
+    if (c.custom) { skipped.push(c.id); return; }   // spoilers/new starters aren't listed yet
+    lines.push(qty + ' ' + c.name + ' [' + c.set + ']');
+  };
+  if (deck.leader) push(deck.leader, 1);
+  for (const id of Object.keys(deck.cards).sort((a,b) => a.localeCompare(b, undefined, {numeric:true}))) push(id, deck.cards[id]);
+  return { lines, skipped };
+}
+
+document.getElementById('btnTcg').onclick = () => {
+  const { lines, skipped } = tcgLines();
+  if (!lines.length) return flashWarn('Add some cards to the deck first');
+  expMode = 'tcg';
+  document.getElementById('exptitle').textContent = 'Buy this deck — TCGplayer Mass Entry';
+  document.getElementById('expAction').textContent = 'Open TCGplayer ↗';
+  const alt = document.getElementById('expAlt');
+  alt.style.display = ''; alt.textContent = 'Copy list';
+  exptext.value = lines.join('\n');
+  exptext.readOnly = true;
+  expmsg.textContent = skipped.length
+    ? 'Skipped ' + skipped.length + ' card(s) not yet sold on TCGplayer: ' + skipped.slice(0,4).join(', ') + (skipped.length > 4 ? '…' : '')
+    : lines.length + ' line(s) ready — opens with your list prefilled.';
+  modal2.style.display = 'flex';
+};
+
+document.getElementById('expAlt').onclick = async () => {
+  try { await navigator.clipboard.writeText(exptext.value); expmsg.textContent = '✔ Copied — paste into the Mass Entry box.'; }
+  catch (e) { exptext.select(); document.execCommand('copy'); expmsg.textContent = '✔ Copied (fallback).'; }
+};
+
 document.getElementById('btnExport').onclick = () => {
   expMode = 'export';
+  document.getElementById('expAlt').style.display = 'none';
   document.getElementById('exptitle').textContent = 'Export deck (OPTCG Sim format)';
   document.getElementById('expAction').textContent = 'Copy to clipboard';
   exptext.value = deckString();
@@ -836,6 +877,7 @@ document.getElementById('btnExport').onclick = () => {
 };
 document.getElementById('btnImport').onclick = () => {
   expMode = 'import';
+  document.getElementById('expAlt').style.display = 'none';
   document.getElementById('exptitle').textContent = 'Import deck string';
   document.getElementById('expAction').textContent = 'Import';
   exptext.value = '';
@@ -845,7 +887,11 @@ document.getElementById('btnImport').onclick = () => {
   exptext.focus();
 };
 document.getElementById('expAction').onclick = async () => {
-  if (expMode === 'export') {
+  if (expMode === 'tcg') {
+    const url = TCG_MASSENTRY + '&c=' + tcgLines().lines.map(encodeURIComponent).join('%7C%7C');
+    window.open(url, '_blank', 'noopener');
+    expmsg.textContent = '✔ Opened TCGplayer in a new tab. Pick your product line if prompted, then Add to Cart.';
+  } else if (expMode === 'export') {
     try { await navigator.clipboard.writeText(exptext.value); expmsg.textContent = '✔ Copied! Paste it into OPTCG Sim → Deck Editor → Import.'; }
     catch (e) { exptext.select(); document.execCommand('copy'); expmsg.textContent = '✔ Copied (fallback).'; }
   } else {
