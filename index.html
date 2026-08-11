@@ -93,6 +93,8 @@
   #leaderbox .lsub { color: var(--text-dim); margin-top: 2px; }
   #leaderbox .lx { background: none; border: none; color: var(--text-dim); cursor: pointer; font-size: 16px; padding: 4px; }
   #leaderbox .lx:hover { color: #ff6b6b; }
+  #deckvalue { font-size: 11.5px; color: var(--text-dim); margin-top: 8px; text-align: right; }
+  #deckvalue b { color: #5fd68a; }
   #curve { display: flex; gap: 3px; align-items: flex-end; height: 44px; margin-top: 10px; padding: 0 2px; }
   .cbar { flex: 1; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; gap: 2px; height: 100%; }
   .cbar .bar { width: 100%; background: var(--accent); border-radius: 2px 2px 0 0; min-height: 1px; opacity: .85; }
@@ -215,6 +217,7 @@
         <option value="cost">Sort: Cost</option>
         <option value="power">Sort: Power</option>
         <option value="name">Sort: Name</option>
+        <option value="price">Sort: Price (high→low)</option>
       </select>
       <span id="count"></span>
       <button id="btnDeckPanel" class="paneltoggle" title="Deck">🃏 <span id="deckMini">0</span></button>
@@ -233,6 +236,7 @@
       <h2>Deck <span id="deckcount">0 / 50</span></h2>
       <div id="leaderbox"><div class="linfo" style="color:var(--text-dim)">No leader selected — click a Leader card to set it.</div></div>
       <div id="curve"></div>
+      <div id="deckvalue"></div>
     </div>
     <div id="decklist"></div>
     <div id="deckfoot">
@@ -288,7 +292,7 @@
 <script>
 'use strict';
 const API = 'https://optcgapi.com/api/';
-const CACHE_KEY = 'optcg_cards_v1';
+const CACHE_KEY = 'optcg_cards_v2'; // v2: includes TCGPlayer prices
 const CACHE_TTL = 24 * 3600 * 1000; // refresh daily
 const DECK_KEY = 'optcg_deck_v1';        // legacy single-deck key (migrated)
 const STORE_KEY = 'optcg_decks_v2';      // multi-deck store
@@ -343,7 +347,9 @@ async function loadCards() {
     rarity: c.rarity, color: c.card_color || '', type: c.card_type, life: c.life,
     cost: c.card_cost != null ? +c.card_cost : null, power: c.card_power != null ? +c.card_power : null,
     subs: c.sub_types || '', counter: c.counter_amount != null ? +c.counter_amount : null,
-    attr: c.attribute || '', img: c.card_image
+    attr: c.attribute || '', img: c.card_image,
+    mp: c.market_price != null ? +c.market_price : null,
+    ip: c.inventory_price != null ? +c.inventory_price : null
   }));
   slim.sort((a, b) => a.id.localeCompare(b.id, undefined, { numeric: true }));
   try { localStorage.setItem(CACHE_KEY, JSON.stringify({ t: Date.now(), d: slim })); } catch (e) {}
@@ -471,6 +477,7 @@ function applyFilters() {
   if (sort === 'cost') filtered.sort((a,b) => (a.cost ?? -1) - (b.cost ?? -1) || a.id.localeCompare(b.id));
   else if (sort === 'power') filtered.sort((a,b) => (b.power ?? -1) - (a.power ?? -1) || a.id.localeCompare(b.id));
   else if (sort === 'name') filtered.sort((a,b) => a.name.localeCompare(b.name));
+  else if (sort === 'price') filtered.sort((a,b) => (b.mp ?? -1) - (a.mp ?? -1) || a.id.localeCompare(b.id));
   else if (sort === 'id') filtered.sort((a,b) => a.id.localeCompare(b.id, undefined, {numeric:true}));
   else filtered.sort((a,b) =>
     colorIdx(a) - colorIdx(b) ||
@@ -522,6 +529,7 @@ function cardEl(c) {
   img.loading = 'lazy';
   img.src = c.img;
   img.alt = c.name;
+  img.title = c.name + (c.mp != null ? ' — $' + c.mp.toFixed(2) : '');
   img.onerror = () => { img.style.opacity = .3; };
   d.appendChild(img);
   const q = qtyOf(c.id);
@@ -700,6 +708,19 @@ function renderDeck() {
     lb.innerHTML = '<div class="linfo" style="color:var(--text-dim)">No leader selected — hover a Leader card and click 👑.</div>';
   }
 
+  // deck value (TCGPlayer market prices)
+  let value = 0, unpriced = 0;
+  const priceOf = id => { const c = byId.get(id); return c && c.mp != null ? c.mp : null; };
+  if (deck.leader) { const p = priceOf(deck.leader); p != null ? value += p : unpriced++; }
+  for (const [id, q] of Object.entries(deck.cards)) {
+    const p = priceOf(id);
+    p != null ? value += p * q : unpriced += q;
+  }
+  document.getElementById('deckvalue').innerHTML = (n || deck.leader)
+    ? 'Deck value: <b>$' + value.toFixed(2) + '</b> <span title="TCGPlayer market prices">ⓘ</span>' +
+      (unpriced ? ' <span style="opacity:.75">(' + unpriced + ' unpriced)</span>' : '')
+    : '';
+
   // cost curve
   const curve = document.getElementById('curve');
   curve.innerHTML = '';
@@ -756,6 +777,8 @@ function openModal(c) {
     c.counter ? 'Counter +' + c.counter : null,
     c.life != null && c.type === 'Leader' ? 'Life ' + c.life : null,
     c.attr || null, c.rarity,
+    c.mp != null ? 'Market $' + c.mp.toFixed(2) : null,
+    c.ip != null ? 'Low $' + c.ip.toFixed(2) : null,
     c.spoiler ? '⚠ Spoiler — some stats unconfirmed' : null
   ].filter(Boolean);
   info.innerHTML =
