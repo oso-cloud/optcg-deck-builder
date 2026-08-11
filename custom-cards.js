@@ -1,4 +1,4 @@
-// Auto-generated OP17 spoiler cards (source: opdeckguide.com, 2026-08-07)
+// Auto-generated OP17 spoiler cards (source: opdeckguide.com, 2026-08-10)
 window.CUSTOM_CARDS = (window.CUSTOM_CARDS || []).concat([
  {
   "id": "OP17-001",
@@ -646,6 +646,24 @@ window.CUSTOM_CARDS = (window.CUSTOM_CARDS || []).concat([
   "counter": null,
   "attr": "",
   "img": "op17/OP17-039.jpg",
+  "spoiler": true
+ },
+ {
+  "id": "OP17-040",
+  "name": "Edward.Newgate",
+  "text": "[On Play] Draw 1 card. [Once Per Turn] When your Leader with a type including &quot;Rocks Pirates&quot; attacks or is attacked, you may trash 1 card from your hand to activate this effect. Your Leader gains +3000 power during this battle.",
+  "set": "The World’s Strongest Warriors (spoilers)",
+  "setId": "OP-17",
+  "rarity": "TR",
+  "color": "Blue",
+  "type": "Character",
+  "life": null,
+  "cost": null,
+  "power": null,
+  "subs": "",
+  "counter": null,
+  "attr": "",
+  "img": "op17/OP17-040.jpg",
   "spoiler": true
  },
  {

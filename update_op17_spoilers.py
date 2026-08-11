@@ -13,6 +13,11 @@ os.makedirs(IMG_DIR, exist_ok=True)
 
 BASE_RARITIES = {'Leader Card': 'L', 'Common': 'C', 'Uncommon': 'UC', 'Rare': 'R',
                  'Super Rare': 'SR', 'Secret Rare': 'SEC', 'Unknown': 'C'}
+# Special printings. Used only when a card number has no base printing revealed yet,
+# so cards whose sole reveal is a TR/SP/manga still make it into the app.
+FALLBACK_RARITIES = {'Treasure Rare': 'TR', 'SP': 'SP', 'SPR': 'SP', 'Gold': 'SP',
+                     'Full Art': 'SR', 'Manga': 'SR', 'PIRATE CREW SUPER ALT MANGA': 'SR'}
+SKIP_RARITIES = {'DON!!'}   # not deck cards
 
 if len(sys.argv) > 1:
     html = open(sys.argv[1], encoding='utf-8', errors='ignore').read()
@@ -32,7 +37,9 @@ def effect_text(a):
     return ' '.join(lines)
 
 cards = {}
-for a in arts:
+# Pass 1 takes normal printings; pass 2 fills gaps from special printings only.
+for allow_fallback in (False, True):
+  for a in arts:
     code_m = re.search(r'leak-card-code[^>]*>([^<]+)', a)
     rar_m = re.search(r'leak-card-rarity[^>]*>([^<]+)', a)
     name_m = re.search(r'<h3[^>]*>([^<]+)</h3>', a)
@@ -40,13 +47,15 @@ for a in arts:
     if not (code_m and img_m): continue
     code = code_m.group(1).strip().upper()
     rar = (rar_m.group(1).strip() if rar_m else 'Unknown')
-    if rar not in BASE_RARITIES: continue          # skip alt arts / manga / DON
+    if rar in SKIP_RARITIES: continue
+    table = FALLBACK_RARITIES if allow_fallback else BASE_RARITIES
+    if rar not in table: continue
     if not re.fullmatch(r'OP17-\d{3}', code): continue
     if code in cards: continue                     # first (base) printing wins
     cards[code] = {
         'id': code,
         'name': (name_m.group(1).strip() if name_m else code),
-        'rarity': BASE_RARITIES[rar],
+        'rarity': table[rar],
         'isLeader': rar == 'Leader Card',
         'text': effect_text(a),
         'imgUrl': urllib.parse.urljoin(BASE, urllib.parse.quote(img_m.group(1))),

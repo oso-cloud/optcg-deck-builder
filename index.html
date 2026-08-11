@@ -95,6 +95,10 @@
   #leaderbox .lx:hover { color: #ff6b6b; }
   #deckvalue { font-size: 11.5px; color: var(--text-dim); margin-top: 8px; text-align: right; }
   #deckvalue b { color: #5fd68a; }
+  #btnStats { display: flex; justify-content: space-between; align-items: center; width: 100%; margin-top: 9px; padding: 8px 11px; background: var(--bg3); border: 1px solid var(--border); border-radius: 7px; color: var(--text); font-size: 12.5px; font-weight: 600; cursor: pointer; }
+  #btnStats:hover { border-color: var(--accent); }
+  #statsBtnHint { color: var(--text-dim); font-weight: 400; font-size: 11.5px; }
+  #btnStats.has-record #statsBtnRecord { color: var(--accent); }
   #curve { display: flex; gap: 3px; align-items: flex-end; height: 44px; margin-top: 10px; padding: 0 2px; }
   .cbar { flex: 1; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; gap: 2px; height: 100%; }
   .cbar .bar { width: 100%; background: var(--accent); border-radius: 2px 2px 0 0; min-height: 1px; opacity: .85; }
@@ -229,7 +233,6 @@
     <div id="deckhead">
       <div id="deckbar">
         <select id="deckSel" title="Switch deck"></select>
-        <button id="btnStats" title="Match record &amp; notes">📊</button>
         <button id="btnRename" title="Rename deck">✎</button>
         <button id="btnDelete" title="Delete deck">🗑</button>
       </div>
@@ -237,6 +240,10 @@
       <div id="leaderbox"><div class="linfo" style="color:var(--text-dim)">No leader selected — click a Leader card to set it.</div></div>
       <div id="curve"></div>
       <div id="deckvalue"></div>
+      <button id="btnStats" title="Log wins/losses and keep notes for this deck">
+        <span id="statsBtnRecord">📊 Record &amp; Notes</span>
+        <span id="statsBtnHint">Log W/L ›</span>
+      </button>
     </div>
     <div id="decklist"></div>
     <div id="deckfoot">
@@ -687,8 +694,14 @@ function renderWarns() {
 
 function renderDeck() {
   renderDeckSel();
-  const rec = recordOf(deck);
-  document.getElementById('btnStats').textContent = (rec.w + rec.l) ? rec.w + '–' + rec.l : '📊';
+  const rec = recordOf(deck), games = rec.w + rec.l;
+  const sb = document.getElementById('btnStats');
+  sb.classList.toggle('has-record', games > 0);
+  document.getElementById('statsBtnRecord').textContent = games
+    ? '📊 Record ' + rec.w + '–' + rec.l + ' (' + Math.round(rec.w / games * 100) + '%)'
+    : '📊 Record & Notes';
+  document.getElementById('statsBtnHint').textContent =
+    (deck.notes && deck.notes.trim() ? '📝 ' : '') + (games ? 'View ›' : 'Log W/L ›');
   const n = deckSize();
   document.getElementById('deckMini').textContent = n;
   const dc = document.getElementById('deckcount');
@@ -1019,7 +1032,13 @@ function renderStats() {
 document.getElementById('btnStats').onclick = () => { renderStats(); modal3.style.display = 'flex'; };
 document.getElementById('btnWin').onclick = () => addMatch(true);
 document.getElementById('btnLoss').onclick = () => addMatch(false);
-document.getElementById('deckNotes').oninput = e => { deck.notes = e.target.value; saveDeck(); };
+document.getElementById('deckNotes').oninput = e => {
+  deck.notes = e.target.value;
+  saveDeck();
+  const games = recordOf(deck).w + recordOf(deck).l;
+  document.getElementById('statsBtnHint').textContent =
+    (deck.notes.trim() ? '📝 ' : '') + (games ? 'View ›' : 'Log W/L ›');
+};
 document.getElementById('statsClose').onclick = () => { modal3.style.display = 'none'; };
 modal3.onclick = e => { if (e.target === modal3) modal3.style.display = 'none'; };
 
