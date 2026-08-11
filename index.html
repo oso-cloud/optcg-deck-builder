@@ -80,7 +80,7 @@
   #deckhead { padding: 12px 14px; border-bottom: 1px solid var(--border); }
   #deckbar { display: flex; gap: 6px; margin-bottom: 10px; }
   #deckbar select { flex: 1; font-weight: 600; }
-  #deckbar button { background: var(--bg3); border: 1px solid var(--border); color: var(--text-dim); border-radius: 6px; width: 32px; cursor: pointer; font-size: 13px; }
+  #deckbar button { background: var(--bg3); border: 1px solid var(--border); color: var(--text-dim); border-radius: 6px; min-width: 32px; padding: 0 6px; cursor: pointer; font-size: 13px; white-space: nowrap; }
   #deckbar button:hover { color: var(--text); border-color: var(--text-dim); }
   #deckhead h2 { font-size: 15px; display: flex; justify-content: space-between; align-items: center; }
   #deckcount { font-size: 14px; }
@@ -136,6 +136,32 @@
   #expbox textarea { height: 260px; font-family: Consolas, monospace; font-size: 12.5px; resize: vertical; }
   #expbox .btnrow { margin-top: 10px; }
   #expmsg { font-size: 12px; color: #5fd68a; height: 16px; margin-top: 6px; }
+
+  /* ===== match tracker ===== */
+  #statsbox { background: var(--bg2); border: 1px solid var(--border); border-radius: 12px; max-width: 480px; width: 92%; max-height: 90vh; overflow-y: auto; padding: 20px; }
+  #statsbox h3 { margin-bottom: 8px; font-size: 16px; }
+  #statsRecord { font-size: 14px; margin-bottom: 12px; color: var(--text-dim); }
+  #statsRecord b { color: var(--text); font-size: 17px; }
+  #addmatch { display: flex; gap: 6px; margin-bottom: 12px; }
+  #addmatch input { flex: 1; }
+  #addmatch .btn { flex: none; padding: 7px 14px; }
+  .mwin { background: #2c7a4b; color: #fff; }
+  .mloss { background: #9e3b3b; color: #fff; }
+  .mwin:hover, .mloss:hover { filter: brightness(1.15); }
+  #vsBreak { font-size: 12px; margin-bottom: 10px; }
+  #vsBreak .vsrow { display: flex; justify-content: space-between; padding: 3px 6px; border-radius: 5px; }
+  #vsBreak .vsrow:nth-child(odd) { background: var(--bg3); }
+  #matchList { max-height: 200px; overflow-y: auto; margin-bottom: 12px; border-top: 1px solid var(--border); }
+  .mrow { display: flex; align-items: center; gap: 8px; padding: 5px 4px; font-size: 12.5px; border-bottom: 1px solid var(--border); }
+  .mrow .mres { font-weight: 700; width: 18px; }
+  .mrow .mres.w { color: #5fd68a; }
+  .mrow .mres.l { color: #ff6b6b; }
+  .mrow .mopp { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .mrow .mdate { color: var(--text-dim); font-size: 11px; }
+  .mrow button { background: none; border: none; color: var(--text-dim); cursor: pointer; font-size: 13px; }
+  .mrow button:hover { color: #ff6b6b; }
+  .stats-label { display: block; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: var(--text-dim); margin-bottom: 5px; }
+  #deckNotes { resize: vertical; }
 
   /* ===== mobile layout ===== */
   .paneltoggle { display: none; background: var(--bg3); border: 1px solid var(--border); color: var(--text); border-radius: 7px; padding: 7px 11px; font-size: 15px; cursor: pointer; white-space: nowrap; }
@@ -200,6 +226,7 @@
     <div id="deckhead">
       <div id="deckbar">
         <select id="deckSel" title="Switch deck"></select>
+        <button id="btnStats" title="Match record &amp; notes">📊</button>
         <button id="btnRename" title="Rename deck">✎</button>
         <button id="btnDelete" title="Delete deck">🗑</button>
       </div>
@@ -227,6 +254,23 @@
 
 <div id="scrim"></div>
 <div id="modal"><div id="modalbox"></div></div>
+<div id="modal3" style="position:fixed;inset:0;background:rgba(0,0,0,.75);display:none;align-items:center;justify-content:center;z-index:60">
+  <div id="statsbox">
+    <h3 id="statsTitle">Matches &amp; Notes</h3>
+    <div id="statsRecord"></div>
+    <div id="addmatch">
+      <input type="text" id="oppInput" list="leaderList" placeholder="Opposing leader (type a name or ID…)">
+      <datalist id="leaderList"></datalist>
+      <button class="btn mwin" id="btnWin">Win</button>
+      <button class="btn mloss" id="btnLoss">Loss</button>
+    </div>
+    <div id="vsBreak"></div>
+    <div id="matchList"></div>
+    <label class="stats-label" for="deckNotes">Notes for this deck</label>
+    <textarea id="deckNotes" rows="4" placeholder="Matchup tips, mulligan plans, cards to try…"></textarea>
+    <div class="btnrow" style="margin-top:10px"><button class="btn btn-dim" id="statsClose">Close</button></div>
+  </div>
+</div>
 <div id="modal2" style="position:fixed;inset:0;background:rgba(0,0,0,.75);display:none;align-items:center;justify-content:center;z-index:60">
   <div id="expbox">
     <h3 id="exptitle">Export deck</h3>
@@ -321,6 +365,7 @@ function finishLoad(list) {
     c.search = (c.name + ' ' + c.text + ' ' + c.subs + ' ' + c.id).toLowerCase();
   }
   buildFilterOptions();
+  populateLeaderList();
   loadDeck();
   applyFilters();
   renderDeck();
@@ -632,6 +677,8 @@ function renderWarns() {
 
 function renderDeck() {
   renderDeckSel();
+  const rec = recordOf(deck);
+  document.getElementById('btnStats').textContent = (rec.w + rec.l) ? rec.w + '–' + rec.l : '📊';
   const n = deckSize();
   document.getElementById('deckMini').textContent = n;
   const dc = document.getElementById('deckcount');
@@ -738,7 +785,7 @@ function openModal(c) {
 }
 function closeModal() { modal.classList.remove('open'); }
 modal.onclick = e => { if (e.target === modal) closeModal(); };
-document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeModal(); closeExp(); } });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeModal(); closeExp(); document.getElementById('modal3').style.display = 'none'; } });
 
 /* ================= export / import ================= */
 const modal2 = document.getElementById('modal2');
@@ -815,6 +862,98 @@ document.getElementById('btnNew').onclick = () => {
 
 function esc(s) { return String(s).replace(/[&<>"']/g, m => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m])); }
 
+/* ================= match tracker & notes ================= */
+const modal3 = document.getElementById('modal3');
+const oppInput = document.getElementById('oppInput');
+
+function deckMatches() { return deck.matches || (deck.matches = []); }
+function recordOf(d) {
+  const m = d.matches || [];
+  return { w: m.filter(x => x.win).length, l: m.filter(x => !x.win).length };
+}
+function oppLabel(opp) {
+  const c = byId.get(opp);
+  return c ? c.name + ' (' + c.id + ')' : opp;
+}
+
+function populateLeaderList() {
+  const dl = document.getElementById('leaderList');
+  dl.innerHTML = '';
+  for (const c of cards) if (c.type === 'Leader') {
+    const o = document.createElement('option');
+    o.value = c.id + ' ' + c.name + (c.color ? ' — ' + c.color : '');
+    dl.appendChild(o);
+  }
+}
+
+function resolveOpp(text) {
+  text = text.trim();
+  if (!text) return null;
+  const idm = text.toUpperCase().match(/^([A-Z0-9]+-\d+)/);
+  if (idm && byId.has(idm[1]) && byId.get(idm[1]).type === 'Leader') return idm[1];
+  const q = text.toLowerCase();
+  const hits = cards.filter(c => c.type === 'Leader' && c.name.toLowerCase().includes(q));
+  if (hits.length === 1) return hits[0].id;
+  return text; // free text (ambiguous or unknown leader)
+}
+
+function addMatch(win) {
+  const opp = resolveOpp(oppInput.value);
+  if (!opp) { oppInput.focus(); return; }
+  deckMatches().unshift({ opp, win, t: Date.now() });
+  oppInput.value = '';
+  saveDeck(); renderStats(); renderDeck();
+}
+
+function renderStats() {
+  document.getElementById('statsTitle').textContent = deck.name + ' — Matches & Notes';
+  const { w, l } = recordOf(deck);
+  const total = w + l;
+  document.getElementById('statsRecord').innerHTML = total
+    ? 'Record: <b>' + w + '–' + l + '</b> (' + Math.round(w / total * 100) + '% win rate, ' + total + ' game' + (total > 1 ? 's' : '') + ')'
+    : 'No matches logged yet — play a game and hit Win or Loss.';
+
+  // per-opponent breakdown
+  const by = new Map();
+  for (const m of deckMatches()) {
+    const k = m.opp;
+    const r = by.get(k) || { w: 0, l: 0 };
+    m.win ? r.w++ : r.l++;
+    by.set(k, r);
+  }
+  const vs = document.getElementById('vsBreak');
+  vs.innerHTML = '';
+  [...by.entries()].sort((a, b) => (b[1].w + b[1].l) - (a[1].w + a[1].l)).forEach(([opp, r]) => {
+    const d = document.createElement('div');
+    d.className = 'vsrow';
+    d.innerHTML = '<span>vs ' + esc(oppLabel(opp)) + '</span><span><b style="color:#5fd68a">' + r.w + '</b>–<b style="color:#ff6b6b">' + r.l + '</b></span>';
+    vs.appendChild(d);
+  });
+
+  // match list, newest first
+  const ml = document.getElementById('matchList');
+  ml.innerHTML = '';
+  deckMatches().forEach((m, i) => {
+    const row = document.createElement('div');
+    row.className = 'mrow';
+    row.innerHTML = '<span class="mres ' + (m.win ? 'w">W' : 'l">L') + '</span><span class="mopp">vs ' + esc(oppLabel(m.opp)) + '</span><span class="mdate">' + new Date(m.t).toLocaleDateString() + '</span>';
+    const x = document.createElement('button');
+    x.textContent = '✕'; x.title = 'Delete this match';
+    x.onclick = () => { deckMatches().splice(i, 1); saveDeck(); renderStats(); renderDeck(); };
+    row.appendChild(x);
+    ml.appendChild(row);
+  });
+
+  document.getElementById('deckNotes').value = deck.notes || '';
+}
+
+document.getElementById('btnStats').onclick = () => { renderStats(); modal3.style.display = 'flex'; };
+document.getElementById('btnWin').onclick = () => addMatch(true);
+document.getElementById('btnLoss').onclick = () => addMatch(false);
+document.getElementById('deckNotes').oninput = e => { deck.notes = e.target.value; saveDeck(); };
+document.getElementById('statsClose').onclick = () => { modal3.style.display = 'none'; };
+modal3.onclick = e => { if (e.target === modal3) modal3.style.display = 'none'; };
+
 /* ================= mobile panel toggles ================= */
 const scrim = document.getElementById('scrim');
 function togglePanel(id) {
@@ -853,7 +992,7 @@ document.getElementById('restoreFile').onchange = async e => {
     let added = 0;
     for (const [id, d] of Object.entries(decks)) {
       if (!d || typeof d !== 'object' || !d.cards) continue;
-      store.decks[id] = { name: d.name || 'Restored deck', leader: d.leader || null, cards: d.cards, updated: d.updated || Date.now() };
+      store.decks[id] = { name: d.name || 'Restored deck', leader: d.leader || null, cards: d.cards, updated: d.updated || Date.now(), matches: d.matches || [], notes: d.notes || '' };
       added++;
     }
     if (!added) return alert('No decks found in that file.');
