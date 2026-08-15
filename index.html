@@ -99,6 +99,32 @@
   #btnStats:hover { border-color: var(--accent); }
   #statsBtnHint { color: var(--text-dim); font-weight: 400; font-size: 11.5px; }
   #btnStats.has-record #statsBtnRecord { color: var(--accent); }
+  #deckactions { display: flex; gap: 7px; margin-top: 7px; }
+  #deckactions button { flex: 1; padding: 8px 0; background: var(--bg3); border: 1px solid var(--border); border-radius: 7px; color: var(--text); font-size: 12.5px; font-weight: 600; cursor: pointer; }
+  #deckactions button:hover { border-color: var(--accent); }
+
+  /* ===== deck stats / test hand ===== */
+  .ovl { position: fixed; inset: 0; background: rgba(0,0,0,.75); display: none; align-items: center; justify-content: center; z-index: 60; }
+  .ovl.open { display: flex; }
+  .lab { background: var(--bg2); border: 1px solid var(--border); border-radius: 12px; width: 92%; max-height: 90vh; overflow-y: auto; padding: 20px; }
+  #statsdeckbox { max-width: 520px; }
+  #handbox { max-width: 720px; }
+  .lab h3 { font-size: 16px; margin-bottom: 12px; }
+  .statgrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(108px, 1fr)); gap: 8px; margin-bottom: 16px; }
+  .stat { background: var(--bg3); border: 1px solid var(--border); border-radius: 8px; padding: 9px; }
+  .stat .sv { font-size: 19px; font-weight: 700; color: var(--accent); }
+  .stat .sl { font-size: 10.5px; color: var(--text-dim); text-transform: uppercase; letter-spacing: .6px; margin-top: 2px; }
+  .sect { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: var(--text-dim); margin: 14px 0 7px; }
+  .prow { display: grid; grid-template-columns: 34px 1fr 74px; align-items: center; gap: 8px; font-size: 12px; padding: 2px 0; }
+  .prow .pbar { background: var(--bg3); border-radius: 3px; height: 15px; position: relative; overflow: hidden; }
+  .prow .pfill { background: var(--accent); height: 100%; border-radius: 3px; opacity: .85; }
+  .prow .pnum { color: var(--text-dim); text-align: right; font-size: 11px; }
+  #handcards { display: grid; grid-template-columns: repeat(auto-fit, minmax(112px, 1fr)); gap: 9px; margin-bottom: 14px; }
+  #handcards .hc { position: relative; cursor: pointer; }
+  #handcards img { width: 100%; border-radius: 7px; display: block; aspect-ratio: 600/838; background: var(--bg3); }
+  #handcards .hc.drawn::after { content: 'DRAWN'; position: absolute; top: 5px; left: 5px; background: var(--accent); color: #1a1a1a; font-size: 9px; font-weight: 700; padding: 2px 5px; border-radius: 4px; }
+  #handinfo { font-size: 12.5px; color: var(--text-dim); margin-bottom: 12px; }
+  #handinfo b { color: var(--text); }
   #curve { display: flex; gap: 3px; align-items: flex-end; height: 44px; margin-top: 10px; padding: 0 2px; }
   .cbar { flex: 1; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; gap: 2px; height: 100%; }
   .cbar .bar { width: 100%; background: var(--accent); border-radius: 2px 2px 0 0; min-height: 1px; opacity: .85; }
@@ -124,7 +150,7 @@
   #warns { font-size: 11.5px; color: #ffb35c; padding: 0 2px; }
 
   /* ===== Modal ===== */
-  #modal { position: fixed; inset: 0; background: rgba(0,0,0,.75); display: none; align-items: center; justify-content: center; z-index: 50; }
+  #modal { position: fixed; inset: 0; background: rgba(0,0,0,.75); display: none; align-items: center; justify-content: center; z-index: 80; }
   #modal.open { display: flex; }
   #modalbox { background: var(--bg2); border: 1px solid var(--border); border-radius: 12px; max-width: 780px; width: 92%; max-height: 90vh; overflow-y: auto; display: flex; gap: 18px; padding: 20px; }
   #modalbox img { width: 300px; max-width: 42%; border-radius: 10px; align-self: flex-start; }
@@ -244,6 +270,10 @@
         <span id="statsBtnRecord">📊 Record &amp; Notes</span>
         <span id="statsBtnHint">Log W/L ›</span>
       </button>
+      <div id="deckactions">
+        <button id="btnDeckStats" title="Counters, triggers, power curve">📈 Deck Stats</button>
+        <button id="btnTestHand" title="Draw a sample opening hand">🎴 Test Hand</button>
+      </div>
     </div>
     <div id="decklist"></div>
     <div id="deckfoot">
@@ -266,6 +296,26 @@
 
 <div id="scrim"></div>
 <div id="modal"><div id="modalbox"></div></div>
+<div id="modal4" class="ovl">
+  <div id="statsdeckbox" class="lab">
+    <h3 id="dsTitle">Deck Statistics</h3>
+    <div id="dsBody"></div>
+    <div class="btnrow" style="margin-top:14px"><button class="btn btn-dim" id="dsClose">Close</button></div>
+  </div>
+</div>
+<div id="modal5" class="ovl">
+  <div id="handbox" class="lab">
+    <h3>🎴 Test Hand</h3>
+    <div id="handinfo"></div>
+    <div id="handcards"></div>
+    <div class="btnrow">
+      <button class="btn btn-gold" id="hNew">New hand</button>
+      <button class="btn btn-dim" id="hMull">Mulligan</button>
+      <button class="btn btn-dim" id="hDraw">Draw 1</button>
+      <button class="btn btn-dim" id="hClose">Close</button>
+    </div>
+  </div>
+</div>
 <div id="modal3" style="position:fixed;inset:0;background:rgba(0,0,0,.75);display:none;align-items:center;justify-content:center;z-index:60">
   <div id="statsbox">
     <h3 id="statsTitle">Matches &amp; Notes</h3>
@@ -823,7 +873,15 @@ function openModal(c) {
 }
 function closeModal() { modal.classList.remove('open'); }
 modal.onclick = e => { if (e.target === modal) closeModal(); };
-document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeModal(); closeExp(); document.getElementById('modal3').style.display = 'none'; } });
+document.addEventListener('keydown', e => {
+  if (e.key !== 'Escape') return;
+  // close the topmost layer only, so Esc from a card detail returns to the hand
+  if (modal.classList.contains('open')) return closeModal();
+  closeExp();
+  document.getElementById('modal3').style.display = 'none';
+  document.getElementById('modal4').classList.remove('open');
+  document.getElementById('modal5').classList.remove('open');
+});
 
 /* ================= export / import ================= */
 const modal2 = document.getElementById('modal2');
@@ -1041,6 +1099,165 @@ document.getElementById('deckNotes').oninput = e => {
 };
 document.getElementById('statsClose').onclick = () => { modal3.style.display = 'none'; };
 modal3.onclick = e => { if (e.target === modal3) modal3.style.display = 'none'; };
+
+/* ================= deck statistics ================= */
+// deck expanded to one entry per physical copy
+function deckCardList() {
+  const out = [];
+  for (const [id, q] of Object.entries(deck.cards)) {
+    const c = byId.get(id);
+    if (c) for (let i = 0; i < q; i++) out.push(c);
+  }
+  return out;
+}
+
+function bar(label, count, max, right) {
+  return '<div class="prow"><span>' + esc(label) + '</span>' +
+    '<span class="pbar"><span class="pfill" style="width:' + (max ? count / max * 100 : 0) + '%"></span></span>' +
+    '<span class="pnum">' + esc(right != null ? right : String(count)) + '</span></div>';
+}
+
+function renderDeckStats() {
+  const list = deckCardList();
+  const body = document.getElementById('dsBody');
+  document.getElementById('dsTitle').textContent = '📈 ' + deck.name + ' — Deck Statistics';
+  if (!list.length) { body.innerHTML = '<div style="color:var(--text-dim)">Add cards to the deck to see statistics.</div>'; return; }
+
+  const chars = list.filter(c => c.type === 'Character');
+  const has = (c, kw) => c.text.includes('[' + kw + ']');
+  const counterCards = list.filter(c => c.counter);
+  const counterTotal = counterCards.reduce((s, c) => s + c.counter, 0);
+  const counterEvents = list.filter(c => has(c, 'Counter')).length;
+  const triggers = list.filter(c => has(c, 'Trigger')).length;
+  const blockers = list.filter(c => has(c, 'Blocker')).length;
+  const rush = list.filter(c => has(c, 'Rush')).length;
+  const costs = list.filter(c => c.cost != null).map(c => c.cost);
+  const avgCost = costs.length ? (costs.reduce((a, b) => a + b, 0) / costs.length) : 0;
+  const powers = chars.filter(c => c.power != null).map(c => c.power);
+  const avgPower = powers.length ? Math.round(powers.reduce((a, b) => a + b, 0) / powers.length) : 0;
+
+  let h = '<div class="statgrid">' +
+    stat(list.length, 'Cards') +
+    stat(counterTotal.toLocaleString(), 'Counter power') +
+    stat(triggers, 'Triggers') +
+    stat(blockers, 'Blockers') +
+    stat(avgCost.toFixed(2), 'Avg cost') +
+    stat(avgPower.toLocaleString(), 'Avg power') +
+    '</div>';
+
+  // counters
+  const c1 = list.filter(c => c.counter === 1000).length;
+  const c2 = list.filter(c => c.counter === 2000).length;
+  const c0 = list.length - counterCards.length;
+  const cmax = Math.max(c1, c2, c0, 1);
+  h += '<div class="sect">Counters</div>' +
+    bar('+2000', c2, cmax, c2 + ' cards') +
+    bar('+1000', c1, cmax, c1 + ' cards') +
+    bar('none', c0, cmax, c0 + ' cards') +
+    '<div style="font-size:11.5px;color:var(--text-dim);margin-top:6px">' +
+    counterEvents + ' card' + (counterEvents === 1 ? '' : 's') + ' with a [Counter] effect · ' +
+    (list.length ? Math.round(counterCards.length / list.length * 100) : 0) + '% of the deck can counter</div>';
+
+  // power curve: characters by cost, with average power at each cost
+  const buckets = {};
+  for (const c of chars) {
+    const k = Math.min(c.cost ?? 0, 10);
+    (buckets[k] || (buckets[k] = [])).push(c.power ?? 0);
+  }
+  const bmax = Math.max(...Object.values(buckets).map(v => v.length), 1);
+  h += '<div class="sect">Power curve (characters by cost)</div>';
+  for (let i = 0; i <= 10; i++) {
+    const v = buckets[i];
+    if (!v) continue;
+    const avg = Math.round(v.reduce((a, b) => a + b, 0) / v.length);
+    h += bar((i === 10 ? '10+' : i), v.length, bmax, v.length + '× · ' + avg.toLocaleString());
+  }
+
+  // type + keyword mix
+  const types = {};
+  for (const c of list) types[c.type] = (types[c.type] || 0) + 1;
+  const tmax = Math.max(...Object.values(types), 1);
+  h += '<div class="sect">Card types</div>';
+  for (const t of ['Character', 'Event', 'Stage']) if (types[t]) h += bar(t, types[t], tmax);
+  h += '<div style="font-size:11.5px;color:var(--text-dim);margin-top:8px">' +
+    blockers + ' Blocker · ' + rush + ' Rush · ' + triggers + ' Trigger</div>';
+
+  body.innerHTML = h;
+}
+function stat(v, l) { return '<div class="stat"><div class="sv">' + esc(String(v)) + '</div><div class="sl">' + esc(l) + '</div></div>'; }
+
+document.getElementById('btnDeckStats').onclick = () => { renderDeckStats(); document.getElementById('modal4').classList.add('open'); };
+document.getElementById('dsClose').onclick = () => document.getElementById('modal4').classList.remove('open');
+document.getElementById('modal4').onclick = e => { if (e.target.id === 'modal4') e.target.classList.remove('open'); };
+
+/* ================= test hand ================= */
+let handDeck = [], hand = [], mulligans = 0;
+
+function shuffle(a) {
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function newHand(isMulligan) {
+  handDeck = shuffle(deckCardList());
+  hand = handDeck.splice(0, 5).map(c => ({ c, drawn: false }));
+  mulligans = isMulligan ? mulligans + 1 : 0;
+  renderHand();
+}
+function drawOne() {
+  if (!handDeck.length) return;
+  hand.push({ c: handDeck.shift(), drawn: true });
+  renderHand();
+}
+
+function renderHand() {
+  const info = document.getElementById('handinfo');
+  const box = document.getElementById('handcards');
+  if (!hand.length) {
+    info.textContent = 'Add cards to the deck to draw a test hand.';
+    box.innerHTML = '';
+    return;
+  }
+  const inHand = hand.map(x => x.c);
+  const costs = inHand.filter(c => c.cost != null).map(c => c.cost);
+  const cheap = costs.filter(c => c <= 2).length;
+  const counters = inHand.filter(c => c.counter).length;
+  const L = deck.leader && byId.get(deck.leader);
+  info.innerHTML =
+    (L ? 'Leader: <b>' + esc(L.name) + '</b> · ' : '') +
+    'Hand: <b>' + hand.length + '</b> · ' +
+    'Avg cost <b>' + (costs.length ? (costs.reduce((a, b) => a + b, 0) / costs.length).toFixed(1) : '–') + '</b> · ' +
+    '<b>' + cheap + '</b> early play' + (cheap === 1 ? '' : 's') + ' (cost ≤2) · ' +
+    '<b>' + counters + '</b> counter' + (counters === 1 ? '' : 's') + ' · ' +
+    handDeck.length + ' cards left' +
+    (mulligans ? ' · mulligans: ' + mulligans : '');
+
+  box.innerHTML = '';
+  for (const { c, drawn } of hand) {
+    const d = document.createElement('div');
+    d.className = 'hc' + (drawn ? ' drawn' : '');
+    const img = document.createElement('img');
+    img.src = c.img; img.alt = c.name; img.loading = 'lazy';
+    img.title = c.name + (c.cost != null ? ' — cost ' + c.cost : '');
+    d.appendChild(img);
+    d.onclick = () => openModal(c);
+    box.appendChild(d);
+  }
+}
+
+document.getElementById('btnTestHand').onclick = () => {
+  if (!deckSize()) return flashWarn('Add cards to the deck first');
+  newHand(false);
+  document.getElementById('modal5').classList.add('open');
+};
+document.getElementById('hNew').onclick = () => newHand(false);
+document.getElementById('hMull').onclick = () => newHand(true);
+document.getElementById('hDraw').onclick = drawOne;
+document.getElementById('hClose').onclick = () => document.getElementById('modal5').classList.remove('open');
+document.getElementById('modal5').onclick = e => { if (e.target.id === 'modal5') e.target.classList.remove('open'); };
 
 /* ================= mobile panel toggles ================= */
 const scrim = document.getElementById('scrim');
