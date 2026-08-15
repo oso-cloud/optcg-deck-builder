@@ -1,4 +1,4 @@
-// Auto-generated OP17 spoiler cards (source: opdeckguide.com, 2026-08-10)
+// Auto-generated OP17 spoiler cards (source: opdeckguide.com, 2026-08-15)
 window.CUSTOM_CARDS = (window.CUSTOM_CARDS || []).concat([
  {
   "id": "OP17-001",
@@ -16,7 +16,8 @@ window.CUSTOM_CARDS = (window.CUSTOM_CARDS || []).concat([
   "counter": null,
   "attr": "",
   "img": "op17/OP17-001.png",
-  "spoiler": true
+  "spoiler": true,
+  "numTBA": false
  },
  {
   "id": "OP17-002",
@@ -34,12 +35,13 @@ window.CUSTOM_CARDS = (window.CUSTOM_CARDS || []).concat([
   "counter": null,
   "attr": "",
   "img": "op17/OP17-002.jpg",
-  "spoiler": true
+  "spoiler": true,
+  "numTBA": false
  },
  {
   "id": "OP17-003",
   "name": "Izo",
-  "text": "[Rush] Character [On Play] If your Leader is [Edward Newgate] or has the {Land of Wano} type, give up to 1 of your opponent&#39;s rested Characters -6000 power during this turn.",
+  "text": "[Rush] Character [On Play] If your Leader is [Edward Newgate] or has the {Land of Wano} type, give up to 1 of your opponent's rested Characters -6000 power during this turn.",
   "set": "The World’s Strongest Warriors (spoilers)",
   "setId": "OP-17",
   "rarity": "R",
@@ -52,12 +54,13 @@ window.CUSTOM_CARDS = (window.CUSTOM_CARDS || []).concat([
   "counter": null,
   "attr": "",
   "img": "op17/OP17-003.jpg",
-  "spoiler": true
+  "spoiler": true,
+  "numTBA": false
  },
  {
   "id": "OP17-004",
-  "name": "Inuarashi &amp; Nekomamushi",
-  "text": "[On Play] Up to 1 of your {Land of Wano} type Characters or up to 1 of your Characters with a type including &quot;Whitebeard Pirates&quot; gains [Rush] during this turn. (This card can attack on the turn in which it is played.)",
+  "name": "Inuarashi & Nekomamushi",
+  "text": "[On Play] Up to 1 of your {Land of Wano} type Characters or up to 1 of your Characters with a type including \"Whitebeard Pirates\" gains [Rush] during this turn. (This card can attack on the turn in which it is played.)",
   "set": "The World’s Strongest Warriors (spoilers)",
   "setId": "OP-17",
   "rarity": "C",
@@ -70,12 +73,13 @@ window.CUSTOM_CARDS = (window.CUSTOM_CARDS || []).concat([
   "counter": null,
   "attr": "",
   "img": "op17/OP17-004.jpg",
-  "spoiler": true
+  "spoiler": true,
+  "numTBA": false
  },
  {
   "id": "OP17-005",
   "name": "Edward Newgate",
-  "text": "If your opponent has a Character with 10000 power or more, give this card in your hand -4 cost. [On Play] Set the base power of your monocolored Leader to 8000 until the end of your opponent&#39;s next End Phase.",
+  "text": "If your opponent has a Character with 10000 power or more, give this card in your hand -4 cost. [On Play] Set the base power of your monocolored Leader to 8000 until the end of your opponent's next End Phase.",
   "set": "The World’s Strongest Warriors (spoilers)",
   "setId": "OP-17",
   "rarity": "SR",
@@ -88,7 +92,8 @@ window.CUSTOM_CARDS = (window.CUSTOM_CARDS || []).concat([
   "counter": null,
   "attr": "",
   "img": "op17/OP17-005.jpg",
-  "spoiler": true
+  "spoiler": true,
+  "numTBA": false
  },
  {
   "id": "OP17-006",
@@ -106,12 +111,13 @@ window.CUSTOM_CARDS = (window.CUSTOM_CARDS || []).concat([
   "counter": null,
   "attr": "",
   "img": "op17/OP17-006.jpg",
-  "spoiler": true
+  "spoiler": true,
+  "numTBA": false
  },
  {
   "id": "OP17-007",
   "name": "Kouzuki Oden",
-  "text": "[On Play] If your Leader is [Edward Newgate] or has the {Land of Wano} type, play up to 1 Character card with a type including {Land of Wano} or &quot;Whitebeard Pirates&quot; with 6000 power or less from your hand.",
+  "text": "[On Play] If your Leader is [Edward Newgate] or has the {Land of Wano} type, play up to 1 Character card with a type including {Land of Wano} or \"Whitebeard Pirates\" with 6000 power or less from your hand.",
   "set": "The World’s Strongest Warriors (spoilers)",
   "setId": "OP-17",
   "rarity": "R",
@@ -124,12 +130,13 @@ window.CUSTOM_CARDS = (window.CUSTOM_CARDS || []).concat([
   "counter": null,
   "attr": "",
   "img": "op17/OP17-007.jpg",
-  "spoiler": true
+  "spoiler": true,
+  "numTBA": false
  },
  {
   "id": "OP17-008",
   "name": "Jozu",
-  "text": "[On Play] Your [Edward.Newgate] Leader&#39;s base power becomes 8000 until the end of your opponent&#39;s next End Phase.",
+  "text": "[On Play] Your [Edward.Newgate] Leader's base power becomes 8000 until the end of your opponent's next End Phase.",
   "set": "The World’s Strongest Warriors (spoilers)",
   "setId": "OP-17",
   "rarity": "R",
@@ -142,12 +149,13 @@ window.CUSTOM_CARDS = (window.CUSTOM_CARDS || []).concat([
   "counter": null,
   "attr": "",
   "img": "op17/OP17-008.jpg",
-  "spoiler": true
+  "spoiler": true,
+  "numTBA": false
  },
  {
   "id": "OP17-010",
   "name": "Fossa",
-  "text": "[Activate:Main] [Once Per Turn] If your opponent has a Character with 10000 power or more, and you do not have [Fossa], this Character gains [Blocker] and +2000 power until the end of your opponent&#39;s next End Phase.",
+  "text": "[Activate:Main] [Once Per Turn] If your opponent has a Character with 10000 power or more, and you do not have [Fossa], this Character gains [Blocker] and +2000 power until the end of your opponent's next End Phase.",
   "set": "The World’s Strongest Warriors (spoilers)",
   "setId": "OP-17",
   "rarity": "C",
@@ -160,12 +168,13 @@ window.CUSTOM_CARDS = (window.CUSTOM_CARDS || []).concat([
   "counter": null,
   "attr": "",
   "img": "op17/OP17-010.jpg",
-  "spoiler": true
+  "spoiler": true,
+  "numTBA": false
  },
  {
   "id": "OP17-011",
   "name": "Blamenco",
-  "text": "[DON!! x2] [When Attacking] Give up to 1 of your opponent&#39;s Characters -4000 power during this turn.",
+  "text": "[DON!! x2] [When Attacking] Give up to 1 of your opponent's Characters -4000 power during this turn.",
   "set": "The World’s Strongest Warriors (spoilers)",
   "setId": "OP-17",
   "rarity": "C",
@@ -178,12 +187,13 @@ window.CUSTOM_CARDS = (window.CUSTOM_CARDS || []).concat([
   "counter": null,
   "attr": "",
   "img": "op17/OP17-011.jpg",
-  "spoiler": true
+  "spoiler": true,
+  "numTBA": false
  },
  {
   "id": "OP17-012",
   "name": "Blenheim",
-  "text": "[Blocker] (After your opponent declares an attack, you may rest this card to make it the new target of the attack.) [On K.O.] Play up to 1 card with a cost of 1 and a type including &quot;Whitebeard Pirates&quot; from your hand.",
+  "text": "[Blocker] (After your opponent declares an attack, you may rest this card to make it the new target of the attack.) [On K.O.] Play up to 1 card with a cost of 1 and a type including \"Whitebeard Pirates\" from your hand.",
   "set": "The World’s Strongest Warriors (spoilers)",
   "setId": "OP-17",
   "rarity": "C",
@@ -196,12 +206,13 @@ window.CUSTOM_CARDS = (window.CUSTOM_CARDS || []).concat([
   "counter": null,
   "attr": "",
   "img": "op17/OP17-012.jpg",
-  "spoiler": true
+  "spoiler": true,
+  "numTBA": false
  },
  {
   "id": "OP17-013",
   "name": "Portgas.D.Ace",
-  "text": "If your opponent has a Character with 10000 power or more, give this card in your hand -2 cost. [On Play] If your Leader is [Edward.Newgate], give up to 1 of your opponent&#39;s rested Characters -6000 power during this turn.",
+  "text": "If your opponent has a Character with 10000 power or more, give this card in your hand -2 cost. [On Play] If your Leader is [Edward.Newgate], give up to 1 of your opponent's rested Characters -6000 power during this turn.",
   "set": "The World’s Strongest Warriors (spoilers)",
   "setId": "OP-17",
   "rarity": "UC",
@@ -214,12 +225,13 @@ window.CUSTOM_CARDS = (window.CUSTOM_CARDS || []).concat([
   "counter": null,
   "attr": "",
   "img": "op17/OP17-013.jpg",
-  "spoiler": true
+  "spoiler": true,
+  "numTBA": false
  },
  {
   "id": "OP17-014",
   "name": "Whitey Bay",
-  "text": "[On Play] K.O. up to 1 of your opponent&#39;s Characters with base power of 2000 or less. [On Your Opponent's Attack] You may trash this Character: Up to 1 of your Leader gains +1000 power during this battle.",
+  "text": "[On Play] K.O. up to 1 of your opponent's Characters with base power of 2000 or less. [On Your Opponent's Attack] You may trash this Character: Up to 1 of your Leader gains +1000 power during this battle.",
   "set": "The World’s Strongest Warriors (spoilers)",
   "setId": "OP-17",
   "rarity": "C",
@@ -232,12 +244,13 @@ window.CUSTOM_CARDS = (window.CUSTOM_CARDS || []).concat([
   "counter": null,
   "attr": "",
   "img": "op17/OP17-014.jpg",
-  "spoiler": true
+  "spoiler": true,
+  "numTBA": false
  },
  {
   "id": "OP17-015",
   "name": "Marco",
-  "text": "If one of your Characters would be removed from the field by your opponent&#39;s effect, you may K.O. this Character instead. [On K.O.] You may trash 1 card with a type including &quot;Whitebeard Pirates&quot; from your hand: Play this Character card from your trash.",
+  "text": "If one of your Characters would be removed from the field by your opponent's effect, you may K.O. this Character instead. [On K.O.] You may trash 1 card with a type including \"Whitebeard Pirates\" from your hand: Play this Character card from your trash.",
   "set": "The World’s Strongest Warriors (spoilers)",
   "setId": "OP-17",
   "rarity": "UC",
@@ -250,12 +263,13 @@ window.CUSTOM_CARDS = (window.CUSTOM_CARDS || []).concat([
   "counter": null,
   "attr": "",
   "img": "op17/OP17-015.jpg",
-  "spoiler": true
+  "spoiler": true,
+  "numTBA": false
  },
  {
   "id": "OP17-017",
   "name": "HAS THE POWER TO DESTROY THE WORLD!!",
-  "text": "[Main] You may rest 2 of your DON!! cards: K.O. up to 1 of your opponent&#39;s Stages. [Counter] If you have 2 or more Characters with 8000 power, up to 1 of your Leader or Character cards gains +4000 power during this battle.",
+  "text": "[Main] You may rest 2 of your DON!! cards: K.O. up to 1 of your opponent's Stages. [Counter] If you have 2 or more Characters with 8000 power, up to 1 of your Leader or Character cards gains +4000 power during this battle.",
   "set": "The World’s Strongest Warriors (spoilers)",
   "setId": "OP-17",
   "rarity": "UC",
@@ -268,12 +282,13 @@ window.CUSTOM_CARDS = (window.CUSTOM_CARDS || []).concat([
   "counter": null,
   "attr": "",
   "img": "op17/OP17-017.jpg",
-  "spoiler": true
+  "spoiler": true,
+  "numTBA": false
  },
  {
   "id": "OP17-019",
-  "name": "I Don&#39;t Have Time to Chat with Snot-Nosed Brats",
-  "text": "[Main] Look at 5 cards from the top of your deck; reveal up to 1 card with a type including &quot;Whitebeard Pirates&quot; and add it to your hand. Then, place the rest at the bottom of your deck in any order. [Trigger] Your Leader gains +1000 power during this turn.",
+  "name": "I Don't Have Time to Chat with Snot-Nosed Brats",
+  "text": "[Main] Look at 5 cards from the top of your deck; reveal up to 1 card with a type including \"Whitebeard Pirates\" and add it to your hand. Then, place the rest at the bottom of your deck in any order. [Trigger] Your Leader gains +1000 power during this turn.",
   "set": "The World’s Strongest Warriors (spoilers)",
   "setId": "OP-17",
   "rarity": "R",
@@ -286,12 +301,13 @@ window.CUSTOM_CARDS = (window.CUSTOM_CARDS || []).concat([
   "counter": null,
   "attr": "",
   "img": "op17/OP17-019.jpg",
-  "spoiler": true
+  "spoiler": true,
+  "numTBA": false
  },
  {
   "id": "OP17-020",
   "name": "Shanks",
-  "text": "[Activate: Main] [Once Per Turn] You may trash 1 card from your hand or rest 1 of your DON!! cards: Up to 1 of your opponent&#39;s rested Characters will not become active during your opponent&#39;s next Refresh Phase.",
+  "text": "[Activate: Main] [Once Per Turn] You may trash 1 card from your hand or rest 1 of your DON!! cards: Up to 1 of your opponent's rested Characters will not become active during your opponent's next Refresh Phase.",
   "set": "The World’s Strongest Warriors (spoilers)",
   "setId": "OP-17",
   "rarity": "L",
@@ -304,12 +320,13 @@ window.CUSTOM_CARDS = (window.CUSTOM_CARDS || []).concat([
   "counter": null,
   "attr": "",
   "img": "op17/OP17-020.jpg",
-  "spoiler": true
+  "spoiler": true,
+  "numTBA": false
  },
  {
   "id": "OP17-021",
   "name": "Crone Oli",
-  "text": "If your Character with a type including &quot;Red-Haired Pirates&quot; would be removed from the field by your opponent&#39;s effect, you may rest 1 of your cards instead.",
+  "text": "If your Character with a type including \"Red-Haired Pirates\" would be removed from the field by your opponent's effect, you may rest 1 of your cards instead.",
   "set": "The World’s Strongest Warriors (spoilers)",
   "setId": "OP-17",
   "rarity": "C",
@@ -322,12 +339,13 @@ window.CUSTOM_CARDS = (window.CUSTOM_CARDS || []).concat([
   "counter": null,
   "attr": "",
   "img": "op17/OP17-021.jpg",
-  "spoiler": true
+  "spoiler": true,
+  "numTBA": false
  },
  {
   "id": "OP17-022",
   "name": "Shanks",
-  "text": "[Rush] [On Play] Set up to 2 of your DON!! cards as active. Then, rest all of your opponent&#39;s Characters.",
+  "text": "[Rush] [On Play] Set up to 2 of your DON!! cards as active. Then, rest all of your opponent's Characters.",
   "set": "The World’s Strongest Warriors (spoilers)",
   "setId": "OP-17",
   "rarity": "SR",
@@ -340,12 +358,13 @@ window.CUSTOM_CARDS = (window.CUSTOM_CARDS || []).concat([
   "counter": null,
   "attr": "",
   "img": "op17/OP17-022.jpg",
-  "spoiler": true
+  "spoiler": true,
+  "numTBA": false
  },
  {
   "id": "OP17-023",
   "name": "Nami",
-  "text": "If your {East Blue} or {Straw Hat Crew} Character would be K.O.&#39;d, you may rest this Character instead.",
+  "text": "If your {East Blue} or {Straw Hat Crew} Character would be K.O.'d, you may rest this Character instead.",
   "set": "The World’s Strongest Warriors (spoilers)",
   "setId": "OP-17",
   "rarity": "UC",
@@ -358,12 +377,13 @@ window.CUSTOM_CARDS = (window.CUSTOM_CARDS || []).concat([
   "counter": null,
   "attr": "",
   "img": "op17/OP17-023.jpg",
-  "spoiler": true
+  "spoiler": true,
+  "numTBA": false
  },
  {
   "id": "OP17-024",
   "name": "Howling Gab",
-  "text": "[Banish] (When this card deals damage, the target card is trashed without activating its Trigger.) [On Play] Rest up to 1 of your opponent&#39;s Characters.",
+  "text": "[Banish] (When this card deals damage, the target card is trashed without activating its Trigger.) [On Play] Rest up to 1 of your opponent's Characters.",
   "set": "The World’s Strongest Warriors (spoilers)",
   "setId": "OP-17",
   "rarity": "C",
@@ -376,12 +396,13 @@ window.CUSTOM_CARDS = (window.CUSTOM_CARDS || []).concat([
   "counter": null,
   "attr": "",
   "img": "op17/OP17-024.jpg",
-  "spoiler": true
+  "spoiler": true,
+  "numTBA": false
  },
  {
   "id": "OP17-025",
   "name": "Building Snake",
-  "text": "[On K.O.] K.O. up to 1 of your opponent&#39;s rested Characters with a cost of 6 or less. [Activate: Main] [Once Per Turn] Give up to 1 rested DON!! card to your [Shanks] Leader.",
+  "text": "[On K.O.] K.O. up to 1 of your opponent's rested Characters with a cost of 6 or less. [Activate: Main] [Once Per Turn] Give up to 1 rested DON!! card to your [Shanks] Leader.",
   "set": "The World’s Strongest Warriors (spoilers)",
   "setId": "OP-17",
   "rarity": "UC",
@@ -394,12 +415,13 @@ window.CUSTOM_CARDS = (window.CUSTOM_CARDS || []).concat([
   "counter": null,
   "attr": "",
   "img": "op17/OP17-025.jpg",
-  "spoiler": true
+  "spoiler": true,
+  "numTBA": false
  },
  {
   "id": "OP17-026",
   "name": "Fugar",
-  "text": "[When Attacking] If your Leader has the {Red-Haired Pirates} type, rest up to 1 of your opponent&#39;s Characters with a cost of 2 or less. [On K.O.] Draw 1 card.",
+  "text": "[When Attacking] If your Leader has the {Red-Haired Pirates} type, rest up to 1 of your opponent's Characters with a cost of 2 or less. [On K.O.] Draw 1 card.",
   "set": "The World’s Strongest Warriors (spoilers)",
   "setId": "OP-17",
   "rarity": "UC",
@@ -412,12 +434,13 @@ window.CUSTOM_CARDS = (window.CUSTOM_CARDS || []).concat([
   "counter": null,
   "attr": "",
   "img": "op17/OP17-026.jpg",
-  "spoiler": true
+  "spoiler": true,
+  "numTBA": false
  },
  {
   "id": "OP17-027",
   "name": "Benn Beckman",
-  "text": "[Rush]: Character (This card can attack Characters on the turn it is played.) [On Play] If your Leader has the {Red-Haired Pirates} type, draw 1 card and rest up to 2 of your opponent&#39;s Characters.",
+  "text": "[Rush]: Character (This card can attack Characters on the turn it is played.) [On Play] If your Leader has the {Red-Haired Pirates} type, draw 1 card and rest up to 2 of your opponent's Characters.",
   "set": "The World’s Strongest Warriors (spoilers)",
   "setId": "OP-17",
   "rarity": "R",
@@ -430,12 +453,13 @@ window.CUSTOM_CARDS = (window.CUSTOM_CARDS || []).concat([
   "counter": null,
   "attr": "",
   "img": "op17/OP17-027.jpg",
-  "spoiler": true
+  "spoiler": true,
+  "numTBA": false
  },
  {
   "id": "OP17-028",
-  "name": "Bonk Punch &amp; Monster",
-  "text": "[Blocker] (After your opponent declares an attack, you may rest this card to make it the new target of the attack.) [On Play] K.O. up to 1 of your opponent&#39;s rested Characters with a cost of 6 or less.",
+  "name": "Bonk Punch & Monster",
+  "text": "[Blocker] (After your opponent declares an attack, you may rest this card to make it the new target of the attack.) [On Play] K.O. up to 1 of your opponent's rested Characters with a cost of 6 or less.",
   "set": "The World’s Strongest Warriors (spoilers)",
   "setId": "OP-17",
   "rarity": "C",
@@ -448,12 +472,13 @@ window.CUSTOM_CARDS = (window.CUSTOM_CARDS || []).concat([
   "counter": null,
   "attr": "",
   "img": "op17/OP17-028.jpg",
-  "spoiler": true
+  "spoiler": true,
+  "numTBA": false
  },
  {
   "id": "OP17-029",
   "name": "Hongo",
-  "text": "[Blocker] [On Play] Set up to 1 of your DON!! cards as active. Then, rest up to 2 of your opponent&#39;s Characters with a cost of 2 or less.",
+  "text": "[Blocker] [On Play] Set up to 1 of your DON!! cards as active. Then, rest up to 2 of your opponent's Characters with a cost of 2 or less.",
   "set": "The World’s Strongest Warriors (spoilers)",
   "setId": "OP-17",
   "rarity": "R",
@@ -466,7 +491,8 @@ window.CUSTOM_CARDS = (window.CUSTOM_CARDS || []).concat([
   "counter": null,
   "attr": "",
   "img": "op17/OP17-029.jpg",
-  "spoiler": true
+  "spoiler": true,
+  "numTBA": false
  },
  {
   "id": "OP17-030",
@@ -484,12 +510,13 @@ window.CUSTOM_CARDS = (window.CUSTOM_CARDS || []).concat([
   "counter": null,
   "attr": "",
   "img": "op17/OP17-030.jpg",
-  "spoiler": true
+  "spoiler": true,
+  "numTBA": false
  },
  {
   "id": "OP17-031",
   "name": "Yasopp",
-  "text": "[On Play] Draw 1 card and rest up to 1 of your opponent&#39;s Characters with a cost of 8 or less. [End of Your Turn] Set up to 1 of your {Red-Haired Pirates} type Characters as active.",
+  "text": "[On Play] Draw 1 card and rest up to 1 of your opponent's Characters with a cost of 8 or less. [End of Your Turn] Set up to 1 of your {Red-Haired Pirates} type Characters as active.",
   "set": "The World’s Strongest Warriors (spoilers)",
   "setId": "OP-17",
   "rarity": "SR",
@@ -502,12 +529,13 @@ window.CUSTOM_CARDS = (window.CUSTOM_CARDS || []).concat([
   "counter": null,
   "attr": "",
   "img": "op17/OP17-031.jpg",
-  "spoiler": true
+  "spoiler": true,
+  "numTBA": false
  },
  {
   "id": "OP17-032",
   "name": "Lime Juice",
-  "text": "[On Play] Look at 3 cards from the top of your deck; reveal up to 1 card with a type including &quot;Red-Haired Pirates&quot; and add it to your hand. Then, place the rest at the bottom of your deck in any order.",
+  "text": "[On Play] Look at 3 cards from the top of your deck; reveal up to 1 card with a type including \"Red-Haired Pirates\" and add it to your hand. Then, place the rest at the bottom of your deck in any order.",
   "set": "The World’s Strongest Warriors (spoilers)",
   "setId": "OP-17",
   "rarity": "R",
@@ -520,12 +548,13 @@ window.CUSTOM_CARDS = (window.CUSTOM_CARDS || []).concat([
   "counter": null,
   "attr": "",
   "img": "op17/OP17-032.jpg",
-  "spoiler": true
+  "spoiler": true,
+  "numTBA": false
  },
  {
   "id": "OP17-033",
   "name": "Lucky.Roux",
-  "text": "[On Play] Look at 3 cards from the top of your deck; reveal up to 1 card with a type including &quot;Red-Haired Pirates&quot; and add it to your hand. Then, place the rest at the bottom of your deck in any order. [On Your Opponent's Attack] You may trash this Character: Rest up to 1 of your opponent&#39;s Leader or Characters.",
+  "text": "[On Play] Look at 3 cards from the top of your deck; reveal up to 1 card with a type including \"Red-Haired Pirates\" and add it to your hand. Then, place the rest at the bottom of your deck in any order. [On Your Opponent's Attack] You may trash this Character: Rest up to 1 of your opponent's Leader or Characters.",
   "set": "The World’s Strongest Warriors (spoilers)",
   "setId": "OP-17",
   "rarity": "R",
@@ -538,12 +567,13 @@ window.CUSTOM_CARDS = (window.CUSTOM_CARDS || []).concat([
   "counter": null,
   "attr": "",
   "img": "op17/OP17-033.jpg",
-  "spoiler": true
+  "spoiler": true,
+  "numTBA": false
  },
  {
   "id": "OP17-034",
   "name": "Rockstar",
-  "text": "[Activate: Main] [Once Per Turn] If your opponent&#39;s Leader has 6000 power or more, set up to 1 of your DON!! cards as active. Then, your {Red-Haired Pirates} type Leader&#39;s base power becomes 6000 until the end of your opponent&#39;s next End Phase.",
+  "text": "[Activate: Main] [Once Per Turn] If your opponent's Leader has 6000 power or more, set up to 1 of your DON!! cards as active. Then, your {Red-Haired Pirates} type Leader's base power becomes 6000 until the end of your opponent's next End Phase.",
   "set": "The World’s Strongest Warriors (spoilers)",
   "setId": "OP-17",
   "rarity": "C",
@@ -556,7 +586,8 @@ window.CUSTOM_CARDS = (window.CUSTOM_CARDS || []).concat([
   "counter": null,
   "attr": "",
   "img": "op17/OP17-034.jpg",
-  "spoiler": true
+  "spoiler": true,
+  "numTBA": false
  },
  {
   "id": "OP17-035",
@@ -574,12 +605,13 @@ window.CUSTOM_CARDS = (window.CUSTOM_CARDS || []).concat([
   "counter": null,
   "attr": "",
   "img": "op17/OP17-035.jpg",
-  "spoiler": true
+  "spoiler": true,
+  "numTBA": false
  },
  {
   "id": "OP17-036",
   "name": "Withdraw Now And Allow Me To Save Face",
-  "text": "[Main] You may rest 6 of your DON!! cards: Rest up to 1 of your opponent&#39;s Characters. Then, K.O. up to 2 of your opponent&#39;s rested Characters with a cost of 6 or less. [Counter] Up to 1 of your [Shanks] gains +4000 power during this battle.",
+  "text": "[Main] You may rest 6 of your DON!! cards: Rest up to 1 of your opponent's Characters. Then, K.O. up to 2 of your opponent's rested Characters with a cost of 6 or less. [Counter] Up to 1 of your [Shanks] gains +4000 power during this battle.",
   "set": "The World’s Strongest Warriors (spoilers)",
   "setId": "OP-17",
   "rarity": "UC",
@@ -592,12 +624,13 @@ window.CUSTOM_CARDS = (window.CUSTOM_CARDS || []).concat([
   "counter": null,
   "attr": "",
   "img": "op17/OP17-036.jpg",
-  "spoiler": true
+  "spoiler": true,
+  "numTBA": false
  },
  {
   "id": "OP17-037",
   "name": "Are You That Afraid of the New Era?!!",
-  "text": "[Main] Look at 5 cards from the top of your deck; reveal up to 1 card with a type including &quot;Red-Haired Pirates&quot; and add it to your hand. Then, place the rest at the bottom of your deck in any order. [Counter] You may rest 1 of your cards: Up to 1 of your Leader or Characters gains +3000 power during this battle.",
+  "text": "[Main] Look at 5 cards from the top of your deck; reveal up to 1 card with a type including \"Red-Haired Pirates\" and add it to your hand. Then, place the rest at the bottom of your deck in any order. [Counter] You may rest 1 of your cards: Up to 1 of your Leader or Characters gains +3000 power during this battle.",
   "set": "The World’s Strongest Warriors (spoilers)",
   "setId": "OP-17",
   "rarity": "R",
@@ -610,12 +643,13 @@ window.CUSTOM_CARDS = (window.CUSTOM_CARDS || []).concat([
   "counter": null,
   "attr": "",
   "img": "op17/OP17-037.jpg",
-  "spoiler": true
+  "spoiler": true,
+  "numTBA": false
  },
  {
   "id": "OP17-038",
-  "name": "I Think He&#39;s Seen An Ugly Future",
-  "text": "[Main] You may rest 4 of your cards: Rest up to 1 of your opponent&#39;s Characters. [Counter] You may trash 1 card from your hand: Up to 1 of your Leader or Character cards gains +3000 power during this battle.",
+  "name": "I Think He's Seen An Ugly Future",
+  "text": "[Main] You may rest 4 of your cards: Rest up to 1 of your opponent's Characters. [Counter] You may trash 1 card from your hand: Up to 1 of your Leader or Character cards gains +3000 power during this battle.",
   "set": "The World’s Strongest Warriors (spoilers)",
   "setId": "OP-17",
   "rarity": "C",
@@ -628,12 +662,13 @@ window.CUSTOM_CARDS = (window.CUSTOM_CARDS || []).concat([
   "counter": null,
   "attr": "",
   "img": "op17/OP17-038.jpg",
-  "spoiler": true
+  "spoiler": true,
+  "numTBA": false
  },
  {
   "id": "OP17-039",
   "name": "Rocks.D.Xebec",
-  "text": "[When Attacking] You may trash 1 card from your hand: Reveal 1 card from the top of your deck. If the revealed card&#39;s type includes &quot;Rocks Pirates&quot;, draw 2 cards.",
+  "text": "[When Attacking] You may trash 1 card from your hand: Reveal 1 card from the top of your deck. If the revealed card's type includes \"Rocks Pirates\", draw 2 cards.",
   "set": "The World’s Strongest Warriors (spoilers)",
   "setId": "OP-17",
   "rarity": "L",
@@ -646,12 +681,13 @@ window.CUSTOM_CARDS = (window.CUSTOM_CARDS || []).concat([
   "counter": null,
   "attr": "",
   "img": "op17/OP17-039.jpg",
-  "spoiler": true
+  "spoiler": true,
+  "numTBA": false
  },
  {
   "id": "OP17-040",
   "name": "Edward.Newgate",
-  "text": "[On Play] Draw 1 card. [Once Per Turn] When your Leader with a type including &quot;Rocks Pirates&quot; attacks or is attacked, you may trash 1 card from your hand to activate this effect. Your Leader gains +3000 power during this battle.",
+  "text": "[On Play] Draw 1 card. [Once Per Turn] When your Leader with a type including \"Rocks Pirates\" attacks or is attacked, you may trash 1 card from your hand to activate this effect. Your Leader gains +3000 power during this battle.",
   "set": "The World’s Strongest Warriors (spoilers)",
   "setId": "OP-17",
   "rarity": "TR",
@@ -664,12 +700,13 @@ window.CUSTOM_CARDS = (window.CUSTOM_CARDS || []).concat([
   "counter": null,
   "attr": "",
   "img": "op17/OP17-040.jpg",
-  "spoiler": true
+  "spoiler": true,
+  "numTBA": false
  },
  {
   "id": "OP17-041",
   "name": "Wang Zhi",
-  "text": "[Blocker] (After your opponent declares an attack, you may rest this card to make it the new target of the attack.) [On Play] You may trash 1 card from your hand: Place all of your opponent&#39;s Characters with a base cost of 1 at the bottom of the owner&#39;s deck in any order.",
+  "text": "[Blocker] (After your opponent declares an attack, you may rest this card to make it the new target of the attack.) [On Play] You may trash 1 card from your hand: Place all of your opponent's Characters with a base cost of 1 at the bottom of the owner's deck in any order.",
   "set": "The World’s Strongest Warriors (spoilers)",
   "setId": "OP-17",
   "rarity": "UC",
@@ -682,12 +719,13 @@ window.CUSTOM_CARDS = (window.CUSTOM_CARDS || []).concat([
   "counter": null,
   "attr": "",
   "img": "op17/OP17-041.jpg",
-  "spoiler": true
+  "spoiler": true,
+  "numTBA": false
  },
  {
   "id": "OP17-042",
   "name": "Kaido",
-  "text": "[Blocker] [On Play] You may reveal 3 cards with a type including &quot;Rocks Pirates&quot; from your hand: Give up to 1 of your opponent&#39;s Characters -3000 power during this turn.",
+  "text": "[Blocker] [On Play] You may reveal 3 cards with a type including \"Rocks Pirates\" from your hand: Give up to 1 of your opponent's Characters -3000 power during this turn.",
   "set": "The World’s Strongest Warriors (spoilers)",
   "setId": "OP-17",
   "rarity": "R",
@@ -700,12 +738,13 @@ window.CUSTOM_CARDS = (window.CUSTOM_CARDS || []).concat([
   "counter": null,
   "attr": "",
   "img": "op17/OP17-042.jpg",
-  "spoiler": true
+  "spoiler": true,
+  "numTBA": false
  },
  {
   "id": "OP17-043",
   "name": "Ganzui",
-  "text": "If this Character would be removed from the field, you may trash 2 cards from your hand instead. [On Play] Your Leader&#39;s base power becomes 6000 until the end of your opponent&#39;s next End Phase.",
+  "text": "If this Character would be removed from the field, you may trash 2 cards from your hand instead. [On Play] Your Leader's base power becomes 6000 until the end of your opponent's next End Phase.",
   "set": "The World’s Strongest Warriors (spoilers)",
   "setId": "OP-17",
   "rarity": "UC",
@@ -718,12 +757,13 @@ window.CUSTOM_CARDS = (window.CUSTOM_CARDS || []).concat([
   "counter": null,
   "attr": "",
   "img": "op17/OP17-043.jpg",
-  "spoiler": true
+  "spoiler": true,
+  "numTBA": false
  },
  {
   "id": "OP17-044",
   "name": "Captain John",
-  "text": "If your Leader&#39;s type includes &quot;Rocks Pirates&quot; and this Character is rested, your opponent cannot attack any card other than the Character [Captain John]. [Activate: Main] You may rest this Character: Draw 1 card and trash 1 card from your hand.",
+  "text": "If your Leader's type includes \"Rocks Pirates\" and this Character is rested, your opponent cannot attack any card other than the Character [Captain John]. [Activate: Main] You may rest this Character: Draw 1 card and trash 1 card from your hand.",
   "set": "The World’s Strongest Warriors (spoilers)",
   "setId": "OP-17",
   "rarity": "UC",
@@ -736,12 +776,13 @@ window.CUSTOM_CARDS = (window.CUSTOM_CARDS || []).concat([
   "counter": null,
   "attr": "",
   "img": "op17/OP17-044.jpg",
-  "spoiler": true
+  "spoiler": true,
+  "numTBA": false
  },
  {
   "id": "OP17-045",
   "name": "Kyo",
-  "text": "If one of your Characters would be removed from the field by your opponent&#39;s effect, you may trash 2 cards from your hand instead. [On Play] Draw 1 card.",
+  "text": "If one of your Characters would be removed from the field by your opponent's effect, you may trash 2 cards from your hand instead. [On Play] Draw 1 card.",
   "set": "The World’s Strongest Warriors (spoilers)",
   "setId": "OP-17",
   "rarity": "UC",
@@ -754,12 +795,13 @@ window.CUSTOM_CARDS = (window.CUSTOM_CARDS || []).concat([
   "counter": null,
   "attr": "",
   "img": "op17/OP17-045.jpg",
-  "spoiler": true
+  "spoiler": true,
+  "numTBA": false
  },
  {
   "id": "OP17-046",
   "name": "Gloriosa",
-  "text": "[Blocker] [On Play] Place up to 1 Character with a cost of 5 or less at the bottom of the owner&#39;s deck.",
+  "text": "[Blocker] [On Play] Place up to 1 Character with a cost of 5 or less at the bottom of the owner's deck.",
   "set": "The World’s Strongest Warriors (spoilers)",
   "setId": "OP-17",
   "rarity": "SR",
@@ -772,7 +814,8 @@ window.CUSTOM_CARDS = (window.CUSTOM_CARDS || []).concat([
   "counter": null,
   "attr": "",
   "img": "op17/OP17-046.jpg",
-  "spoiler": true
+  "spoiler": true,
+  "numTBA": false
  },
  {
   "id": "OP17-047",
@@ -790,12 +833,13 @@ window.CUSTOM_CARDS = (window.CUSTOM_CARDS || []).concat([
   "counter": null,
   "attr": "",
   "img": "op17/OP17-047.jpg",
-  "spoiler": true
+  "spoiler": true,
+  "numTBA": false
  },
  {
   "id": "OP17-048",
   "name": "Shiki",
-  "text": "[Rush: Character] [When Attacking] / [On Your Opponent's Attack] [Once Per Turn] You may trash 1 card with a type including &quot;Rocks Pirates&quot; from your hand: Give up to 1 of your opponent&#39;s Characters -3000 power during this turn.",
+  "text": "[Rush: Character] [When Attacking] / [On Your Opponent's Attack] [Once Per Turn] You may trash 1 card with a type including \"Rocks Pirates\" from your hand: Give up to 1 of your opponent's Characters -3000 power during this turn.",
   "set": "The World’s Strongest Warriors (spoilers)",
   "setId": "OP-17",
   "rarity": "SR",
@@ -808,7 +852,8 @@ window.CUSTOM_CARDS = (window.CUSTOM_CARDS || []).concat([
   "counter": null,
   "attr": "",
   "img": "op17/OP17-048.jpg",
-  "spoiler": true
+  "spoiler": true,
+  "numTBA": false
  },
  {
   "id": "OP17-049",
@@ -826,7 +871,8 @@ window.CUSTOM_CARDS = (window.CUSTOM_CARDS || []).concat([
   "counter": null,
   "attr": "",
   "img": "op17/OP17-049.jpg",
-  "spoiler": true
+  "spoiler": true,
+  "numTBA": false
  },
  {
   "id": "OP17-050",
@@ -844,7 +890,8 @@ window.CUSTOM_CARDS = (window.CUSTOM_CARDS || []).concat([
   "counter": null,
   "attr": "",
   "img": "op17/OP17-050.jpg",
-  "spoiler": true
+  "spoiler": true,
+  "numTBA": false
  },
  {
   "id": "OP17-051",
@@ -862,7 +909,8 @@ window.CUSTOM_CARDS = (window.CUSTOM_CARDS || []).concat([
   "counter": null,
   "attr": "",
   "img": "op17/OP17-051.jpg",
-  "spoiler": true
+  "spoiler": true,
+  "numTBA": false
  },
  {
   "id": "OP17-052",
@@ -880,7 +928,8 @@ window.CUSTOM_CARDS = (window.CUSTOM_CARDS || []).concat([
   "counter": null,
   "attr": "",
   "img": "op17/OP17-052.jpg",
-  "spoiler": true
+  "spoiler": true,
+  "numTBA": false
  },
  {
   "id": "OP17-053",
@@ -898,12 +947,13 @@ window.CUSTOM_CARDS = (window.CUSTOM_CARDS || []).concat([
   "counter": null,
   "attr": "",
   "img": "op17/OP17-053.jpg",
-  "spoiler": true
+  "spoiler": true,
+  "numTBA": false
  },
  {
   "id": "OP17-054",
   "name": "Miss Buckingham Stussy",
-  "text": "[On Play] Up to 1 of your opponent&#39;s Characters with a base cost of 6 or less cannot attack until the end of your opponent&#39;s next End Phase. [Activate: Main] You may rest 3 of your DON!! cards and this Character: Up to 1 of your opponent&#39;s Characters cannot attack until the end of your opponent&#39;s next End Phase.",
+  "text": "[On Play] Up to 1 of your opponent's Characters with a base cost of 6 or less cannot attack until the end of your opponent's next End Phase. [Activate: Main] You may rest 3 of your DON!! cards and this Character: Up to 1 of your opponent's Characters cannot attack until the end of your opponent's next End Phase.",
   "set": "The World’s Strongest Warriors (spoilers)",
   "setId": "OP-17",
   "rarity": "R",
@@ -916,12 +966,13 @@ window.CUSTOM_CARDS = (window.CUSTOM_CARDS || []).concat([
   "counter": null,
   "attr": "",
   "img": "op17/OP17-054.jpg",
-  "spoiler": true
+  "spoiler": true,
+  "numTBA": false
  },
  {
   "id": "OP17-055",
-  "name": "There&#39;s No Authority in the World That Lasts Forever!!!",
-  "text": "[Main] You may rest 1 of your DON!! cards: Up to 1 of your [Rocks.D.Xebec] gains [Unblockable] during this turn. [Counter] Up to 1 of your Leader with a type including &quot;Rocks Pirates&quot; or up to 1 of your Characters with a type including &quot;Rocks Pirates&quot; gains +2000 power during this battle.",
+  "name": "There's No Authority in the World That Lasts Forever!!!",
+  "text": "[Main] You may rest 1 of your DON!! cards: Up to 1 of your [Rocks.D.Xebec] gains [Unblockable] during this turn. [Counter] Up to 1 of your Leader with a type including \"Rocks Pirates\" or up to 1 of your Characters with a type including \"Rocks Pirates\" gains +2000 power during this battle.",
   "set": "The World’s Strongest Warriors (spoilers)",
   "setId": "OP-17",
   "rarity": "R",
@@ -934,12 +985,13 @@ window.CUSTOM_CARDS = (window.CUSTOM_CARDS || []).concat([
   "counter": null,
   "attr": "",
   "img": "op17/OP17-055.jpg",
-  "spoiler": true
+  "spoiler": true,
+  "numTBA": false
  },
  {
   "id": "OP17-056",
   "name": "Rocks Pirates",
-  "text": "[Main] You may rest 5 of your DON!! cards: Return up to 1 Character with a cost of 6 or less to the owner&#39;s hand. [Counter] Up to 1 of your Leader with a type including &quot;Rocks Pirates&quot; or up to 1 of your Characters with a type including &quot;Rocks Pirates&quot; gains +2000 power during this battle.",
+  "text": "[Main] You may rest 5 of your DON!! cards: Return up to 1 Character with a cost of 6 or less to the owner's hand. [Counter] Up to 1 of your Leader with a type including \"Rocks Pirates\" or up to 1 of your Characters with a type including \"Rocks Pirates\" gains +2000 power during this battle.",
   "set": "The World’s Strongest Warriors (spoilers)",
   "setId": "OP-17",
   "rarity": "UC",
@@ -952,12 +1004,13 @@ window.CUSTOM_CARDS = (window.CUSTOM_CARDS || []).concat([
   "counter": null,
   "attr": "",
   "img": "op17/OP17-056.jpg",
-  "spoiler": true
+  "spoiler": true,
+  "numTBA": false
  },
  {
   "id": "OP17-057",
   "name": "Fullalead",
-  "text": "[On Your Opponent's Attack] You may rest this Stage and trash 1 card from your hand: Up to 1 of your Leader with a type including &quot;Rocks Pirates&quot; or up to 1 of your Characters with a type including &quot;Rocks Pirates&quot; gains +1000 power during this battle.",
+  "text": "[On Your Opponent's Attack] You may rest this Stage and trash 1 card from your hand: Up to 1 of your Leader with a type including \"Rocks Pirates\" or up to 1 of your Characters with a type including \"Rocks Pirates\" gains +1000 power during this battle.",
   "set": "The World’s Strongest Warriors (spoilers)",
   "setId": "OP-17",
   "rarity": "C",
@@ -970,12 +1023,13 @@ window.CUSTOM_CARDS = (window.CUSTOM_CARDS || []).concat([
   "counter": null,
   "attr": "",
   "img": "op17/OP17-057.jpg",
-  "spoiler": true
+  "spoiler": true,
+  "numTBA": false
  },
  {
   "id": "OP17-058",
   "name": "Kaido",
-  "text": "[When Attacking] / [On Your Opponent's Attack] [Once Per Turn] DON!! -1: Up to 1 of your opponent&#39;s Characters gets -2000 power during this turn.",
+  "text": "[When Attacking] / [On Your Opponent's Attack] [Once Per Turn] DON!! -1: Up to 1 of your opponent's Characters gets -2000 power during this turn.",
   "set": "The World’s Strongest Warriors (spoilers)",
   "setId": "OP-17",
   "rarity": "L",
@@ -988,12 +1042,13 @@ window.CUSTOM_CARDS = (window.CUSTOM_CARDS || []).concat([
   "counter": null,
   "attr": "",
   "img": "op17/OP17-058.jpg",
-  "spoiler": true
+  "spoiler": true,
+  "numTBA": false
  },
  {
   "id": "OP17-059",
   "name": "Aramaki",
-  "text": "[Blocker] (After your opponent declares an attack, you may rest this card to make it the new target of the attack.) [On Play] DON!! -1: Draw 1 card and K.O. up to 2 of your opponent&#39;s Characters with a cost of 2 or less.",
+  "text": "[Blocker] (After your opponent declares an attack, you may rest this card to make it the new target of the attack.) [On Play] DON!! -1: Draw 1 card and K.O. up to 2 of your opponent's Characters with a cost of 2 or less.",
   "set": "The World’s Strongest Warriors (spoilers)",
   "setId": "OP-17",
   "rarity": "UC",
@@ -1006,12 +1061,13 @@ window.CUSTOM_CARDS = (window.CUSTOM_CARDS || []).concat([
   "counter": null,
   "attr": "",
   "img": "op17/OP17-059.jpg",
-  "spoiler": true
+  "spoiler": true,
+  "numTBA": false
  },
  {
   "id": "OP17-060",
-  "name": "Ulti &amp; Page One",
-  "text": "[On Play] If your Leader has the {Animal Kingdom Pirates} type, add up to 1 DON!! from your DON!! deck and set it as active. Then, K.O. up to 1 of your opponent&#39;s Characters with 3000 power or less.",
+  "name": "Ulti & Page One",
+  "text": "[On Play] If your Leader has the {Animal Kingdom Pirates} type, add up to 1 DON!! from your DON!! deck and set it as active. Then, K.O. up to 1 of your opponent's Characters with 3000 power or less.",
   "set": "The World’s Strongest Warriors (spoilers)",
   "setId": "OP-17",
   "rarity": "R",
@@ -1024,7 +1080,8 @@ window.CUSTOM_CARDS = (window.CUSTOM_CARDS || []).concat([
   "counter": null,
   "attr": "",
   "img": "op17/OP17-060.jpg",
-  "spoiler": true
+  "spoiler": true,
+  "numTBA": false
  },
  {
   "id": "OP17-061",
@@ -1042,7 +1099,8 @@ window.CUSTOM_CARDS = (window.CUSTOM_CARDS || []).concat([
   "counter": null,
   "attr": "",
   "img": "op17/OP17-061.jpg",
-  "spoiler": true
+  "spoiler": true,
+  "numTBA": false
  },
  {
   "id": "OP17-062",
@@ -1060,12 +1118,13 @@ window.CUSTOM_CARDS = (window.CUSTOM_CARDS || []).concat([
   "counter": null,
   "attr": "",
   "img": "op17/OP17-062.jpg",
-  "spoiler": true
+  "spoiler": true,
+  "numTBA": false
  },
  {
   "id": "OP17-063",
   "name": "Kaido",
-  "text": "All of your Character cards without a Counter in your hand have a +1000 Counter. [Activate: Main] [Once Per Turn] DON!! -1: If this Character was played on this turn, negate the effect of up to 1 of your opponent&#39;s Characters with a cost of 6 or less, and K.O. that Character.",
+  "text": "All of your Character cards without a Counter in your hand have a +1000 Counter. [Activate: Main] [Once Per Turn] DON!! -1: If this Character was played on this turn, negate the effect of up to 1 of your opponent's Characters with a cost of 6 or less, and K.O. that Character.",
   "set": "The World’s Strongest Warriors (spoilers)",
   "setId": "OP-17",
   "rarity": "SR",
@@ -1078,7 +1137,8 @@ window.CUSTOM_CARDS = (window.CUSTOM_CARDS || []).concat([
   "counter": null,
   "attr": "",
   "img": "op17/OP17-063.jpg",
-  "spoiler": true
+  "spoiler": true,
+  "numTBA": false
  },
  {
   "id": "OP17-064",
@@ -1096,7 +1156,27 @@ window.CUSTOM_CARDS = (window.CUSTOM_CARDS || []).concat([
   "counter": null,
   "attr": "",
   "img": "op17/OP17-064.jpg",
-  "spoiler": true
+  "spoiler": true,
+  "numTBA": false
+ },
+ {
+  "id": "OP17-065",
+  "name": "Queen",
+  "text": "[Banish] [On Play] DON!! -1: Draw 1 card. Then, up to 2 of your opponent's Characters with a cost of 5 or less cannot attack until the end of your opponent's next End Phase.",
+  "set": "The World’s Strongest Warriors (spoilers)",
+  "setId": "OP-17",
+  "rarity": "UC",
+  "color": "Purple",
+  "type": "Character",
+  "life": null,
+  "cost": null,
+  "power": null,
+  "subs": "",
+  "counter": null,
+  "attr": "",
+  "img": "op17/OP17-065.jpg",
+  "spoiler": true,
+  "numTBA": false
  },
  {
   "id": "OP17-066",
@@ -1114,12 +1194,13 @@ window.CUSTOM_CARDS = (window.CUSTOM_CARDS || []).concat([
   "counter": null,
   "attr": "",
   "img": "op17/OP17-066.jpg",
-  "spoiler": true
+  "spoiler": true,
+  "numTBA": false
  },
  {
   "id": "OP17-067",
   "name": "Kurozumi Kanjuro",
-  "text": "[On Play] DON!! -1: If you have a Character with a cost of 10 or more, rest up to 1 of your opponent&#39;s Characters.",
+  "text": "[On Play] DON!! -1: If you have a Character with a cost of 10 or more, rest up to 1 of your opponent's Characters.",
   "set": "The World’s Strongest Warriors (spoilers)",
   "setId": "OP-17",
   "rarity": "C",
@@ -1132,7 +1213,8 @@ window.CUSTOM_CARDS = (window.CUSTOM_CARDS || []).concat([
   "counter": null,
   "attr": "",
   "img": "op17/OP17-067.jpg",
-  "spoiler": true
+  "spoiler": true,
+  "numTBA": false
  },
  {
   "id": "OP17-070",
@@ -1150,12 +1232,13 @@ window.CUSTOM_CARDS = (window.CUSTOM_CARDS || []).concat([
   "counter": null,
   "attr": "",
   "img": "op17/OP17-070.jpg",
-  "spoiler": true
+  "spoiler": true,
+  "numTBA": false
  },
  {
   "id": "OP17-071",
-  "name": "Who&#39;s.Who",
-  "text": "[On Play] DON!! -1: K.O. up to 2 of your opponent&#39;s Characters with a cost of 2 or less. [Trigger] Play this card.",
+  "name": "Who's.Who",
+  "text": "[On Play] DON!! -1: K.O. up to 2 of your opponent's Characters with a cost of 2 or less. [Trigger] Play this card.",
   "set": "The World’s Strongest Warriors (spoilers)",
   "setId": "OP-17",
   "rarity": "C",
@@ -1168,7 +1251,8 @@ window.CUSTOM_CARDS = (window.CUSTOM_CARDS || []).concat([
   "counter": null,
   "attr": "",
   "img": "op17/OP17-071.jpg",
-  "spoiler": true
+  "spoiler": true,
+  "numTBA": false
  },
  {
   "id": "OP17-072",
@@ -1186,7 +1270,8 @@ window.CUSTOM_CARDS = (window.CUSTOM_CARDS || []).concat([
   "counter": null,
   "attr": "",
   "img": "op17/OP17-072.jpg",
-  "spoiler": true
+  "spoiler": true,
+  "numTBA": false
  },
  {
   "id": "OP17-074",
@@ -1204,12 +1289,13 @@ window.CUSTOM_CARDS = (window.CUSTOM_CARDS || []).concat([
   "counter": null,
   "attr": "",
   "img": "op17/OP17-074.jpg",
-  "spoiler": true
+  "spoiler": true,
+  "numTBA": false
  },
  {
   "id": "OP17-076",
   "name": "X.Drake",
-  "text": "[On Play] DON!! -2: Trash 1 card from your opponent&#39;s hand.",
+  "text": "[On Play] DON!! -2: Trash 1 card from your opponent's hand.",
   "set": "The World’s Strongest Warriors (spoilers)",
   "setId": "OP-17",
   "rarity": "C",
@@ -1222,7 +1308,27 @@ window.CUSTOM_CARDS = (window.CUSTOM_CARDS || []).concat([
   "counter": null,
   "attr": "",
   "img": "op17/OP17-076.jpg",
-  "spoiler": true
+  "spoiler": true,
+  "numTBA": false
+ },
+ {
+  "id": "OP17-077",
+  "name": "Gundari Meteor Shower",
+  "text": "[Main] You may rest 3 of your DON!! cards and trash 2 cards from your hand: If your Leader has the {Animal Kingdom Pirates} type, add up to 3 DON!! cards from your DON!! deck and rest them. [Counter] DON!! -1: Your Leader gains +4000 power during this battle.",
+  "set": "The World’s Strongest Warriors (spoilers)",
+  "setId": "OP-17",
+  "rarity": "UC",
+  "color": "Purple",
+  "type": "Event",
+  "life": null,
+  "cost": null,
+  "power": null,
+  "subs": "",
+  "counter": null,
+  "attr": "",
+  "img": "op17/OP17-077.jpg",
+  "spoiler": true,
+  "numTBA": false
  },
  {
   "id": "OP17-078",
@@ -1240,7 +1346,8 @@ window.CUSTOM_CARDS = (window.CUSTOM_CARDS || []).concat([
   "counter": null,
   "attr": "",
   "img": "op17/OP17-078.jpg",
-  "spoiler": true
+  "spoiler": true,
+  "numTBA": false
  },
  {
   "id": "OP17-079",
@@ -1258,7 +1365,8 @@ window.CUSTOM_CARDS = (window.CUSTOM_CARDS || []).concat([
   "counter": null,
   "attr": "",
   "img": "op17/OP17-079.png",
-  "spoiler": true
+  "spoiler": true,
+  "numTBA": false
  },
  {
   "id": "OP17-080",
@@ -1276,7 +1384,8 @@ window.CUSTOM_CARDS = (window.CUSTOM_CARDS || []).concat([
   "counter": null,
   "attr": "",
   "img": "op17/OP17-080.jpg",
-  "spoiler": true
+  "spoiler": true,
+  "numTBA": false
  },
  {
   "id": "OP17-081",
@@ -1294,7 +1403,8 @@ window.CUSTOM_CARDS = (window.CUSTOM_CARDS || []).concat([
   "counter": null,
   "attr": "",
   "img": "op17/OP17-081.jpg",
-  "spoiler": true
+  "spoiler": true,
+  "numTBA": false
  },
  {
   "id": "OP17-082",
@@ -1312,7 +1422,8 @@ window.CUSTOM_CARDS = (window.CUSTOM_CARDS || []).concat([
   "counter": null,
   "attr": "",
   "img": "op17/OP17-082.jpg",
-  "spoiler": true
+  "spoiler": true,
+  "numTBA": false
  },
  {
   "id": "OP17-083",
@@ -1330,7 +1441,8 @@ window.CUSTOM_CARDS = (window.CUSTOM_CARDS || []).concat([
   "counter": null,
   "attr": "",
   "img": "op17/OP17-083.jpg",
-  "spoiler": true
+  "spoiler": true,
+  "numTBA": false
  },
  {
   "id": "OP17-084",
@@ -1348,7 +1460,8 @@ window.CUSTOM_CARDS = (window.CUSTOM_CARDS || []).concat([
   "counter": null,
   "attr": "",
   "img": "op17/OP17-084.jpg",
-  "spoiler": true
+  "spoiler": true,
+  "numTBA": false
  },
  {
   "id": "OP17-085",
@@ -1366,12 +1479,13 @@ window.CUSTOM_CARDS = (window.CUSTOM_CARDS || []).concat([
   "counter": null,
   "attr": "",
   "img": "op17/OP17-085.jpg",
-  "spoiler": true
+  "spoiler": true,
+  "numTBA": false
  },
  {
   "id": "OP17-087",
   "name": "Nico Robin",
-  "text": "If there is a Character with a cost of 12 or more, this Character gains +3000 power. [On Play] If there is a Character with a cost of 12 or more, give up to 1 of your opponent&#39;s Characters -3000 power during this turn.",
+  "text": "If there is a Character with a cost of 12 or more, this Character gains +3000 power. [On Play] If there is a Character with a cost of 12 or more, give up to 1 of your opponent's Characters -3000 power during this turn.",
   "set": "The World’s Strongest Warriors (spoilers)",
   "setId": "OP-17",
   "rarity": "R",
@@ -1384,7 +1498,8 @@ window.CUSTOM_CARDS = (window.CUSTOM_CARDS || []).concat([
   "counter": null,
   "attr": "",
   "img": "op17/OP17-087.jpg",
-  "spoiler": true
+  "spoiler": true,
+  "numTBA": false
  },
  {
   "id": "OP17-088",
@@ -1402,7 +1517,8 @@ window.CUSTOM_CARDS = (window.CUSTOM_CARDS || []).concat([
   "counter": null,
   "attr": "",
   "img": "op17/OP17-088.jpg",
-  "spoiler": true
+  "spoiler": true,
+  "numTBA": false
  },
  {
   "id": "OP17-089",
@@ -1420,12 +1536,13 @@ window.CUSTOM_CARDS = (window.CUSTOM_CARDS || []).concat([
   "counter": null,
   "attr": "",
   "img": "op17/OP17-089.jpg",
-  "spoiler": true
+  "spoiler": true,
+  "numTBA": false
  },
  {
   "id": "OP17-090",
   "name": "Franky",
-  "text": "If there is a Character with a cost of 12 or more, this Character gains +3000 power. [On Play] If there is a Character with a cost of 12 or more, K.O. up to 1 of your opponent&#39;s Characters with a cost of 2 or less.",
+  "text": "If there is a Character with a cost of 12 or more, this Character gains +3000 power. [On Play] If there is a Character with a cost of 12 or more, K.O. up to 1 of your opponent's Characters with a cost of 2 or less.",
   "set": "The World’s Strongest Warriors (spoilers)",
   "setId": "OP-17",
   "rarity": "C",
@@ -1438,7 +1555,8 @@ window.CUSTOM_CARDS = (window.CUSTOM_CARDS || []).concat([
   "counter": null,
   "attr": "",
   "img": "op17/OP17-090.jpg",
-  "spoiler": true
+  "spoiler": true,
+  "numTBA": false
  },
  {
   "id": "OP17-091",
@@ -1456,7 +1574,8 @@ window.CUSTOM_CARDS = (window.CUSTOM_CARDS || []).concat([
   "counter": null,
   "attr": "",
   "img": "op17/OP17-091.jpg",
-  "spoiler": true
+  "spoiler": true,
+  "numTBA": false
  },
  {
   "id": "OP17-092",
@@ -1474,7 +1593,8 @@ window.CUSTOM_CARDS = (window.CUSTOM_CARDS || []).concat([
   "counter": null,
   "attr": "",
   "img": "op17/OP17-092.jpg",
-  "spoiler": true
+  "spoiler": true,
+  "numTBA": false
  },
  {
   "id": "OP17-093",
@@ -1492,7 +1612,8 @@ window.CUSTOM_CARDS = (window.CUSTOM_CARDS || []).concat([
   "counter": null,
   "attr": "",
   "img": "op17/OP17-093.jpg",
-  "spoiler": true
+  "spoiler": true,
+  "numTBA": false
  },
  {
   "id": "OP17-094",
@@ -1510,12 +1631,13 @@ window.CUSTOM_CARDS = (window.CUSTOM_CARDS || []).concat([
   "counter": null,
   "attr": "",
   "img": "op17/OP17-094.jpg",
-  "spoiler": true
+  "spoiler": true,
+  "numTBA": false
  },
  {
   "id": "OP17-095",
   "name": "Roronoa Zoro",
-  "text": "If there is a Character with a cost of 12 or more, this Character gains +3000 power. If one of your Characters would be removed from the field by your opponent&#39;s effect, you may place 3 cards from your trash at the bottom of your deck in any order instead.",
+  "text": "If there is a Character with a cost of 12 or more, this Character gains +3000 power. If one of your Characters would be removed from the field by your opponent's effect, you may place 3 cards from your trash at the bottom of your deck in any order instead.",
   "set": "The World’s Strongest Warriors (spoilers)",
   "setId": "OP-17",
   "rarity": "C",
@@ -1528,11 +1650,12 @@ window.CUSTOM_CARDS = (window.CUSTOM_CARDS || []).concat([
   "counter": null,
   "attr": "",
   "img": "op17/OP17-095.jpg",
-  "spoiler": true
+  "spoiler": true,
+  "numTBA": false
  },
  {
   "id": "OP17-096",
-  "name": "I&#39;m Luffy!! The Man Who&#39;s Gonna Become the King of the Pirates!!",
+  "name": "I'm Luffy!! The Man Who's Gonna Become the King of the Pirates!!",
   "text": "[Counter] If you have a Character with a cost of 12 or more, up to 1 of your Leader or Character cards gains +4000 power during this battle. [Trigger] Add up to 1 {Elbaph} type card from your trash to your hand.",
   "set": "The World’s Strongest Warriors (spoilers)",
   "setId": "OP-17",
@@ -1546,12 +1669,13 @@ window.CUSTOM_CARDS = (window.CUSTOM_CARDS || []).concat([
   "counter": null,
   "attr": "",
   "img": "op17/OP17-096.jpg",
-  "spoiler": true
+  "spoiler": true,
+  "numTBA": false
  },
  {
   "id": "OP17-097",
-  "name": "Instead I&#39;ll Feed on this Rage!! And Use It to Bring the World to Ruin!!",
-  "text": "[Main] Give all of your opponent&#39;s Characters -1 cost during this turn. [Counter] Your Leader gains +3000 power during this battle.",
+  "name": "Instead I'll Feed on this Rage!! And Use It to Bring the World to Ruin!!",
+  "text": "[Main] Give all of your opponent's Characters -1 cost during this turn. [Counter] Your Leader gains +3000 power during this battle.",
   "set": "The World’s Strongest Warriors (spoilers)",
   "setId": "OP-17",
   "rarity": "C",
@@ -1564,12 +1688,13 @@ window.CUSTOM_CARDS = (window.CUSTOM_CARDS || []).concat([
   "counter": null,
   "attr": "",
   "img": "op17/OP17-097.jpg",
-  "spoiler": true
+  "spoiler": true,
+  "numTBA": false
  },
  {
   "id": "OP17-098",
   "name": "Gum-Gum Kong Pistol",
-  "text": "[Main] You may rest 6 of your DON!! cards: If there is a Character with a cost of 12 or more, K.O. up to 2 of your opponent&#39;s Characters with a cost of 6 or less. [Counter] Your Leader gains +3000 power during this battle.",
+  "text": "[Main] You may rest 6 of your DON!! cards: If there is a Character with a cost of 12 or more, K.O. up to 2 of your opponent's Characters with a cost of 6 or less. [Counter] Your Leader gains +3000 power during this battle.",
   "set": "The World’s Strongest Warriors (spoilers)",
   "setId": "OP-17",
   "rarity": "C",
@@ -1582,7 +1707,8 @@ window.CUSTOM_CARDS = (window.CUSTOM_CARDS || []).concat([
   "counter": null,
   "attr": "",
   "img": "op17/OP17-098.jpg",
-  "spoiler": true
+  "spoiler": true,
+  "numTBA": false
  },
  {
   "id": "OP17-099",
@@ -1600,11 +1726,12 @@ window.CUSTOM_CARDS = (window.CUSTOM_CARDS || []).concat([
   "counter": null,
   "attr": "",
   "img": "op17/OP17-099.jpg",
-  "spoiler": true
+  "spoiler": true,
+  "numTBA": false
  },
  {
   "id": "OP17-100",
-  "name": "Capone &quot;Gang&quot; Bege",
+  "name": "Capone \"Gang\" Bege",
   "text": "",
   "set": "The World’s Strongest Warriors (spoilers)",
   "setId": "OP-17",
@@ -1618,12 +1745,13 @@ window.CUSTOM_CARDS = (window.CUSTOM_CARDS || []).concat([
   "counter": null,
   "attr": "",
   "img": "op17/OP17-100.jpg",
-  "spoiler": true
+  "spoiler": true,
+  "numTBA": false
  },
  {
   "id": "OP17-101",
   "name": "Caribou",
-  "text": "[Activate: Main] [Once Per Turn] You may add 1 card from the top of your Life cards to your hand: Give up to 1 of your opponent&#39;s Characters -3000 power during this turn. [Trigger] You may trash 1 card from your hand: K.O. up to 1 of your opponent&#39;s Characters with a cost of 5 or less.",
+  "text": "[Activate: Main] [Once Per Turn] You may add 1 card from the top of your Life cards to your hand: Give up to 1 of your opponent's Characters -3000 power during this turn. [Trigger] You may trash 1 card from your hand: K.O. up to 1 of your opponent's Characters with a cost of 5 or less.",
   "set": "The World’s Strongest Warriors (spoilers)",
   "setId": "OP-17",
   "rarity": "C",
@@ -1636,12 +1764,13 @@ window.CUSTOM_CARDS = (window.CUSTOM_CARDS || []).concat([
   "counter": null,
   "attr": "",
   "img": "op17/OP17-101.jpg",
-  "spoiler": true
+  "spoiler": true,
+  "numTBA": false
  },
  {
   "id": "OP17-103",
   "name": "Charlotte Katakuri",
-  "text": "[Your Turn] [On Play] If your Leader has the {Big Mom Pirates} type, add up to 1 card from the top of your deck to the top of your Life cards. Then, give up to 1 of your opponent&#39;s Characters -3000 power during this turn. [Trigger] Play this card.",
+  "text": "[Your Turn] [On Play] If your Leader has the {Big Mom Pirates} type, add up to 1 card from the top of your deck to the top of your Life cards. Then, give up to 1 of your opponent's Characters -3000 power during this turn. [Trigger] Play this card.",
   "set": "The World’s Strongest Warriors (spoilers)",
   "setId": "OP-17",
   "rarity": "UC",
@@ -1654,7 +1783,8 @@ window.CUSTOM_CARDS = (window.CUSTOM_CARDS || []).concat([
   "counter": null,
   "attr": "",
   "img": "op17/OP17-103.jpg",
-  "spoiler": true
+  "spoiler": true,
+  "numTBA": false
  },
  {
   "id": "OP17-104",
@@ -1672,12 +1802,13 @@ window.CUSTOM_CARDS = (window.CUSTOM_CARDS || []).concat([
   "counter": null,
   "attr": "",
   "img": "op17/OP17-104.jpg",
-  "spoiler": true
+  "spoiler": true,
+  "numTBA": false
  },
  {
   "id": "OP17-105",
   "name": "Charlotte Chiffon",
-  "text": "[On Play] You may trash 1 card with a [Trigger] from your hand: Return up to 1 of your opponent&#39;s Characters with a [Trigger] to the owner&#39;s hand.",
+  "text": "[On Play] You may trash 1 card with a [Trigger] from your hand: Return up to 1 of your opponent's Characters with a [Trigger] to the owner's hand.",
   "set": "The World’s Strongest Warriors (spoilers)",
   "setId": "OP-17",
   "rarity": "C",
@@ -1690,7 +1821,8 @@ window.CUSTOM_CARDS = (window.CUSTOM_CARDS || []).concat([
   "counter": null,
   "attr": "",
   "img": "op17/OP17-105.jpg",
-  "spoiler": true
+  "spoiler": true,
+  "numTBA": false
  },
  {
   "id": "OP17-106",
@@ -1708,12 +1840,13 @@ window.CUSTOM_CARDS = (window.CUSTOM_CARDS || []).concat([
   "counter": null,
   "attr": "",
   "img": "op17/OP17-106.jpg",
-  "spoiler": true
+  "spoiler": true,
+  "numTBA": false
  },
  {
   "id": "OP17-108",
   "name": "Charlotte Brulee",
-  "text": "[Blocker] (After your opponent declares an attack, you may rest this card to make it the new target of the attack.) [Trigger] Rest up to 1 of your opponent&#39;s Characters with a cost of 6 or less.",
+  "text": "[Blocker] (After your opponent declares an attack, you may rest this card to make it the new target of the attack.) [Trigger] Rest up to 1 of your opponent's Characters with a cost of 6 or less.",
   "set": "The World’s Strongest Warriors (spoilers)",
   "setId": "OP-17",
   "rarity": "C",
@@ -1726,7 +1859,8 @@ window.CUSTOM_CARDS = (window.CUSTOM_CARDS || []).concat([
   "counter": null,
   "attr": "",
   "img": "op17/OP17-108.jpg",
-  "spoiler": true
+  "spoiler": true,
+  "numTBA": false
  },
  {
   "id": "OP17-109",
@@ -1744,12 +1878,13 @@ window.CUSTOM_CARDS = (window.CUSTOM_CARDS || []).concat([
   "counter": null,
   "attr": "",
   "img": "op17/OP17-109.jpg",
-  "spoiler": true
+  "spoiler": true,
+  "numTBA": false
  },
  {
   "id": "OP17-112",
   "name": "Charlotte Linlin",
-  "text": "[Your Turn] All of your Characters with 4000 base power and a [Trigger] become 8000 base power. [On Play] Draw 1 card and choose one of the following effects. - Add up to 1 card from the top of your deck to the top of your Life cards. - Add up to 1 card from the top of your opponent&#39;s Life cards to the owner&#39;s hand.",
+  "text": "[Your Turn] All of your Characters with 4000 base power and a [Trigger] become 8000 base power. [On Play] Draw 1 card and choose one of the following effects. - Add up to 1 card from the top of your deck to the top of your Life cards. - Add up to 1 card from the top of your opponent's Life cards to the owner's hand.",
   "set": "The World’s Strongest Warriors (spoilers)",
   "setId": "OP-17",
   "rarity": "SR",
@@ -1762,7 +1897,8 @@ window.CUSTOM_CARDS = (window.CUSTOM_CARDS || []).concat([
   "counter": null,
   "attr": "",
   "img": "op17/OP17-112.jpg",
-  "spoiler": true
+  "spoiler": true,
+  "numTBA": false
  },
  {
   "id": "OP17-113",
@@ -1780,12 +1916,13 @@ window.CUSTOM_CARDS = (window.CUSTOM_CARDS || []).concat([
   "counter": null,
   "attr": "",
   "img": "op17/OP17-113.jpg",
-  "spoiler": true
+  "spoiler": true,
+  "numTBA": false
  },
  {
   "id": "OP17-114",
   "name": "The 3 Sweet Commanders",
-  "text": "[Your Turn] [On Play] You may rest 2 of your DON!! cards: Draw 1 card and add up to 1 card from the top of your deck to the top of your Life. Then, give up to 2 of your opponent&#39;s Characters -3000 power during this turn. [Trigger] Play this card.",
+  "text": "[Your Turn] [On Play] You may rest 2 of your DON!! cards: Draw 1 card and add up to 1 card from the top of your deck to the top of your Life. Then, give up to 2 of your opponent's Characters -3000 power during this turn. [Trigger] Play this card.",
   "set": "The World’s Strongest Warriors (spoilers)",
   "setId": "OP-17",
   "rarity": "R",
@@ -1798,12 +1935,13 @@ window.CUSTOM_CARDS = (window.CUSTOM_CARDS || []).concat([
   "counter": null,
   "attr": "",
   "img": "op17/OP17-114.jpg",
-  "spoiler": true
+  "spoiler": true,
+  "numTBA": false
  },
  {
   "id": "OP17-116",
   "name": "Fulgora",
-  "text": "[Main] You may rest 2 of your DON!! cards: K.O. up to 1 of your opponent&#39;s Stages. [Counter] If you have 2 or more Characters with a [Trigger], up to 1 of your Leader or Characters gains +4000 power during this battle.",
+  "text": "[Main] You may rest 2 of your DON!! cards: K.O. up to 1 of your opponent's Stages. [Counter] If you have 2 or more Characters with a [Trigger], up to 1 of your Leader or Characters gains +4000 power during this battle.",
   "set": "The World’s Strongest Warriors (spoilers)",
   "setId": "OP-17",
   "rarity": "UC",
@@ -1816,12 +1954,13 @@ window.CUSTOM_CARDS = (window.CUSTOM_CARDS || []).concat([
   "counter": null,
   "attr": "",
   "img": "op17/OP17-116.jpg",
-  "spoiler": true
+  "spoiler": true,
+  "numTBA": false
  },
  {
   "id": "OP17-117",
   "name": "Maser Saber",
-  "text": "[Counter] Up to 1 of your [Charlotte Linlin] cards gains +3000 power during this battle. [Trigger] Your opponent may trash 3 cards from their hand. If they don&#39;t, K.O. up to 1 of your opponent&#39;s Characters with a cost of 6 or less.",
+  "text": "[Counter] Up to 1 of your [Charlotte Linlin] cards gains +3000 power during this battle. [Trigger] Your opponent may trash 3 cards from their hand. If they don't, K.O. up to 1 of your opponent's Characters with a cost of 6 or less.",
   "set": "The World’s Strongest Warriors (spoilers)",
   "setId": "OP-17",
   "rarity": "C",
@@ -1834,7 +1973,8 @@ window.CUSTOM_CARDS = (window.CUSTOM_CARDS || []).concat([
   "counter": null,
   "attr": "",
   "img": "op17/OP17-117.jpg",
-  "spoiler": true
+  "spoiler": true,
+  "numTBA": false
  },
  {
   "id": "OP17-118",
@@ -1852,12 +1992,13 @@ window.CUSTOM_CARDS = (window.CUSTOM_CARDS || []).concat([
   "counter": null,
   "attr": "",
   "img": "op17/OP17-118.jpg",
-  "spoiler": true
+  "spoiler": true,
+  "numTBA": false
  },
  {
   "id": "OP17-119",
   "name": "Loki",
-  "text": "This character&#39;s cost increases by 12, and if it&#39;s your opponent&#39;s turn, this character&#39;s power increases by 3000. [On Play] KO your opponent&#39;s characters so that their total cost is 4 or less.",
+  "text": "This character's cost increases by 12, and if it's your opponent's turn, this character's power increases by 3000. [On Play] KO your opponent's characters so that their total cost is 4 or less.",
   "set": "The World’s Strongest Warriors (spoilers)",
   "setId": "OP-17",
   "rarity": "SEC",
@@ -1870,6 +2011,254 @@ window.CUSTOM_CARDS = (window.CUSTOM_CARDS || []).concat([
   "counter": null,
   "attr": "",
   "img": "op17/OP17-119.png",
-  "spoiler": true
+  "spoiler": true,
+  "numTBA": false
+ },
+ {
+  "id": "OP17-BASIL-HAWKINS",
+  "name": "Basil Hawkins",
+  "text": "[On Play] You may trash 1 card from your hand: If your Leader has the {Animal Kingdom Pirates} type, add up to 1 DON!! card from your DON!! deck and set it as active.",
+  "set": "The World’s Strongest Warriors (spoilers)",
+  "setId": "OP-17",
+  "rarity": "C",
+  "color": "Purple",
+  "type": "Character",
+  "life": null,
+  "cost": null,
+  "power": null,
+  "subs": "",
+  "counter": null,
+  "attr": "",
+  "img": "op17/OP17-BASIL-HAWKINS.jpg",
+  "spoiler": true,
+  "numTBA": true
+ },
+ {
+  "id": "OP17-CHARLOTTE-DAIFUKU",
+  "name": "Charlotte Daifuku",
+  "text": "[Trigger] Play this card.",
+  "set": "The World’s Strongest Warriors (spoilers)",
+  "setId": "OP-17",
+  "rarity": "C",
+  "color": "Yellow",
+  "type": "Character",
+  "life": null,
+  "cost": null,
+  "power": null,
+  "subs": "",
+  "counter": null,
+  "attr": "",
+  "img": "op17/OP17-CHARLOTTE-DAIFUKU.jpg",
+  "spoiler": true,
+  "numTBA": true
+ },
+ {
+  "id": "OP17-CHARLOTTE-MONT-D-OR",
+  "name": "Charlotte Mont-d'or",
+  "text": "[On Play] You may reveal 2 cards with a [Trigger] from your hand: K.O. up to 2 of your opponent's Characters with a cost of 1 or less. [Trigger] Play this card.",
+  "set": "The World’s Strongest Warriors (spoilers)",
+  "setId": "OP-17",
+  "rarity": "C",
+  "color": "Yellow",
+  "type": "Character",
+  "life": null,
+  "cost": null,
+  "power": null,
+  "subs": "",
+  "counter": null,
+  "attr": "",
+  "img": "op17/OP17-CHARLOTTE-MONT-D-OR.jpg",
+  "spoiler": true,
+  "numTBA": true
+ },
+ {
+  "id": "OP17-CHARLOTTE-OVEN",
+  "name": "Charlotte Oven",
+  "text": "[On K.O.] Play up to 1 Character card with 4000 power or less other than [Charlotte Oven] from your trash. [Trigger] Play this card.",
+  "set": "The World’s Strongest Warriors (spoilers)",
+  "setId": "OP-17",
+  "rarity": "C",
+  "color": "Yellow",
+  "type": "Character",
+  "life": null,
+  "cost": null,
+  "power": null,
+  "subs": "",
+  "counter": null,
+  "attr": "",
+  "img": "op17/OP17-CHARLOTTE-OVEN.jpg",
+  "spoiler": true,
+  "numTBA": true
+ },
+ {
+  "id": "OP17-CHARLOTTE-PEROSPERO",
+  "name": "Charlotte Perospero",
+  "text": "[Your Turn] [On Play] Play up to 1 {Big Mom Pirates} type Character card with a cost of 6 or less from your hand. Then, this Character gains [Rush]. [Trigger] Play this card.",
+  "set": "The World’s Strongest Warriors (spoilers)",
+  "setId": "OP-17",
+  "rarity": "C",
+  "color": "Yellow",
+  "type": "Character",
+  "life": null,
+  "cost": null,
+  "power": null,
+  "subs": "",
+  "counter": null,
+  "attr": "",
+  "img": "op17/OP17-CHARLOTTE-PEROSPERO.jpg",
+  "spoiler": true,
+  "numTBA": true
+ },
+ {
+  "id": "OP17-DORRY",
+  "name": "Dorry",
+  "text": "This Character gains +12 cost. [On Play] If your Leader has the {Elbaph} type, play up to 1 [Brogy] with a cost of 5 or less from your hand or trash. Then, you cannot play Character cards during this turn.",
+  "set": "The World’s Strongest Warriors (spoilers)",
+  "setId": "OP-17",
+  "rarity": "C",
+  "color": "Yellow",
+  "type": "Character",
+  "life": null,
+  "cost": null,
+  "power": null,
+  "subs": "",
+  "counter": null,
+  "attr": "",
+  "img": "op17/OP17-DORRY.jpg",
+  "spoiler": true,
+  "numTBA": true
+ },
+ {
+  "id": "OP17-GURARARARARARA",
+  "name": "Gurararararara!",
+  "text": "[Counter] Up to 1 of your Leader or Character cards with a type including \"Whitebeard Pirates\" gains +2000 power during this battle. Then, give up to 1 of your opponent's Leader or Character cards -2000 power during this turn.",
+  "set": "The World’s Strongest Warriors (spoilers)",
+  "setId": "OP-17",
+  "rarity": "C",
+  "color": "Red",
+  "type": "Event",
+  "life": null,
+  "cost": null,
+  "power": null,
+  "subs": "",
+  "counter": null,
+  "attr": "",
+  "img": "op17/OP17-GURARARARARARA.jpg",
+  "spoiler": true,
+  "numTBA": true
+ },
+ {
+  "id": "OP17-HARUTA",
+  "name": "Haruta",
+  "text": "[Opponent's Turn] This Character gains +3000 power. [On Play] K.O. up to 1 of your opponent's Characters with 2000 base power or less.",
+  "set": "The World’s Strongest Warriors (spoilers)",
+  "setId": "OP-17",
+  "rarity": "C",
+  "color": "Red",
+  "type": "Character",
+  "life": null,
+  "cost": null,
+  "power": null,
+  "subs": "",
+  "counter": null,
+  "attr": "",
+  "img": "op17/OP17-HARUTA.jpg",
+  "spoiler": true,
+  "numTBA": true
+ },
+ {
+  "id": "OP17-JACK",
+  "name": "Jack",
+  "text": "[Rush: Character] [On Play] DON!! -1: If your Leader has the {Animal Kingdom Pirates} type, give up to 1 of your opponent's Characters -2000 power during this turn.",
+  "set": "The World’s Strongest Warriors (spoilers)",
+  "setId": "OP-17",
+  "rarity": "C",
+  "color": "Purple",
+  "type": "Character",
+  "life": null,
+  "cost": null,
+  "power": null,
+  "subs": "",
+  "counter": null,
+  "attr": "",
+  "img": "op17/OP17-JACK.jpg",
+  "spoiler": true,
+  "numTBA": true
+ },
+ {
+  "id": "OP17-RAKUYO",
+  "name": "Rakuyo",
+  "text": "[On Play] K.O. up to 2 of your opponent's Characters with 2000 base power or less.",
+  "set": "The World’s Strongest Warriors (spoilers)",
+  "setId": "OP-17",
+  "rarity": "C",
+  "color": "Red",
+  "type": "Character",
+  "life": null,
+  "cost": null,
+  "power": null,
+  "subs": "",
+  "counter": null,
+  "attr": "",
+  "img": "op17/OP17-RAKUYO.jpg",
+  "spoiler": true,
+  "numTBA": true
+ },
+ {
+  "id": "OP17-SASAKI",
+  "name": "Sasaki",
+  "text": "[When Attacking] You may trash 2 cards from your hand: If your Leader has the {Animal Kingdom} type, add up to 2 DON!! cards from your DON!! deck and rest them.",
+  "set": "The World’s Strongest Warriors (spoilers)",
+  "setId": "OP-17",
+  "rarity": "C",
+  "color": "Purple",
+  "type": "Character",
+  "life": null,
+  "cost": null,
+  "power": null,
+  "subs": "",
+  "counter": null,
+  "attr": "",
+  "img": "op17/OP17-SASAKI.jpg",
+  "spoiler": true,
+  "numTBA": true
+ },
+ {
+  "id": "OP17-THERE-S-STILL-A-CODE-OF-",
+  "name": "There's Still A Code Of Honour? You Clowns!",
+  "text": "[Main] Your [Charlotte Linlin] Leader gains [Unblockable] during this turn. [Counter] Up to 1 of your [Charlotte Linlin] gains +4000 power during this battle.",
+  "set": "The World’s Strongest Warriors (spoilers)",
+  "setId": "OP-17",
+  "rarity": "C",
+  "color": "Yellow",
+  "type": "Event",
+  "life": null,
+  "cost": null,
+  "power": null,
+  "subs": "",
+  "counter": null,
+  "attr": "",
+  "img": "op17/OP17-THERE-S-STILL-A-CODE-OF-.jpg",
+  "spoiler": true,
+  "numTBA": true
+ },
+ {
+  "id": "OP17-WO-RO-RO-RO-RO-I-THINK-I",
+  "name": "Wo Ro Ro Ro Ro!! I Think I’ve Sobered Up!!",
+  "text": "[Counter] You may trash 1 card from your hand: Up to 1 of your Leader or Character cards gains +3000 power during this battle. [Trigger] DON!! -1: Draw 2 cards.",
+  "set": "The World’s Strongest Warriors (spoilers)",
+  "setId": "OP-17",
+  "rarity": "R",
+  "color": "Purple",
+  "type": "Event",
+  "life": null,
+  "cost": null,
+  "power": null,
+  "subs": "",
+  "counter": null,
+  "attr": "",
+  "img": "op17/OP17-WO-RO-RO-RO-RO-I-THINK-I.jpg",
+  "spoiler": true,
+  "numTBA": true
  }
 ]);

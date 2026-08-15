@@ -845,7 +845,8 @@ function openModal(c) {
     c.attr || null, c.rarity,
     c.mp != null ? 'Market $' + c.mp.toFixed(2) : null,
     c.ip != null ? 'Low $' + c.ip.toFixed(2) : null,
-    c.spoiler ? '⚠ Spoiler — some stats unconfirmed' : null
+    c.spoiler ? '⚠ Spoiler — some stats unconfirmed' : null,
+    c.numTBA ? '⚠ Card number not assigned yet' : null
   ].filter(Boolean);
   info.innerHTML =
     '<h3>' + esc(c.name) + '</h3>' +
@@ -943,7 +944,12 @@ document.getElementById('btnExport').onclick = () => {
   document.getElementById('expAction').textContent = 'Copy to clipboard';
   exptext.value = deckString();
   exptext.readOnly = true;
-  expmsg.textContent = deck.leader ? '' : 'Note: no leader set — the sim expects the leader as the first line.';
+  const tba = Object.keys(deck.cards).filter(id => byId.get(id)?.numTBA);
+  expmsg.textContent = !deck.leader
+    ? 'Note: no leader set — the sim expects the leader as the first line.'
+    : tba.length
+      ? 'Note: ' + tba.join(', ') + ' has no official card number yet, so the sim will not recognise that line.'
+      : '';
   modal2.style.display = 'flex';
   exptext.select();
 };

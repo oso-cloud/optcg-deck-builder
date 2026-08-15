@@ -3,6 +3,7 @@
 # Usage: python update_op17_spoilers.py            (fetches the page itself)
 #        python update_op17_spoilers.py page.html  (use a saved copy)
 import re, sys, os, json, urllib.request, urllib.parse, collections
+from html import unescape
 from PIL import Image
 
 OUT_DIR = os.path.dirname(os.path.abspath(__file__))   # app folder
@@ -41,7 +42,8 @@ cards = {}
 for allow_fallback in (False, True):
   for a in arts:
     code_m = re.search(r'leak-card-code[^>]*>([^<]+)', a)
-    rar_m = re.search(r'leak-card-rarity[^>]*>([^<]+)', a)
+    # match the exact class; the site wraps it in a "leak-card-rarity-group" div
+    rar_m = re.search(r'class="leak-card-rarity"[^>]*>([^<]+)', a)
     name_m = re.search(r'<h3[^>]*>([^<]+)</h3>', a)
     img_m = re.search(r'data-full="([^"]+)"', a) or re.search(r'<img[^>]*src="(/Cards/[^"]+)"', a)
     if not (code_m and img_m): continue
@@ -50,11 +52,21 @@ for allow_fallback in (False, True):
     if rar in SKIP_RARITIES: continue
     table = FALLBACK_RARITIES if allow_fallback else BASE_RARITIES
     if rar not in table: continue
-    if not re.fullmatch(r'OP17-\d{3}', code): continue
+    name = (name_m.group(1).strip() if name_m else code)
+    # Some revealed cards have no assigned number yet (listed as OP17-0XX / OP17-JACK).
+    # Keep them under a synthetic id so they're still browsable; a later re-run
+    # replaces them with the real number once the source assigns one.
+    num_tba = not re.fullmatch(r'OP17-\d{3}', code)
+    if num_tba:
+        if not code.upper().startswith('OP17-'): continue   # other sets' alt arts
+        if '-DON-' in code.upper(): continue                # DON!! cards aren't deck cards
+        slug = re.sub(r'[^A-Za-z0-9]+', '-', unescape(name)).strip('-').upper()[:24]
+        code = 'OP17-' + (slug or 'TBA')
     if code in cards: continue                     # first (base) printing wins
     cards[code] = {
         'id': code,
-        'name': (name_m.group(1).strip() if name_m else code),
+        'numTBA': num_tba,
+        'name': name,
         'rarity': table[rar],
         'isLeader': rar == 'Leader Card',
         'text': effect_text(a),
@@ -143,13 +155,13 @@ for code in ['OP17-001', 'OP17-022']:
 out = []
 for code, c in sorted(cards.items()):
     out.append({
-        'id': c['id'], 'name': c['name'], 'text': c['text'],
+        'id': c['id'], 'name': unescape(c['name']), 'text': unescape(c['text']),
         'set': 'The World’s Strongest Warriors (spoilers)', 'setId': 'OP-17',
         'rarity': c['rarity'], 'color': ' '.join(c['colors']),
         'type': 'Leader' if c['isLeader'] else 'Character',
         'life': None, 'cost': None, 'power': None,
         'subs': '', 'counter': None, 'attr': '', 'img': c['img'],
-        'spoiler': True,
+        'spoiler': True, 'numTBA': c.get('numTBA', False),
     })
 
 # crude type guess: pure [Main]/[Counter] effects with no character keywords -> Event
@@ -167,5 +179,7 @@ with open(path, 'w', encoding='utf-8') as f:
     json.dump(out, f, ensure_ascii=False, indent=1)
     f.write(');\n')
 print('wrote', path, 'with', len(out), 'cards')
+tba = [o['id'] for o in out if o['numTBA']]
+print('number-pending cards (%d):' % len(tba), tba)
 print('color coverage:', sum(1 for o in out if o['color']), '/', len(out))
 print('types:', collections.Counter(o['type'] for o in out))
