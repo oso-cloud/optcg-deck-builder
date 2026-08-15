@@ -2116,7 +2116,7 @@ window.CUSTOM_CARDS = (window.CUSTOM_CARDS || []).concat([
   "set": "The World’s Strongest Warriors (spoilers)",
   "setId": "OP-17",
   "rarity": "C",
-  "color": "Yellow",
+  "color": "Black",
   "type": "Character",
   "life": null,
   "cost": null,

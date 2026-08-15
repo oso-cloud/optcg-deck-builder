@@ -20,6 +20,13 @@ FALLBACK_RARITIES = {'Treasure Rare': 'TR', 'SP': 'SP', 'SPR': 'SP', 'Gold': 'SP
                      'Full Art': 'SR', 'Manga': 'SR', 'PIRATE CREW SUPER ALT MANGA': 'SR'}
 SKIP_RARITIES = {'DON!!'}   # not deck cards
 
+# Colour is detected from frame pixels, which fails on reveals that are phone
+# photos of a physical card (cream borders, tilted, another card in shot).
+# Hand-verified corrections go here and always win over detection.
+COLOR_OVERRIDES = {
+    'OP17-DORRY': ['Black'],
+}
+
 if len(sys.argv) > 1:
     html = open(sys.argv[1], encoding='utf-8', errors='ignore').read()
 else:
@@ -146,6 +153,8 @@ def detect_colors(path, is_leader):
 for code, c in sorted(cards.items()):
     p = os.path.join(IMG_DIR, os.path.basename(c['img']))
     c['colors'] = detect_colors(p, c['isLeader']) if os.path.exists(p) else []
+    if code in COLOR_OVERRIDES:
+        c['colors'] = COLOR_OVERRIDES[code]
 
 # sanity print
 for code in ['OP17-001', 'OP17-022']:
