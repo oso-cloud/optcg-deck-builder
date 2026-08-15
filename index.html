@@ -115,9 +115,10 @@
   .stat .sv { font-size: 19px; font-weight: 700; color: var(--accent); }
   .stat .sl { font-size: 10.5px; color: var(--text-dim); text-transform: uppercase; letter-spacing: .6px; margin-top: 2px; }
   .sect { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: var(--text-dim); margin: 14px 0 7px; }
-  .prow { display: grid; grid-template-columns: 34px 1fr 74px; align-items: center; gap: 8px; font-size: 12px; padding: 2px 0; }
-  .prow .pbar { background: var(--bg3); border-radius: 3px; height: 15px; position: relative; overflow: hidden; }
-  .prow .pfill { background: var(--accent); height: 100%; border-radius: 3px; opacity: .85; }
+  .prow { display: grid; grid-template-columns: 46px 1fr 88px; align-items: center; gap: 8px; font-size: 12px; padding: 2px 0; }
+  .prow.wide { grid-template-columns: 74px 1fr 88px; }
+  .prow .pbar { background: var(--bg3); border-radius: 3px; height: 15px; overflow: hidden; }
+  .prow .pfill { display: block; background: var(--accent); height: 100%; border-radius: 3px; opacity: .85; min-width: 2px; }
   .prow .pnum { color: var(--text-dim); text-align: right; font-size: 11px; }
   #handcards { display: grid; grid-template-columns: repeat(auto-fit, minmax(112px, 1fr)); gap: 9px; margin-bottom: 14px; }
   #handcards .hc { position: relative; cursor: pointer; }
@@ -1111,8 +1112,8 @@ function deckCardList() {
   return out;
 }
 
-function bar(label, count, max, right) {
-  return '<div class="prow"><span>' + esc(label) + '</span>' +
+function bar(label, count, max, right, wide) {
+  return '<div class="prow' + (wide ? ' wide' : '') + '"><span>' + esc(label) + '</span>' +
     '<span class="pbar"><span class="pfill" style="width:' + (max ? count / max * 100 : 0) + '%"></span></span>' +
     '<span class="pnum">' + esc(right != null ? right : String(count)) + '</span></div>';
 }
@@ -1178,7 +1179,7 @@ function renderDeckStats() {
   for (const c of list) types[c.type] = (types[c.type] || 0) + 1;
   const tmax = Math.max(...Object.values(types), 1);
   h += '<div class="sect">Card types</div>';
-  for (const t of ['Character', 'Event', 'Stage']) if (types[t]) h += bar(t, types[t], tmax);
+  for (const t of ['Character', 'Event', 'Stage']) if (types[t]) h += bar(t, types[t], tmax, null, true);
   h += '<div style="font-size:11.5px;color:var(--text-dim);margin-top:8px">' +
     blockers + ' Blocker · ' + rush + ' Rush · ' + triggers + ' Trigger</div>';
 
