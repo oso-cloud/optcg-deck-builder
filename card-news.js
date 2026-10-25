@@ -1,6 +1,7 @@
-// Batches of card ids announced once when the app opens.
-// Append a new object with a fresh id when you add cards. Do not reuse an id.
-// The browser remembers dismissed batch ids in localStorage (optcg_seen_card_news),
+// Batches of card ids. The app opens this list on every page load, and the
+// News button opens it again. Append a new object at the end when you add
+// cards; the last object is the newest. Use a fresh id so that batch can be
+// marked New. Dismissed ids live in localStorage (optcg_seen_card_news),
 // separate from saved decks. See the README.
 window.CARD_NEWS = [
   {
