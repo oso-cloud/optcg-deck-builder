@@ -49,8 +49,14 @@ def main():
         html,
         count=1,
     )
-    if n_meta != 1 or n_script != 1:
-        raise SystemExit(f"could not stamp index.html (meta={n_meta}, script={n_script})")
+    html, n_news = re.subn(
+        r'(<script src="card-news\.js\?v=)[^"]*(")',
+        script,
+        html,
+        count=1,
+    )
+    if n_meta != 1 or n_script != 1 or n_news != 1:
+        raise SystemExit(f"could not stamp index.html (meta={n_meta}, script={n_script}, news={n_news})")
     html_path.write_text(html)
     (ROOT / "version.json").write_text(json.dumps({"version": version}, indent=2) + "\n")
     print(version)

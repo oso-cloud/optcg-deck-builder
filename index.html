@@ -175,6 +175,31 @@
   #modaltext { margin-top: 10px; line-height: 1.55; color: #cdd6e4; white-space: pre-wrap; }
   #modalbtns { margin-top: 16px; display: flex; gap: 8px; }
   #modalbtns .btn { flex: none; padding: 9px 18px; }
+  #modalbox { position: relative; touch-action: pan-y; flex-wrap: wrap; }
+  .decknav-row { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; flex: 0 0 auto; width: 100%; }
+  .decknav-row button { flex: none; min-width: 48px; min-height: 44px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg3); color: var(--text); font-size: 22px; line-height: 1; cursor: pointer; }
+  .decknav-row button:hover, .decknav-row button:focus-visible { border-color: var(--accent); outline: none; }
+  .decknav-row button:disabled { opacity: .35; cursor: default; }
+  .decknav-row .pos { flex: 1; text-align: center; color: var(--text-dim); font-size: 13px; font-weight: 600; }
+
+  /* new-card announcement */
+  #news { position: fixed; inset: 0; z-index: 75; background: rgba(0,0,0,.72); display: flex; align-items: flex-end; justify-content: center; }
+  #news[hidden] { display: none; }
+  #newsbox { background: var(--bg2); border: 1px solid var(--border); border-radius: 16px 16px 0 0; width: min(480px, 100%); max-height: min(88vh, 760px); display: flex; flex-direction: column; box-shadow: 0 -8px 32px rgba(0,0,0,.45); padding-bottom: max(8px, env(safe-area-inset-bottom)); }
+  #newshead { display: flex; align-items: center; gap: 12px; padding: 14px 14px 8px; flex-shrink: 0; }
+  #newshead h2 { font-size: 18px; }
+  #newshead p { color: var(--text-dim); font-size: 13px; margin-top: 2px; }
+  #newsClose { margin-left: auto; flex: none; min-height: 44px; padding: 0 16px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg3); color: var(--text); font-size: 15px; font-weight: 700; cursor: pointer; }
+  #newsClose:hover, #newsClose:focus-visible { border-color: var(--accent); outline: none; }
+  #newsList { overflow-y: auto; overscroll-behavior: contain; padding: 0 8px 8px; }
+  .newsrow { width: 100%; text-align: left; background: transparent; border: none; border-bottom: 1px solid var(--border); color: inherit; font: inherit; padding: 11px 8px; min-height: 52px; cursor: pointer; display: flex; flex-direction: column; align-items: flex-start; gap: 2px; }
+  .newsrow:hover, .newsrow:focus-visible { background: var(--bg3); outline: none; }
+  .newsrow .nname { font-weight: 700; font-size: 15px; }
+  .newsrow .nmeta { color: var(--text-dim); font-size: 13px; }
+  @media (min-width: 700px) {
+    #news { align-items: center; padding: 16px; }
+    #newsbox { border-radius: 16px; width: min(440px, 92vw); max-height: 80vh; }
+  }
 
   /* export modal */
   #expbox { background: var(--bg2); border: 1px solid var(--border); border-radius: 12px; max-width: 460px; width: 92%; padding: 20px; }
@@ -337,6 +362,18 @@
   <p>A new update is available</p>
   <button type="button" id="btnApplyUpdate">Update</button>
 </div>
+<div id="news" hidden role="dialog" aria-modal="true" aria-labelledby="newsTitle">
+  <div id="newsbox">
+    <div id="newshead">
+      <div>
+        <h2 id="newsTitle">New cards</h2>
+        <p id="newsSub"></p>
+      </div>
+      <button type="button" id="newsClose">Close</button>
+    </div>
+    <div id="newsList"></div>
+  </div>
+</div>
 <div id="modal"><div id="modalbox"></div></div>
 <div id="modal4" class="ovl">
   <div id="statsdeckbox" class="lab">
@@ -389,6 +426,7 @@
 </div>
 
 <script src="custom-cards.js?v=d9eb7c883c73148c8cc2c7f83692f8d4ac7ded87"></script>
+<script src="card-news.js?v=d9eb7c883c73148c8cc2c7f83692f8d4ac7ded87"></script>
 <script>
 'use strict';
 const API = 'https://optcgapi.com/api/';
@@ -475,6 +513,7 @@ function finishLoad(list) {
   loadDeck();
   applyFilters();
   renderDeck();
+  showCardNews();
 }
 
 /* ================= filters UI ================= */
@@ -652,7 +691,7 @@ function cardEl(c) {
     bar.append(badd, brem);
   }
   d.appendChild(bar);
-  d.onclick = () => openModal(c);
+  d.onclick = () => openModal(c, 'browse');
   return d;
 }
 
@@ -804,7 +843,7 @@ function renderDeck() {
   if (deck.leader && byId.has(deck.leader)) {
     const L = byId.get(deck.leader);
     lb.innerHTML = '';
-    const img = document.createElement('img'); img.src = L.img; img.onclick = () => openModal(L);
+    const img = document.createElement('img'); img.src = L.img; img.onclick = () => openModal(L, 'deck');
     const info = document.createElement('div'); info.className = 'linfo';
     info.innerHTML = '<div class="lname">' + esc(L.name) + '</div><div class="lsub">' + esc(L.id) + ' · ' + esc(L.color) + ' · ' + esc(L.subs) + '</div>';
     const x = document.createElement('button'); x.className = 'lx'; x.textContent = '✕'; x.title = 'Remove leader';
@@ -842,38 +881,66 @@ function renderDeck() {
     curve.appendChild(cb);
   });
 
-  // list grouped by type
+  // list grouped by type, in the same order deck browsing uses
   const dl = document.getElementById('decklist');
   dl.innerHTML = '';
+  const list = deckCardsInListOrder();
+  const totals = {};
+  for (const c of list) totals[c.type] = (totals[c.type] || 0) + qtyOf(c.id);
+  let lastType = '';
+  for (const c of list) {
+    if (c.type !== lastType) {
+      lastType = c.type;
+      const h = document.createElement('div'); h.className = 'dsection';
+      h.textContent = c.type + 's (' + totals[c.type] + ')';
+      dl.appendChild(h);
+    }
+    const row = document.createElement('div'); row.className = 'drow';
+    row.innerHTML = '<img loading="lazy" src="' + esc(c.img) + '"><span class="dcost">' + (c.cost ?? '–') + '</span><span class="dname">' + esc(c.name) + '</span><span class="dqty">×' + qtyOf(c.id) + '</span>';
+    const bm = document.createElement('button'); bm.textContent = '−'; bm.onclick = e => { e.stopPropagation(); removeCard(c.id); };
+    const bp = document.createElement('button'); bp.textContent = '+'; bp.onclick = e => { e.stopPropagation(); addCard(c.id); };
+    row.append(bm, bp);
+    row.onclick = () => openModal(c, 'deck');
+    dl.appendChild(row);
+  }
+  renderWarns();
+}
+
+// Deck-list order: characters, then events, then stages, each by cost then id.
+// Extra types follow in the order they show up. The leader is not a list row.
+function deckCardsInListOrder() {
   const groups = { Character: [], Event: [], Stage: [] };
   for (const id of Object.keys(deck.cards)) {
     const c = byId.get(id);
     if (c) (groups[c.type] || (groups[c.type] = [])).push(c);
   }
-  for (const [type, list] of Object.entries(groups)) {
-    if (!list.length) continue;
-    list.sort((a,b) => (a.cost ?? 0) - (b.cost ?? 0) || a.id.localeCompare(b.id));
-    const total = list.reduce((s,c) => s + qtyOf(c.id), 0);
-    const h = document.createElement('div'); h.className = 'dsection'; h.textContent = type + 's (' + total + ')';
-    dl.appendChild(h);
-    for (const c of list) {
-      const row = document.createElement('div'); row.className = 'drow';
-      row.innerHTML = '<img loading="lazy" src="' + esc(c.img) + '"><span class="dcost">' + (c.cost ?? '–') + '</span><span class="dname">' + esc(c.name) + '</span><span class="dqty">×' + qtyOf(c.id) + '</span>';
-      const bm = document.createElement('button'); bm.textContent = '−'; bm.onclick = e => { e.stopPropagation(); removeCard(c.id); };
-      const bp = document.createElement('button'); bp.textContent = '+'; bp.onclick = e => { e.stopPropagation(); addCard(c.id); };
-      row.append(bm, bp);
-      row.onclick = () => openModal(c);
-      dl.appendChild(row);
-    }
+  const out = [];
+  for (const group of Object.values(groups)) {
+    group.sort((a, b) => (a.cost ?? 0) - (b.cost ?? 0) || a.id.localeCompare(b.id, undefined, { numeric: true }));
+    out.push(...group);
   }
-  renderWarns();
+  return out;
+}
+
+// Leader first (it sits above the list), then the list. One entry per card, not per copy.
+function deckBrowseCards() {
+  const out = [];
+  if (deck.leader && byId.has(deck.leader)) out.push(byId.get(deck.leader));
+  for (const c of deckCardsInListOrder()) if (c.id !== deck.leader) out.push(c);
+  return out;
 }
 
 /* ================= card modal ================= */
 const modal = document.getElementById('modal');
 const modalbox = document.getElementById('modalbox');
-function openModal(c) {
+// 'deck' while a card was opened from the deck panel, so add/remove can refresh it
+// without leaving the deck sequence. Null for the browser and the test hand.
+let modalNav = null;
+function openModal(c, nav) {
+  if (nav === 'deck') modalNav = 'deck';
+  else if (nav === 'browse') modalNav = null;
   modalbox.innerHTML = '';
+  modalbox.dataset.cardId = c.id;
   const img = document.createElement('img'); img.src = c.img; img.alt = c.name;
   const info = document.createElement('div'); info.id = 'modalinfo';
   const tags = [
@@ -910,20 +977,139 @@ function openModal(c) {
     btns.append(b1, b2, q);
   }
   info.appendChild(btns);
+  if (modalNav === 'deck') {
+    const seq = deckBrowseCards();
+    const idx = seq.findIndex(x => x.id === c.id);
+    if (seq.length > 1 && idx >= 0) {
+      const row = document.createElement('div'); row.className = 'decknav-row';
+      const prev = document.createElement('button');
+      prev.type = 'button'; prev.className = 'deckprev'; prev.textContent = '‹';
+      prev.setAttribute('aria-label', 'Previous card in deck');
+      prev.disabled = idx === 0;
+      prev.onclick = e => { e.stopPropagation(); stepDeckCard(-1); };
+      const pos = document.createElement('div'); pos.className = 'pos';
+      pos.textContent = (idx + 1) + ' of ' + seq.length;
+      const next = document.createElement('button');
+      next.type = 'button'; next.className = 'decknext'; next.textContent = '›';
+      next.setAttribute('aria-label', 'Next card in deck');
+      next.disabled = idx === seq.length - 1;
+      next.onclick = e => { e.stopPropagation(); stepDeckCard(1); };
+      row.append(prev, pos, next);
+      modalbox.appendChild(row);
+    }
+  }
   modalbox.append(img, info);
+  modalbox.scrollTop = 0;
   modal.classList.add('open');
 }
-function closeModal() { modal.classList.remove('open'); }
+function stepDeckCard(dir) {
+  if (modalNav !== 'deck') return;
+  const seq = deckBrowseCards();
+  const i = seq.findIndex(c => c.id === modalbox.dataset.cardId);
+  const n = i + dir;
+  if (i < 0 || n < 0 || n >= seq.length) return;
+  openModal(seq[n]);
+}
+function closeModal() { modal.classList.remove('open'); modalNav = null; }
 modal.onclick = e => { if (e.target === modal) closeModal(); };
+
+// Horizontal swipe moves through the deck. A vertical drag still scrolls the card.
+let deckGesture = null;
+modalbox.addEventListener('pointerdown', e => {
+  if (modalNav !== 'deck' || !e.isPrimary) return;
+  if (e.target.closest('button, a, input, textarea, select')) return;
+  deckGesture = { id: e.pointerId, x: e.clientX, y: e.clientY, locked: null };
+});
+modalbox.addEventListener('pointermove', e => {
+  if (!deckGesture || e.pointerId !== deckGesture.id) return;
+  const dx = e.clientX - deckGesture.x;
+  const dy = e.clientY - deckGesture.y;
+  if (!deckGesture.locked) {
+    if (Math.abs(dx) < 10 && Math.abs(dy) < 10) return;
+    deckGesture.locked = Math.abs(dx) > Math.abs(dy) ? 'x' : 'y';
+  }
+  if (deckGesture.locked === 'x') e.preventDefault();
+});
+function endDeckGesture(e) {
+  if (!deckGesture || e.pointerId !== deckGesture.id) return;
+  const g = deckGesture;
+  deckGesture = null;
+  if (g.locked !== 'x') return;
+  const dx = e.clientX - g.x;
+  if (dx <= -48) stepDeckCard(1);
+  else if (dx >= 48) stepDeckCard(-1);
+}
+modalbox.addEventListener('pointerup', endDeckGesture);
+modalbox.addEventListener('pointercancel', e => {
+  if (deckGesture && e.pointerId === deckGesture.id) deckGesture = null;
+});
+
 document.addEventListener('keydown', e => {
+  if (modal.classList.contains('open') && modalNav === 'deck' && (e.key === 'ArrowLeft' || e.key === 'ArrowRight')) {
+    e.preventDefault();
+    stepDeckCard(e.key === 'ArrowRight' ? 1 : -1);
+    return;
+  }
   if (e.key !== 'Escape') return;
-  // close the topmost layer only, so Esc from a card detail returns to the hand
+  // close the topmost layer only, so Esc from a card detail returns to the hand or the new-card list
   if (modal.classList.contains('open')) return closeModal();
+  if (!document.getElementById('news').hidden) return dismissCardNews();
   closeExp();
   document.getElementById('modal3').style.display = 'none';
   document.getElementById('modal4').classList.remove('open');
   document.getElementById('modal5').classList.remove('open');
 });
+
+/* ================= new card announcement ================= */
+const NEWS_KEY = 'optcg_seen_card_news';
+function seenNewsBatches() {
+  try {
+    const raw = JSON.parse(localStorage.getItem(NEWS_KEY));
+    return new Set(Array.isArray(raw) ? raw.filter(x => typeof x === 'string') : []);
+  } catch (e) { return new Set(); }
+}
+function dismissCardNews() {
+  const news = document.getElementById('news');
+  const ids = (news.dataset.batches || '').split(',').filter(Boolean);
+  if (ids.length) {
+    const seen = seenNewsBatches();
+    ids.forEach(id => seen.add(id));
+    try { localStorage.setItem(NEWS_KEY, JSON.stringify([...seen])); } catch (e) {}
+  }
+  news.hidden = true;
+}
+function showCardNews() {
+  const batches = Array.isArray(window.CARD_NEWS) ? window.CARD_NEWS : [];
+  const seen = seenNewsBatches();
+  const fresh = batches.filter(b => b && typeof b.id === 'string' && !seen.has(b.id));
+  if (!fresh.length) return;
+  const ids = [];
+  const have = new Set();
+  for (const batch of fresh) {
+    for (const id of batch.ids || []) {
+      if (typeof id === 'string' && !have.has(id)) { have.add(id); ids.push(id); }
+    }
+  }
+  const rows = ids.map(id => byId.get(id)).filter(Boolean);
+  rows.sort((a, b) => a.id.localeCompare(b.id, undefined, { numeric: true }));
+  if (!rows.length) return;
+  const news = document.getElementById('news');
+  news.dataset.batches = fresh.map(b => b.id).join(',');
+  document.getElementById('newsTitle').textContent = fresh.length === 1 && fresh[0].title ? fresh[0].title : 'New cards';
+  document.getElementById('newsSub').textContent = rows.length + (rows.length === 1 ? ' new card' : ' new cards') + ' · tap one to view it';
+  const list = document.getElementById('newsList');
+  list.innerHTML = '';
+  for (const c of rows) {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'newsrow';
+    btn.innerHTML = '<span class="nname">' + esc(c.name) + '</span><span class="nmeta">' + esc(c.color || '—') + ' · ' + esc(c.id) + '</span>';
+    btn.onclick = () => openModal(c, 'browse');
+    list.appendChild(btn);
+  }
+  news.hidden = false;
+}
+document.getElementById('newsClose').onclick = () => dismissCardNews();
 
 /* ================= export / import ================= */
 const modal2 = document.getElementById('modal2');
@@ -1290,7 +1476,7 @@ function renderHand() {
     img.src = c.img; img.alt = c.name; img.loading = 'lazy';
     img.title = c.name + (c.cost != null ? ' — cost ' + c.cost : '');
     d.appendChild(img);
-    d.onclick = () => openModal(c);
+    d.onclick = () => openModal(c, 'browse');
     box.appendChild(d);
   }
 }
