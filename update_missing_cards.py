@@ -15,13 +15,16 @@
 import json, os, re, urllib.request, collections, datetime
 from html import unescape
 
-SET_PREFIXES = ['OP17']
+# OP18 is not on DotGG yet; update_op18_spoilers.py fills that in and this
+# script keeps those cards when it rewrites custom-cards.js.
+SET_PREFIXES = ['OP17', 'EB05']
 
 OUT_DIR = os.path.dirname(os.path.abspath(__file__))
-IMG_DIR = os.path.join(OUT_DIR, 'op17')
-os.makedirs(IMG_DIR, exist_ok=True)
 UA = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/126'}
-SET_NAMES = {'OP17': "The World's Strongest Warriors"}
+SET_NAMES = {
+    'OP17': "The World's Strongest Warriors",
+    'EB05': 'ONE PIECE Heroines Edition vol.2',
+}
 
 req = urllib.request.Request('https://api.dotgg.gg/cgfw/getcards?game=onepiece&mode=indexed', headers=UA)
 d = json.load(urllib.request.urlopen(req, timeout=60))
@@ -35,7 +38,9 @@ def num(v):
     return int(v) if v is not None and str(v).strip().isdigit() else None
 
 def clean(s):
-    # DotGG embeds <br> in effect text; the app renders text as plain (pre-wrap)
+    # DotGG embeds <br> in effect text; the app renders text as plain (pre-wrap).
+    # <Wisdom> / <Special> are attribute icons, not markup — keep the word.
+    s = re.sub(r'<(Strike|Slash|Ranged|Wisdom|Special)>', r'\1', s)
     s = re.sub(r'<br\s*/?>', '\n', s, flags=re.I)
     s = re.sub(r'<[^>]+>', '', s)
     return unescape(s).strip()
@@ -49,7 +54,10 @@ for r in d['data']:
     base = cid.split('-')[0]
     text = clean(g(r, 'Effect') or '')
     trig = clean(g(r, 'Trigger') or '')
-    if trig: text += ('\n' if text else '') + '[Trigger] ' + trig
+    # DotGG's Trigger column already includes the [Trigger] keyword. Don't add a second one.
+    if trig and trig not in text:
+        if not trig.startswith('[Trigger]'): trig = '[Trigger] ' + trig
+        text += ('\n' if text else '') + trig
     cards[cid] = {
         'id': cid,
         'name': g(r, 'name') or cid,
@@ -66,14 +74,16 @@ for r in d['data']:
         'subs': (g(r, 'Type') or '').replace('/', ' '),
         'counter': num(g(r, 'Counter')),
         'attr': g(r, 'Attribute') or '',
-        'img': 'op17/' + cid + '.webp',
+        'img': base.lower() + '/' + cid + '.webp',
     }
 
 print('parsed', len(cards), 'cards:', dict(collections.Counter(c['setId'] for c in cards.values())))
 
 failed = []
 for cid, c in sorted(cards.items()):
-    dest = os.path.join(IMG_DIR, cid + '.webp')
+    img_dir = os.path.join(OUT_DIR, cid.split('-')[0].lower())
+    os.makedirs(img_dir, exist_ok=True)
+    dest = os.path.join(img_dir, cid + '.webp')
     if os.path.exists(dest) and os.path.getsize(dest) > 5000: continue
     try:
         rq = urllib.request.Request('https://static.dotgg.gg/onepiece/card/' + cid + '.webp', headers=UA)
@@ -84,14 +94,35 @@ for cid, c in sorted(cards.items()):
         c['img'] = 'https://static.dotgg.gg/onepiece/card/' + cid + '.webp'
 print('images done,', len(failed), 'failed:', failed[:5])
 
-out = sorted(cards.values(), key=lambda c: c['id'])
+def load_existing(path):
+    if not os.path.exists(path): return []
+    text = open(path, encoding='utf-8').read()
+    m = re.search(r'concat\((\[.*\])\)\s*;', text, re.S)
+    return json.loads(m.group(1)) if m else []
+
 path = os.path.join(OUT_DIR, 'custom-cards.js')
+prefixes = tuple(p + '-' for p in SET_PREFIXES)
+fresh = {c['id']: c for c in cards.values()}
+merged, seen = [], set()
+for old in load_existing(path):
+    if old['id'].startswith(prefixes):
+        if old['id'] in fresh and old['id'] not in seen:
+            merged.append(fresh[old['id']]); seen.add(old['id'])
+    else:
+        merged.append(old); seen.add(old['id'])
+for c in sorted(fresh.values(), key=lambda c: c['id']):
+    if c['id'] not in seen:
+        merged.append(c); seen.add(c['id'])
+
 with open(path, 'w', encoding='utf-8') as f:
     f.write('// Auto-generated cards missing from optcgapi (source: dotgg.gg, %s)\n'
             % datetime.date.today().isoformat())
+    f.write('// Sets refreshed from DotGG: %s. Other ids already in this file are kept.\n'
+            % ', '.join(SET_PREFIXES))
     f.write('window.CUSTOM_CARDS = (window.CUSTOM_CARDS || []).concat(')
-    json.dump(out, f, ensure_ascii=False, indent=1)
+    json.dump(merged, f, ensure_ascii=False, indent=1)
     f.write(');\n')
+out = merged
 print('wrote', path, 'with', len(out), 'cards')
 print('leaders:', [(c['id'], c['name'], c['color']) for c in out if c['type'] == 'Leader'])
 miss = [c['id'] for c in out if not c['color'] or (c['cost'] is None and c['type'] != 'Leader')]

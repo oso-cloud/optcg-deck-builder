@@ -198,11 +198,23 @@
 
   /* ===== mobile layout ===== */
   .paneltoggle { display: none; background: var(--bg3); border: 1px solid var(--border); color: var(--text); border-radius: 7px; padding: 7px 11px; font-size: 15px; cursor: pointer; white-space: nowrap; }
+  /* Deck drawer back control. Hidden on desktop, where the panel is always on screen. */
+  .panelback { display: none; }
   #scrim { position: fixed; inset: 0; background: rgba(0,0,0,.55); z-index: 39; display: none; }
   #scrim.on { display: block; }
   @media (max-width: 900px) {
     .paneltoggle { display: inline-block; }
     #deckMini { color: var(--accent); font-weight: 700; }
+    .panelback {
+      display: flex; align-items: center; gap: 10px; flex-shrink: 0;
+      width: 100%; min-height: 48px; padding: 10px 14px;
+      padding-top: max(10px, env(safe-area-inset-top));
+      background: var(--bg3); border: none; border-bottom: 1px solid var(--border);
+      color: var(--text); font-size: 16px; font-weight: 700; cursor: pointer; text-align: left;
+    }
+    .panelback:hover, .panelback:focus-visible { background: #2a3346; outline: none; }
+    .panelback:active { background: var(--border); }
+    .panelback-arrow { font-size: 22px; line-height: 1; width: 28px; text-align: center; }
     #sidebar { position: fixed; left: 0; top: 0; bottom: 0; z-index: 40; width: min(300px, 85vw); transform: translateX(-105%); transition: transform .2s; }
     #sidebar.open { transform: none; box-shadow: 6px 0 30px rgba(0,0,0,.5); }
     #deckpanel { position: fixed; right: 0; top: 0; bottom: 0; z-index: 40; width: min(340px, 92vw); min-width: 0; transform: translateX(105%); transition: transform .2s; }
@@ -257,6 +269,9 @@
   </div>
 
   <div id="deckpanel">
+    <button type="button" id="btnDeckClose" class="panelback" aria-label="Close deck and return to cards">
+      <span class="panelback-arrow" aria-hidden="true">←</span> Back
+    </button>
     <div id="deckhead">
       <div id="deckbar">
         <select id="deckSel" title="Switch deck"></select>
@@ -1267,19 +1282,74 @@ document.getElementById('modal5').onclick = e => { if (e.target.id === 'modal5')
 
 /* ================= mobile panel toggles ================= */
 const scrim = document.getElementById('scrim');
-function togglePanel(id) {
-  const el = document.getElementById(id);
-  const opening = !el.classList.contains('open');
-  closePanels();
-  if (opening) { el.classList.add('open'); scrim.classList.add('on'); }
+const drawerMq = window.matchMedia('(max-width: 900px)');
+// history.back() is async. Queue pushes behind it so a fast reopen cannot
+// skip its own entry, and so that late popstate does not close the new drawer.
+let historyChain = Promise.resolve();
+let suppressPop = 0;
+function deckDrawerOpen() {
+  return document.getElementById('deckpanel').classList.contains('open');
 }
-function closePanels() {
+function consumeDeckHistoryEntry() {
+  historyChain = historyChain.then(() => new Promise(resolve => {
+    if (!(history.state && history.state.optcgDeck)) { resolve(); return; }
+    suppressPop++;
+    let settled = false;
+    const done = () => {
+      if (settled) return;
+      settled = true;
+      window.removeEventListener('popstate', done);
+      suppressPop--;
+      resolve();
+    };
+    window.addEventListener('popstate', done);
+    history.back();
+    setTimeout(done, 800);
+  }));
+}
+// One history entry while the deck drawer covers the card browser, so the
+// Android/browser back gesture closes the drawer instead of leaving the page.
+function pushDeckHistory() {
+  if (!drawerMq.matches) return;
+  historyChain = historyChain.then(() => {
+    if (!drawerMq.matches || !deckDrawerOpen()) return;
+    if (history.state && history.state.optcgDeck) return;
+    history.pushState({ optcgDeck: 1 }, '');
+  });
+}
+function hidePanels() {
   document.getElementById('sidebar').classList.remove('open');
   document.getElementById('deckpanel').classList.remove('open');
   scrim.classList.remove('on');
 }
+function togglePanel(id) {
+  const el = document.getElementById(id);
+  const opening = !el.classList.contains('open');
+  const deckWas = deckDrawerOpen();
+  hidePanels();
+  if (deckWas && !(opening && id === 'deckpanel')) consumeDeckHistoryEntry();
+  if (!opening) return;
+  el.classList.add('open');
+  scrim.classList.add('on');
+  if (id === 'deckpanel') pushDeckHistory();
+}
+function closePanels() {
+  const deckWas = deckDrawerOpen();
+  hidePanels();
+  if (deckWas) consumeDeckHistoryEntry();
+}
+window.addEventListener('popstate', () => {
+  if (suppressPop || !deckDrawerOpen()) return;
+  document.getElementById('deckpanel').classList.remove('open');
+  if (!document.getElementById('sidebar').classList.contains('open')) scrim.classList.remove('on');
+});
+drawerMq.addEventListener('change', e => {
+  // Leaving the overlay layout: drop the history entry the drawer pushed.
+  if (!e.matches) consumeDeckHistoryEntry();
+});
 document.getElementById('btnFilters').onclick = () => togglePanel('sidebar');
 document.getElementById('btnDeckPanel').onclick = () => togglePanel('deckpanel');
+document.getElementById('btnDeckClose').onclick = closePanels;
 scrim.onclick = closePanels;
 
 /* ================= backup / restore all decks ================= */
