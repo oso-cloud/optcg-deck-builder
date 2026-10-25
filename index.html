@@ -4,7 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>OPTCG Deck Builder</title>
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'unsafe-inline'; img-src 'self' https://optcgapi.com https://static.dotgg.gg data: blob:; connect-src https://optcgapi.com; manifest-src 'self'; base-uri 'none'; form-action 'none'; object-src 'none'; frame-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'unsafe-inline'; img-src 'self' https://optcgapi.com https://static.dotgg.gg data: blob:; connect-src 'self' https://optcgapi.com; manifest-src 'self'; base-uri 'none'; form-action 'none'; object-src 'none'; frame-src 'none'">
+<!-- app-version must match version.json. Stamped on push to main; see README. -->
+<meta name="app-version" content="1">
 <meta name="referrer" content="no-referrer">
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="icon-192.png">
@@ -52,6 +54,17 @@
   #search { flex: 1; max-width: 480px; }
   #count { font-size: 12px; color: var(--text-dim); white-space: nowrap; }
   #sort { width: auto; }
+  #topbreak { display: none; }
+  #btnRefresh { flex: none; background: var(--bg3); border: 1px solid var(--border); color: var(--text); border-radius: 7px; min-height: 44px; padding: 0 12px; font-size: 14px; font-weight: 700; cursor: pointer; white-space: nowrap; }
+  #btnRefresh:hover, #btnRefresh:focus-visible { border-color: var(--accent); outline: none; }
+  #btnRefresh:active { background: var(--border); }
+  #btnRefresh:disabled { opacity: .55; }
+  #updateBanner { position: fixed; z-index: 70; left: 12px; right: 12px; bottom: max(12px, env(safe-area-inset-bottom)); display: flex; align-items: center; gap: 12px; padding: 12px 14px; background: var(--bg2); border: 1px solid var(--accent); border-radius: 12px; box-shadow: 0 10px 32px rgba(0,0,0,.5); }
+  #updateBanner[hidden] { display: none; }
+  #updateBanner p { flex: 1; font-size: 15px; font-weight: 700; line-height: 1.3; }
+  #btnApplyUpdate { flex: none; min-height: 44px; padding: 0 16px; background: var(--accent); color: #1a1a1a; border: none; border-radius: 8px; font-size: 15px; font-weight: 700; cursor: pointer; }
+  #btnApplyUpdate:hover, #btnApplyUpdate:focus-visible { filter: brightness(1.08); outline: none; }
+  #btnApplyUpdate:disabled { opacity: .55; }
   #grid { flex: 1; overflow-y: auto; padding: 14px; display: grid; grid-template-columns: repeat(auto-fill, minmax(138px, 1fr)); gap: 10px; align-content: start; }
   .card { position: relative; cursor: pointer; border-radius: 7px; transition: transform .1s; }
   .card:hover { transform: translateY(-3px); }
@@ -220,7 +233,14 @@
     #deckpanel { position: fixed; right: 0; top: 0; bottom: 0; z-index: 40; width: min(340px, 92vw); min-width: 0; transform: translateX(105%); transition: transform .2s; }
     #deckpanel.open { transform: none; box-shadow: -6px 0 30px rgba(0,0,0,.5); }
     #grid { grid-template-columns: repeat(auto-fill, minmax(102px, 1fr)); gap: 7px; padding: 8px; }
-    #topbar { padding: 8px; gap: 6px; }
+    #topbar { padding: 8px; gap: 6px; flex-wrap: wrap; }
+    #btnFilters { order: 1; }
+    #search { order: 2; flex: 1 1 0; width: auto; min-width: 0; max-width: none; }
+    #btnDeckPanel { order: 3; }
+    #topbreak { display: block; order: 4; flex-basis: 100%; height: 0; }
+    #sort { order: 5; flex: 1 1 0; width: auto; min-width: 0; }
+    #btnRefresh { order: 6; margin-left: 0; }
+    #count { order: 7; }
     #count { display: none; }
     #modalbox { flex-direction: column; align-items: center; gap: 12px; }
     #modalbox img { width: min(260px, 70vw); max-width: none; }
@@ -263,6 +283,8 @@
         <option value="price">Sort: Price (high→low)</option>
       </select>
       <span id="count"></span>
+      <span id="topbreak"></span>
+      <button type="button" id="btnRefresh" title="Clear cached app files and reload the latest version. Saved decks, notes, and records stay.">↻ Refresh</button>
       <button id="btnDeckPanel" class="paneltoggle" title="Deck">🃏 <span id="deckMini">0</span></button>
     </div>
     <div id="grid"><div id="loadState"><span class="spinner"></span>Loading card database…</div></div>
@@ -311,6 +333,10 @@
 </div>
 
 <div id="scrim"></div>
+<div id="updateBanner" hidden role="status" aria-live="polite">
+  <p>A new update is available</p>
+  <button type="button" id="btnApplyUpdate">Update</button>
+</div>
 <div id="modal"><div id="modalbox"></div></div>
 <div id="modal4" class="ovl">
   <div id="statsdeckbox" class="lab">
@@ -362,7 +388,7 @@
   </div>
 </div>
 
-<script src="custom-cards.js"></script>
+<script src="custom-cards.js?v=1"></script>
 <script>
 'use strict';
 const API = 'https://optcgapi.com/api/';
@@ -1385,6 +1411,69 @@ document.getElementById('restoreFile').onchange = async e => {
     alert('Could not read that backup file: ' + err.message);
   }
 };
+
+/* ================= app update ================= */
+// Drop the cache-busting query the Refresh button adds, without a second load.
+(function stripRefreshParam() {
+  const url = new URL(location.href);
+  if (!url.searchParams.has('refresh')) return;
+  url.searchParams.delete('refresh');
+  const next = url.pathname + url.search + url.hash;
+  history.replaceState(history.state, '', next);
+})();
+
+// Clears Cache Storage and any service worker, then reloads past the HTTP cache.
+// Does not read or write localStorage or IndexedDB, so decks, notes, and W/L stay.
+let refreshInFlight = false;
+async function refreshApp() {
+  if (refreshInFlight) return;
+  refreshInFlight = true;
+  const buttons = [document.getElementById('btnRefresh'), document.getElementById('btnApplyUpdate')];
+  for (const btn of buttons) if (btn) btn.disabled = true;
+  try {
+    if (navigator.serviceWorker) {
+      const regs = await navigator.serviceWorker.getRegistrations();
+      await Promise.all(regs.map(async reg => {
+        try { await reg.update(); } catch (e) {}
+        try { await reg.unregister(); } catch (e) {}
+      }));
+    }
+    if (window.caches) {
+      const keys = await caches.keys();
+      await Promise.all(keys.map(key => caches.delete(key)));
+    }
+  } catch (e) {}
+  const url = new URL(location.href);
+  url.searchParams.set('refresh', String(Date.now()));
+  location.replace(url.href);
+}
+
+let updateCheck = null;
+function checkForAppUpdate() {
+  if (updateCheck) return updateCheck;
+  updateCheck = (async () => {
+    const running = document.querySelector('meta[name="app-version"]')?.getAttribute('content') || '';
+    if (!running) return;
+    try {
+      const res = await fetch('version.json?t=' + Date.now(), { cache: 'no-store' });
+      if (!res.ok) return;
+      const data = await res.json();
+      const remote = data && data.version != null ? String(data.version) : '';
+      const banner = document.getElementById('updateBanner');
+      if (!banner || !remote) return;
+      banner.hidden = remote === running;
+    } catch (e) {}
+  })().finally(() => { updateCheck = null; });
+  return updateCheck;
+}
+document.getElementById('btnRefresh').onclick = () => refreshApp();
+document.getElementById('btnApplyUpdate').onclick = () => refreshApp();
+checkForAppUpdate();
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible') checkForAppUpdate();
+});
+window.addEventListener('pageshow', e => { if (e.persisted) checkForAppUpdate(); });
+window.addEventListener('focus', () => checkForAppUpdate());
 
 /* ================= boot ================= */
 loadCards().catch(err => {
