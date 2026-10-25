@@ -59,6 +59,9 @@
   #btnRefresh:hover, #btnRefresh:focus-visible { border-color: var(--accent); outline: none; }
   #btnRefresh:active { background: var(--border); }
   #btnRefresh:disabled { opacity: .55; }
+  #btnNews { flex: none; background: var(--bg3); border: 1px solid var(--accent); color: var(--accent); border-radius: 7px; min-height: 44px; padding: 0 12px; font-size: 14px; font-weight: 700; cursor: pointer; white-space: nowrap; }
+  #btnNews:hover, #btnNews:focus-visible { filter: brightness(1.08); outline: none; }
+  #btnNews:active { background: var(--border); }
   #updateBanner { position: fixed; z-index: 70; left: 12px; right: 12px; bottom: max(12px, env(safe-area-inset-bottom)); display: flex; align-items: center; gap: 12px; padding: 12px 14px; background: var(--bg2); border: 1px solid var(--accent); border-radius: 12px; box-shadow: 0 10px 32px rgba(0,0,0,.5); }
   #updateBanner[hidden] { display: none; }
   #updateBanner p { flex: 1; font-size: 15px; font-weight: 700; line-height: 1.3; }
@@ -251,9 +254,9 @@
   }
 
   /* new-card announcement */
-  #news { position: fixed; inset: 0; z-index: 75; background: rgba(0,0,0,.72); display: flex; align-items: flex-end; justify-content: center; }
+  #news { position: fixed; inset: 0; z-index: 75; background: rgba(0,0,0,.72); display: flex; align-items: flex-end; justify-content: center; height: 100vh; height: 100dvh; }
   #news[hidden] { display: none; }
-  #newsbox { background: var(--bg2); border: 1px solid var(--border); border-radius: 16px 16px 0 0; width: min(480px, 100%); max-height: min(88vh, 760px); display: flex; flex-direction: column; box-shadow: 0 -8px 32px rgba(0,0,0,.45); padding-bottom: max(8px, env(safe-area-inset-bottom)); }
+  #newsbox { background: var(--bg2); border: 1px solid var(--border); border-radius: 16px 16px 0 0; width: min(480px, 100%); max-height: min(88vh, 760px); max-height: min(88dvh, 760px); display: flex; flex-direction: column; box-shadow: 0 -8px 32px rgba(0,0,0,.45); padding-bottom: max(8px, env(safe-area-inset-bottom)); }
   #newshead { display: flex; align-items: center; gap: 12px; padding: 14px 14px 8px; flex-shrink: 0; }
   #newshead h2 { font-size: 18px; }
   #newshead p { color: var(--text-dim); font-size: 13px; margin-top: 2px; }
@@ -264,6 +267,9 @@
   .newsrow:hover, .newsrow:focus-visible { background: var(--bg3); outline: none; }
   .newsrow .nname { font-weight: 700; font-size: 15px; }
   .newsrow .nmeta { color: var(--text-dim); font-size: 13px; }
+  .newsbatch { display: flex; align-items: center; gap: 8px; padding: 12px 10px 4px; font-size: 12px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: var(--accent); }
+  .newsbatch .newtag { text-transform: none; letter-spacing: 0; font-size: 11px; background: var(--accent); color: #1a1a1a; border-radius: 8px; padding: 2px 7px; }
+  .newsempty { padding: 24px 16px 32px; text-align: center; color: var(--text-dim); font-size: 15px; line-height: 1.45; }
   @media (min-width: 700px) {
     #news { align-items: center; padding: 16px; }
     #newsbox { border-radius: 16px; width: min(440px, 92vw); max-height: 80vh; }
@@ -331,9 +337,10 @@
     #search { order: 2; flex: 1 1 0; width: auto; min-width: 0; max-width: none; }
     #btnDeckPanel { order: 3; }
     #topbreak { display: block; order: 4; flex-basis: 100%; height: 0; }
-    #sort { order: 5; flex: 1 1 0; width: auto; min-width: 0; }
+    #sort { order: 5; flex: 1 1 0; width: 0; min-width: 0; }
     #btnRefresh { order: 6; margin-left: 0; }
-    #count { order: 7; }
+    #btnNews { order: 7; }
+    #count { order: 8; }
     #count { display: none; }
     .card .add-bar { display: flex; opacity: .95; }
   }
@@ -376,6 +383,7 @@
       <span id="count"></span>
       <span id="topbreak"></span>
       <button type="button" id="btnRefresh" title="Clear cached app files and reload the latest version. Saved decks, notes, and records stay.">↻ Refresh</button>
+      <button type="button" id="btnNews" title="New cards">📢 News</button>
       <button id="btnDeckPanel" class="paneltoggle" title="Deck">🃏 <span id="deckMini">0</span></button>
     </div>
     <div id="grid"><div id="loadState"><span class="spinner"></span>Loading card database…</div></div>
@@ -1142,12 +1150,38 @@ document.addEventListener('keydown', e => {
 });
 
 /* ================= new card announcement ================= */
+// Remembered batch ids only mark which announcements are still "new".
+// They never hide the sheet. Not part of the deck save.
 const NEWS_KEY = 'optcg_seen_card_news';
+// Set once finishLoad has decided whether to auto-open. A later re-render in
+// the same document (not a page load) must not pop the sheet again.
+let newsAutoShown = false;
 function seenNewsBatches() {
   try {
     const raw = JSON.parse(localStorage.getItem(NEWS_KEY));
     return new Set(Array.isArray(raw) ? raw.filter(x => typeof x === 'string') : []);
   } catch (e) { return new Set(); }
+}
+// Last object in card-news.js is the newest batch.
+function newsSections() {
+  const batches = Array.isArray(window.CARD_NEWS) ? window.CARD_NEWS : [];
+  const ordered = batches.filter(b => b && typeof b.id === 'string').slice().reverse();
+  const used = new Set();
+  const sections = [];
+  for (const batch of ordered) {
+    const cards = [];
+    for (const id of batch.ids || []) {
+      if (typeof id !== 'string' || used.has(id)) continue;
+      const c = byId.get(id);
+      if (!c) continue;
+      used.add(id);
+      cards.push(c);
+    }
+    if (!cards.length) continue;
+    cards.sort((a, b) => a.id.localeCompare(b.id, undefined, { numeric: true }));
+    sections.push({ batch, cards });
+  }
+  return sections;
 }
 function dismissCardNews() {
   const news = document.getElementById('news');
@@ -1159,38 +1193,58 @@ function dismissCardNews() {
   }
   news.hidden = true;
 }
-function showCardNews() {
-  const batches = Array.isArray(window.CARD_NEWS) ? window.CARD_NEWS : [];
+function openCardNews() {
+  const sections = newsSections();
   const seen = seenNewsBatches();
-  const fresh = batches.filter(b => b && typeof b.id === 'string' && !seen.has(b.id));
-  if (!fresh.length) return;
-  const ids = [];
-  const have = new Set();
-  for (const batch of fresh) {
-    for (const id of batch.ids || []) {
-      if (typeof id === 'string' && !have.has(id)) { have.add(id); ids.push(id); }
-    }
-  }
-  const rows = ids.map(id => byId.get(id)).filter(Boolean);
-  rows.sort((a, b) => a.id.localeCompare(b.id, undefined, { numeric: true }));
-  if (!rows.length) return;
   const news = document.getElementById('news');
-  news.dataset.batches = fresh.map(b => b.id).join(',');
-  document.getElementById('newsTitle').textContent = fresh.length === 1 && fresh[0].title ? fresh[0].title : 'New cards';
-  document.getElementById('newsSub').textContent = rows.length + (rows.length === 1 ? ' new card' : ' new cards') + ' · tap one to view it';
   const list = document.getElementById('newsList');
   list.innerHTML = '';
-  for (const c of rows) {
-    const btn = document.createElement('button');
-    btn.type = 'button';
-    btn.className = 'newsrow';
-    btn.innerHTML = '<span class="nname">' + esc(c.name) + '</span><span class="nmeta">' + esc(c.color || '—') + ' · ' + esc(c.id) + '</span>';
-    btn.onclick = () => openModal(c, 'browse');
-    list.appendChild(btn);
+  let count = 0;
+  for (const { batch, cards } of sections) {
+    if (sections.length > 1) {
+      const h = document.createElement('div');
+      h.className = 'newsbatch';
+      h.textContent = batch.title || batch.id;
+      if (!seen.has(batch.id)) {
+        const tag = document.createElement('span');
+        tag.className = 'newtag';
+        tag.textContent = 'New';
+        h.appendChild(tag);
+      }
+      list.appendChild(h);
+    }
+    for (const c of cards) {
+      count++;
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'newsrow';
+      btn.innerHTML = '<span class="nname">' + esc(c.name) + '</span><span class="nmeta">' + esc(c.color || '—') + ' · ' + esc(c.id) + '</span>';
+      btn.onclick = () => openModal(c, 'browse');
+      list.appendChild(btn);
+    }
+  }
+  news.dataset.batches = sections.map(s => s.batch.id).join(',');
+  const only = sections.length === 1 ? sections[0].batch : null;
+  document.getElementById('newsTitle').textContent = only && only.title ? only.title : 'New cards';
+  document.getElementById('newsSub').textContent = count
+    ? count + (count === 1 ? ' new card' : ' new cards') + ' · tap one to view it'
+    : 'Nothing new right now';
+  if (!count) {
+    const p = document.createElement('p');
+    p.className = 'newsempty';
+    p.textContent = 'No new cards to show yet.';
+    list.appendChild(p);
   }
   news.hidden = false;
 }
+function showCardNews() {
+  if (newsAutoShown) return;
+  newsAutoShown = true;
+  if (!newsSections().length) return;
+  openCardNews();
+}
 document.getElementById('newsClose').onclick = () => dismissCardNews();
+document.getElementById('btnNews').onclick = () => openCardNews();
 
 /* ================= export / import ================= */
 const modal2 = document.getElementById('modal2');

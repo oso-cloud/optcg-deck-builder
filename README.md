@@ -24,9 +24,11 @@ That writes the current commit SHA into `version.json` and `index.html`. The two
 
 ## New-card announcement
 
-`card-news.js` lists batches of card ids. The app shows a batch once, the first time those cards are in the loaded set. Closing the list stores that batch id in `localStorage` under `optcg_seen_card_news`. That key is not part of the deck save, so it does not change decks, notes, or win/loss records.
+`card-news.js` lists batches of card ids. The app opens that list on every page load. After it is closed, the **News** button in the top bar opens the same list again. Coming back to the app without a reload does not open it by itself.
 
-When you add cards, append a new object. Use a new `id` every time — a repeated id is treated as already seen:
+Closing the list stores those batch ids in `localStorage` under `optcg_seen_card_news`. That only marks a batch as already noticed (a "New" label on a batch you have not closed yet, when more than one batch is listed). It does not hide the list. The key is not part of the deck save, so it does not change decks, notes, or win/loss records.
+
+When you add cards, append a new object at the end of the array. The last object is the newest batch. Use a new `id` every time so that batch can be marked New:
 
 ```javascript
 window.CARD_NEWS.push({
