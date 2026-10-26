@@ -39,3 +39,24 @@ window.CARD_NEWS.push({
 ```
 
 The card data itself still goes in `custom-cards.js` (or arrives from the API). The announcement only lists ids that actually loaded, with each card's name, color, and number. The scripts that rewrite `custom-cards.js` leave `card-news.js` alone, so add the batch there by hand in the same change.
+
+## Phones (iOS Safari and Android Chrome)
+
+The app is a home-screen web app. On iPhone, `viewport-fit=cover` and `apple-mobile-web-app-status-bar-style: black-translucent` paint the page under the status bar and the home indicator. The top bar, drawers, announcement, card dialog, and update banner pad with `env(safe-area-inset-*)`. Those insets are 0 on Android, so the same rules do not add a gap there. Text fields are 16px on narrow screens so Safari does not zoom the page when they are focused. The shell uses `100dvh` (with `100vh` and `-webkit-fill-available` behind it) so Safari’s toolbar does not cover the bottom of a fixed panel.
+
+Before changing layout, check both:
+
+- WebKit, iPhone 16 size (393×852, DPR 3, touch), with the safe-area insets simulated (about 59px top and 34px bottom). Also a short iPhone (375×667) and a Pro Max (430×932).
+- Chromium at 360×740, 390×844, and 412×915, with the insets left at 0.
+
+Cover the card browser, the top bar (Refresh and News), the deck drawer’s Back button, the new-card list, a card dialog, and the update banner. Nothing should sit under the status bar or the home indicator, and nothing should scroll sideways.
+
+`scripts/phone-layout.mjs` loads those sizes in Playwright and writes screenshots. From a checkout with Playwright installed:
+
+```bash
+npm install playwright
+npx playwright install webkit chromium
+node scripts/phone-layout.mjs
+```
+
+Screenshots land in `phone-shots/`. That folder is local and is not part of the site.
