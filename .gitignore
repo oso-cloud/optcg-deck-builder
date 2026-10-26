@@ -1,2 +1,4 @@
 .claude/
 *.lnk
+phone-shots/
+node_modules/
