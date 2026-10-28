@@ -1106,6 +1106,7 @@ function openModal(c, nav) {
     c.mp != null ? 'Market $' + c.mp.toFixed(2) : null,
     c.ip != null ? 'Low $' + c.ip.toFixed(2) : null,
     c.spoiler ? '⚠ Spoiler — some stats unconfirmed' : null,
+    c.unofficial ? '⚠ Unofficial English translation' : null,
     c.numTBA ? '⚠ Card number not assigned yet' : null
   ].filter(Boolean);
   info.innerHTML =

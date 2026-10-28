@@ -10,7 +10,6 @@
 # Not emitted:
 #   OP18-080 — Tier One's number for the Spandam leader. The card is OP18-079.
 #   OP18-105 — Tier One's number for Doberman. The card is OP18-106.
-#   OP18-070 Tom — revealed, but not part of the requested list.
 import json, os, re, urllib.request, datetime
 
 OUT_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -21,13 +20,14 @@ API = 'https://oplaytcg.com/api/cards/'
 
 # Printed numbers confirmed on the card images / English spoilers.
 WANTED = '''
-OP18-001 OP18-003 OP18-010 OP18-011 OP18-013 OP18-015 OP18-016 OP18-017
+OP18-001 OP18-003 OP18-010 OP18-011 OP18-013 OP18-015 OP18-016 OP18-017 OP18-018
 OP18-021 OP18-022 OP18-024 OP18-025 OP18-028 OP18-029 OP18-031 OP18-032
 OP18-034 OP18-036 OP18-041 OP18-044 OP18-046 OP18-047 OP18-048 OP18-051
 OP18-052 OP18-055 OP18-056 OP18-060 OP18-061 OP18-063 OP18-064 OP18-065
-OP18-066 OP18-069 OP18-075 OP18-076 OP18-077 OP18-078 OP18-079 OP18-084
-OP18-085 OP18-086 OP18-089 OP18-091 OP18-092 OP18-093 OP18-100 OP18-101
-OP18-106 OP18-108 OP18-111 OP18-112 OP18-113 OP18-119
+OP18-066 OP18-069 OP18-070 OP18-075 OP18-076 OP18-077 OP18-078 OP18-079
+OP18-084 OP18-085 OP18-086 OP18-088 OP18-089 OP18-091 OP18-092 OP18-093
+OP18-100 OP18-101 OP18-103 OP18-106 OP18-108 OP18-110 OP18-111 OP18-112
+OP18-113 OP18-119
 '''.split()
 
 RARITY = {
@@ -48,6 +48,8 @@ COLOR_OVERRIDES = {
 # OPlay left Chopper's attribute blank. The Japanese list gives 打 (Strike).
 ATTR_OVERRIDES = {'OP18-010': 'Strike', 'OP18-065': ''}
 NAME_OVERRIDES = {'OP18-011': 'Nefertari Vivi'}  # printed name; OPlay has "Nefeltari"
+# English text for these is an unofficial translation of the Japanese reveal.
+UNOFFICIAL = {'OP18-018', 'OP18-070', 'OP18-088', 'OP18-103', 'OP18-110'}
 
 def get_json(url):
     req = urllib.request.Request(url, headers=UA)
@@ -113,6 +115,8 @@ for cid in WANTED:
         'attr': attr,
         'img': 'op18/' + cid + '.webp',
     }
+    if cid in UNOFFICIAL:
+        cards[cid]['unofficial'] = True
     printing = (o.get('printings') or [{}])[0]
     url = printing.get('imageFull') or printing.get('image')
     dest = os.path.join(IMG_DIR, cid + '.webp')

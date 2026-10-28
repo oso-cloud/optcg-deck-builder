@@ -107,15 +107,24 @@ async function run(browserType, label, contextOpts, insets, shots) {
     const box = document.getElementById('newsbox').getBoundingClientRect();
     const close = document.getElementById('newsClose').getBoundingClientRect();
     const pad = parseFloat(getComputedStyle(document.getElementById('newsbox')).paddingBottom);
+    let expected = 0;
+    const used = new Set();
+    const batches = Array.isArray(window.CARD_NEWS) ? window.CARD_NEWS.slice().reverse() : [];
+    for (const b of batches) {
+      for (const id of b.ids || []) {
+        if (typeof id === 'string' && !used.has(id) && byId.has(id)) { used.add(id); expected++; }
+      }
+    }
     return {
       closeTop: Math.round(close.top),
       closeIn: close.bottom <= innerHeight + 1 && close.right <= innerWidth + 1 && close.height >= 44,
       boxIn: box.left >= -1 && box.right <= innerWidth + 1 && box.bottom <= innerHeight + 1,
       pad,
       n: document.querySelectorAll('.newsrow').length,
+      expected,
     };
   });
-  check(newsBox.n === 115 && newsBox.boxIn && newsBox.closeIn && newsBox.closeTop >= sat - 1 && newsBox.pad + 0.5 >= sab, `${label} announcement clears safe area`, newsBox);
+  check(newsBox.n === newsBox.expected && newsBox.n > 0 && newsBox.boxIn && newsBox.closeIn && newsBox.closeTop >= sat - 1 && newsBox.pad + 0.5 >= sab, `${label} announcement clears safe area`, newsBox);
   if (shots.news) await page.screenshot({ path: path.join(out, shots.news) });
 
   await page.click('#newsClose');
