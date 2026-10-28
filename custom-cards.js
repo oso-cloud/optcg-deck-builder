@@ -3197,6 +3197,24 @@ window.CUSTOM_CARDS = (window.CUSTOM_CARDS || []).concat([
   "img": "op18/OP18-017.webp"
  },
  {
+  "id": "OP18-018",
+  "name": "Let's Go, Karoo!!",
+  "text": "[Main] All of your {Alabasta} type Characters gain +1000 power during this turn.\n[Trigger] Up to 1 of your Leader or Characters gains +2000 power during this turn.",
+  "set": "The Dominance of God",
+  "setId": "OP-18",
+  "rarity": "C",
+  "color": "Red",
+  "type": "Event",
+  "life": null,
+  "cost": 1,
+  "power": null,
+  "subs": "Alabasta",
+  "counter": null,
+  "attr": "",
+  "img": "op18/OP18-018.webp",
+  "unofficial": true
+ },
+ {
   "id": "OP18-021",
   "name": "Franky",
   "text": "All Stage cards in your hand have a +3000 Counter.\n[Activate: Main] [Once Per Turn] DON!! −1: Play up to 1 Stage card with a cost of 5 or less from your hand.",
@@ -3639,6 +3657,24 @@ window.CUSTOM_CARDS = (window.CUSTOM_CARDS || []).concat([
   "img": "op18/OP18-069.webp"
  },
  {
+  "id": "OP18-070",
+  "name": "Tom",
+  "text": "[On Play] DON!! −1, you may trash 1 card from your hand: Add up to 2 Stage cards from your trash to your hand.",
+  "set": "The Dominance of God",
+  "setId": "OP-18",
+  "rarity": "R",
+  "color": "Purple",
+  "type": "Character",
+  "life": null,
+  "cost": 1,
+  "power": 2000,
+  "subs": "Fish-Man Water Seven",
+  "counter": 2000,
+  "attr": "Wisdom",
+  "img": "op18/OP18-070.webp",
+  "unofficial": true
+ },
+ {
   "id": "OP18-075",
   "name": "Thousand Sunny",
   "text": "[On Play] Draw 1 card, add up to 1 DON!! card from your DON!! deck and rest it.\n[Activate: Main] DON!! −2, you may rest this Stage: Set up to 1 of your {Straw Hat Crew} type Characters with a power of 7000 or less as active.",
@@ -3775,6 +3811,24 @@ window.CUSTOM_CARDS = (window.CUSTOM_CARDS || []).concat([
   "img": "op18/OP18-086.webp"
  },
  {
+  "id": "OP18-088",
+  "name": "Saint Sommers",
+  "text": "[Your Turn] [On Play] If you have 6 or more DON!! cards on your field, K.O. up to 1 of your opponent's Characters with a base cost of 4 or less.\n[On K.O.] You may trash 2 cards from your hand: Play this Character card from your trash.",
+  "set": "The Dominance of God",
+  "setId": "OP-18",
+  "rarity": "R",
+  "color": "Black",
+  "type": "Character",
+  "life": null,
+  "cost": 6,
+  "power": 6000,
+  "subs": "Celestial Dragons Holy Knights of God",
+  "counter": 2000,
+  "attr": "Special",
+  "img": "op18/OP18-088.webp",
+  "unofficial": true
+ },
+ {
   "id": "OP18-089",
   "name": "Dorry",
   "text": "This Character gains +12 cost.\n[On Play] You may trash 1 card from your hand: Your opponent trashes 1 card from their hand.",
@@ -3877,6 +3931,24 @@ window.CUSTOM_CARDS = (window.CUSTOM_CARDS || []).concat([
   "img": "op18/OP18-101.webp"
  },
  {
+  "id": "OP18-103",
+  "name": "Jabra",
+  "text": "[On K.O.] Add up to 1 card from the top of your deck to the top of your Life cards. Then, trash up to 1 card from the top of your opponent's Life cards.\n[Trigger] If your Leader has a type including \"CP\", draw 1 card and place up to 1 Character with a cost of 8 or less at the bottom of the owner's deck.",
+  "set": "The Dominance of God",
+  "setId": "OP-18",
+  "rarity": "R",
+  "color": "Yellow",
+  "type": "Character",
+  "life": null,
+  "cost": 6,
+  "power": 8000,
+  "subs": "CP9",
+  "counter": null,
+  "attr": "Strike",
+  "img": "op18/OP18-103.webp",
+  "unofficial": true
+ },
+ {
   "id": "OP18-106",
   "name": "Doberman",
   "text": "[Double Attack] (This card deals 2 damage.)",
@@ -3909,6 +3981,24 @@ window.CUSTOM_CARDS = (window.CUSTOM_CARDS || []).concat([
   "counter": 1000,
   "attr": "Slash",
   "img": "op18/OP18-108.webp"
+ },
+ {
+  "id": "OP18-110",
+  "name": "Blueno",
+  "text": "[On Play] Look at 4 cards from the top of your deck; reveal up to 1 card with a type including \"CP\" other than [Blueno] and add it to your hand. Then, place the rest at the bottom of your deck in any order.\n[Trigger] Draw 1 card and K.O. up to 1 of your opponent's Characters with a cost of 2 or less.",
+  "set": "The Dominance of God",
+  "setId": "OP-18",
+  "rarity": "R",
+  "color": "Yellow",
+  "type": "Character",
+  "life": null,
+  "cost": 1,
+  "power": 2000,
+  "subs": "CP9",
+  "counter": 1000,
+  "attr": "Strike",
+  "img": "op18/OP18-110.webp",
+  "unofficial": true
  },
  {
   "id": "OP18-111",
