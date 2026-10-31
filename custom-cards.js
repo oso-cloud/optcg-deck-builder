@@ -3095,6 +3095,24 @@ window.CUSTOM_CARDS = (window.CUSTOM_CARDS || []).concat([
   "img": "op18/OP18-003.webp"
  },
  {
+  "id": "OP18-004",
+  "name": "Karoo",
+  "text": "Apply each of the following based on this Character's power:\n• 5000 or more, this Character gains [Rush].\n• 6000 or more, this Character gains [Banish].\n• 7000 or more, this Character gains [Unblockable].",
+  "set": "The Dominance of God",
+  "setId": "OP-18",
+  "rarity": "R",
+  "color": "Red",
+  "type": "Character",
+  "life": null,
+  "cost": 3,
+  "power": 4000,
+  "subs": "Alabasta Animal",
+  "counter": 1000,
+  "attr": "Strike",
+  "img": "op18/OP18-004.webp",
+  "unofficial": true
+ },
+ {
   "id": "OP18-010",
   "name": "Tony Tony.Chopper",
   "text": "[On K.O.] Add up to 1 Character card with 4000 power or less from your trash to your hand.",
@@ -3215,6 +3233,24 @@ window.CUSTOM_CARDS = (window.CUSTOM_CARDS || []).concat([
   "unofficial": true
  },
  {
+  "id": "OP18-020",
+  "name": "Stop Fighting!",
+  "text": "[Counter] You may add all of your Life cards to your hand: If your Leader is [Nefertari Vivi], give your opponent's Leader and all of their Characters −5000 power during this turn.",
+  "set": "The Dominance of God",
+  "setId": "OP-18",
+  "rarity": "UC",
+  "color": "Red",
+  "type": "Event",
+  "life": null,
+  "cost": 1,
+  "power": null,
+  "subs": "Alabasta",
+  "counter": null,
+  "attr": "",
+  "img": "op18/OP18-020.webp",
+  "unofficial": true
+ },
+ {
   "id": "OP18-021",
   "name": "Franky",
   "text": "All Stage cards in your hand have a +3000 Counter.\n[Activate: Main] [Once Per Turn] DON!! −1: Play up to 1 Stage card with a cost of 5 or less from your hand.",
@@ -3281,6 +3317,24 @@ window.CUSTOM_CARDS = (window.CUSTOM_CARDS || []).concat([
   "counter": 1000,
   "attr": "Wisdom",
   "img": "op18/OP18-025.webp"
+ },
+ {
+  "id": "OP18-027",
+  "name": "Zoro and Sogeking",
+  "text": "[Opponent's Turn] Your active [Monkey.D.Luffy] Leader with 3 or more DON!! attached has a base power of 7000.\n[On Play] Set up to 2 of your DON!! cards as active. Then, up to 1 of your opponent's Characters with a cost of 6 or less cannot be rested until the end of your opponent's next End Phase.",
+  "set": "The Dominance of God",
+  "setId": "OP-18",
+  "rarity": "R",
+  "color": "Green",
+  "type": "Character",
+  "life": null,
+  "cost": 5,
+  "power": 6000,
+  "subs": "Sniper Island Straw Hat Crew Water Seven",
+  "counter": null,
+  "attr": "Slash/Ranged",
+  "img": "op18/OP18-027.webp",
+  "unofficial": true
  },
  {
   "id": "OP18-028",
@@ -3383,6 +3437,24 @@ window.CUSTOM_CARDS = (window.CUSTOM_CARDS || []).concat([
   "counter": 2000,
   "attr": "Strike",
   "img": "op18/OP18-036.webp"
+ },
+ {
+  "id": "OP18-040",
+  "name": "Diable Jambe Flambé Shot",
+  "text": "[Main] K.O. up to 1 of your opponent's rested Characters with a cost of 7 or less.\n[Trigger] Rest up to 1 of your opponent's Characters with a cost of 7 or less.",
+  "set": "The Dominance of God",
+  "setId": "OP-18",
+  "rarity": "C",
+  "color": "Green",
+  "type": "Event",
+  "life": null,
+  "cost": 4,
+  "power": null,
+  "subs": "Straw Hat Crew Water Seven",
+  "counter": null,
+  "attr": "",
+  "img": "op18/OP18-040.webp",
+  "unofficial": true
  },
  {
   "id": "OP18-041",
@@ -3536,6 +3608,24 @@ window.CUSTOM_CARDS = (window.CUSTOM_CARDS || []).concat([
   "counter": 1000,
   "attr": "Wisdom",
   "img": "op18/OP18-056.webp"
+ },
+ {
+  "id": "OP18-058",
+  "name": "This Kingdom Is Doomed. You Can't Save It!",
+  "text": "[Main] You may return 1 of your Characters to its owner's hand: Place up to 1 Character with a cost of 4 or less at the bottom of its owner's deck.\n[Trigger] Activate this card's [Main] effect.",
+  "set": "The Dominance of God",
+  "setId": "OP-18",
+  "rarity": "C",
+  "color": "Blue",
+  "type": "Event",
+  "life": null,
+  "cost": 3,
+  "power": null,
+  "subs": "Baroque Works The Seven Warlords of the Sea",
+  "counter": null,
+  "attr": "",
+  "img": "op18/OP18-058.webp",
+  "unofficial": true
  },
  {
   "id": "OP18-060",
@@ -3760,6 +3850,24 @@ window.CUSTOM_CARDS = (window.CUSTOM_CARDS || []).concat([
   "img": "op18/OP18-079.webp"
  },
  {
+  "id": "OP18-083",
+  "name": "Saint Killingham",
+  "text": "[Your Turn] [On Play] Play up to 1 [MMA] from your trash.\n[On K.O.] You may trash 2 cards from your hand: Play this Character card from your trash.",
+  "set": "The Dominance of God",
+  "setId": "OP-18",
+  "rarity": "R",
+  "color": "Black",
+  "type": "Character",
+  "life": null,
+  "cost": 5,
+  "power": 6000,
+  "subs": "Celestial Dragons Holy Knights of God",
+  "counter": 1000,
+  "attr": "Special",
+  "img": "op18/OP18-083.webp",
+  "unofficial": true
+ },
+ {
   "id": "OP18-084",
   "name": "Gunko",
   "text": "[On Play] Look at 4 cards from the top of your deck; reveal up to 1 {Holy Knights of God} type card and add it to your hand. Then, place the remaining cards into the trash.\n[Activate: Main] You may rest 4 of your DON!! cards: Play up to 1 Character card with a cost of 6 or less and the {Holy Knights of God} type from your trash.",
@@ -3895,6 +4003,24 @@ window.CUSTOM_CARDS = (window.CUSTOM_CARDS || []).concat([
   "counter": 2000,
   "attr": "Special",
   "img": "op18/OP18-093.webp"
+ },
+ {
+  "id": "OP18-094",
+  "name": "Hee Hee Hee!!! I Smell Adventure!!!",
+  "text": "[Main] Look at 5 cards from the top of your deck; reveal up to 1 {Elbaph} type card and add it to your hand. Then, place the rest at the bottom of your deck in any order.\n[Trigger] Draw 1 card.",
+  "set": "The Dominance of God",
+  "setId": "OP-18",
+  "rarity": "C",
+  "color": "Black",
+  "type": "Event",
+  "life": null,
+  "cost": 1,
+  "power": null,
+  "subs": "Elbaph The Four Emperors Straw Hat Crew",
+  "counter": null,
+  "attr": "",
+  "img": "op18/OP18-094.webp",
+  "unofficial": true
  },
  {
   "id": "OP18-100",
