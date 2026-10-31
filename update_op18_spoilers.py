@@ -20,13 +20,13 @@ API = 'https://oplaytcg.com/api/cards/'
 
 # Printed numbers confirmed on the card images / English spoilers.
 WANTED = '''
-OP18-001 OP18-003 OP18-010 OP18-011 OP18-013 OP18-015 OP18-016 OP18-017 OP18-018
-OP18-021 OP18-022 OP18-024 OP18-025 OP18-028 OP18-029 OP18-031 OP18-032
-OP18-034 OP18-036 OP18-041 OP18-044 OP18-046 OP18-047 OP18-048 OP18-051
-OP18-052 OP18-055 OP18-056 OP18-060 OP18-061 OP18-063 OP18-064 OP18-065
+OP18-001 OP18-003 OP18-004 OP18-010 OP18-011 OP18-013 OP18-015 OP18-016 OP18-017 OP18-018
+OP18-020 OP18-021 OP18-022 OP18-024 OP18-025 OP18-027 OP18-028 OP18-029 OP18-031 OP18-032
+OP18-034 OP18-036 OP18-040 OP18-041 OP18-044 OP18-046 OP18-047 OP18-048 OP18-051
+OP18-052 OP18-055 OP18-056 OP18-058 OP18-060 OP18-061 OP18-063 OP18-064 OP18-065
 OP18-066 OP18-069 OP18-070 OP18-075 OP18-076 OP18-077 OP18-078 OP18-079
-OP18-084 OP18-085 OP18-086 OP18-088 OP18-089 OP18-091 OP18-092 OP18-093
-OP18-100 OP18-101 OP18-103 OP18-106 OP18-108 OP18-110 OP18-111 OP18-112
+OP18-083 OP18-084 OP18-085 OP18-086 OP18-088 OP18-089 OP18-091 OP18-092 OP18-093
+OP18-094 OP18-100 OP18-101 OP18-103 OP18-106 OP18-108 OP18-110 OP18-111 OP18-112
 OP18-113 OP18-119
 '''.split()
 
@@ -49,7 +49,10 @@ COLOR_OVERRIDES = {
 ATTR_OVERRIDES = {'OP18-010': 'Strike', 'OP18-065': ''}
 NAME_OVERRIDES = {'OP18-011': 'Nefertari Vivi'}  # printed name; OPlay has "Nefeltari"
 # English text for these is an unofficial translation of the Japanese reveal.
-UNOFFICIAL = {'OP18-018', 'OP18-070', 'OP18-088', 'OP18-103', 'OP18-110'}
+UNOFFICIAL = {
+    'OP18-004', 'OP18-018', 'OP18-020', 'OP18-027', 'OP18-040', 'OP18-058',
+    'OP18-070', 'OP18-083', 'OP18-088', 'OP18-094', 'OP18-103', 'OP18-110',
+}
 
 def get_json(url):
     req = urllib.request.Request(url, headers=UA)
@@ -70,6 +73,31 @@ def fix_text(cid, effect, trigger):
     elif cid == 'OP18-064':
         # The card's effect badges are [On Play] and [On K.O.]. OPlay also inserts [Your Turn].
         effect = effect.replace('[Your Turn] ', '')
+    elif cid == 'OP18-004':
+        # Same Japanese effect as the 2026-10-31 reveal. OPlay's bullets add "If it is".
+        effect = (
+            "Apply each of the following based on this Character's power:\n"
+            "• 5000 or more, this Character gains [Rush].\n"
+            "• 6000 or more, this Character gains [Banish].\n"
+            "• 7000 or more, this Character gains [Unblockable]."
+        )
+    elif cid == 'OP18-020':
+        # OPlay spells the leader "Nefeltari". The printed name, and OP18-011, is Nefertari.
+        effect = (
+            "[Counter] You may add all of your Life cards to your hand: If your Leader is "
+            "[Nefertari Vivi], give your opponent's Leader and all of their Characters −5000 power during this turn."
+        )
+    elif cid == 'OP18-027':
+        effect = (
+            "[Opponent's Turn] Your active [Monkey.D.Luffy] Leader with 3 or more DON!! attached has a base power of 7000.\n"
+            "[On Play] Set up to 2 of your DON!! cards as active. Then, up to 1 of your opponent's Characters "
+            "with a cost of 6 or less cannot be rested until the end of your opponent's next End Phase."
+        )
+    elif cid == 'OP18-058':
+        effect = (
+            "[Main] You may return 1 of your Characters to its owner's hand: Place up to 1 Character "
+            "with a cost of 4 or less at the bottom of its owner's deck."
+        )
     elif cid == 'OP18-075':
         # Same effect as OPDeckGuide, in the app's usual line breaks. OPlay's wording
         # ("Draw one card", "characters", "lower") is not how the card is phrased.
@@ -98,6 +126,9 @@ for cid in WANTED:
     if attr in ('?', '？', 'None'):
         attr = ''
     traits = [t.get('name') or '' for t in (o.get('traits') or [])]
+    if cid == 'OP18-094':
+        # Printed order, and the same string already used for this type line.
+        traits = ['Elbaph', 'The Four Emperors', 'Straw Hat Crew']
     cards[cid] = {
         'id': cid,
         'name': NAME_OVERRIDES.get(cid, o.get('name') or cid),
