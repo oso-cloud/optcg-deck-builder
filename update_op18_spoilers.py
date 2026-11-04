@@ -23,11 +23,11 @@ WANTED = '''
 OP18-001 OP18-003 OP18-004 OP18-010 OP18-011 OP18-013 OP18-015 OP18-016 OP18-017 OP18-018
 OP18-020 OP18-021 OP18-022 OP18-024 OP18-025 OP18-027 OP18-028 OP18-029 OP18-031 OP18-032
 OP18-034 OP18-036 OP18-040 OP18-041 OP18-044 OP18-046 OP18-047 OP18-048 OP18-051
-OP18-052 OP18-055 OP18-056 OP18-058 OP18-060 OP18-061 OP18-063 OP18-064 OP18-065
+OP18-052 OP18-055 OP18-056 OP18-058 OP18-059 OP18-060 OP18-061 OP18-063 OP18-064 OP18-065
 OP18-066 OP18-069 OP18-070 OP18-075 OP18-076 OP18-077 OP18-078 OP18-079
 OP18-083 OP18-084 OP18-085 OP18-086 OP18-088 OP18-089 OP18-091 OP18-092 OP18-093
 OP18-094 OP18-100 OP18-101 OP18-103 OP18-106 OP18-108 OP18-110 OP18-111 OP18-112
-OP18-113 OP18-119
+OP18-113 OP18-116 OP18-119
 '''.split()
 
 RARITY = {
@@ -47,11 +47,16 @@ COLOR_OVERRIDES = {
 }
 # OPlay left Chopper's attribute blank. The Japanese list gives 打 (Strike).
 ATTR_OVERRIDES = {'OP18-010': 'Strike', 'OP18-065': ''}
-NAME_OVERRIDES = {'OP18-011': 'Nefertari Vivi'}  # printed name; OPlay has "Nefeltari"
+NAME_OVERRIDES = {
+    'OP18-011': 'Nefertari Vivi',  # printed name; OPlay has "Nefeltari"
+    'OP18-059': 'I Pray For Your Success!',
+    'OP18-116': 'Iron Body Empty Tree',
+}
 # English text for these is an unofficial translation of the Japanese reveal.
 UNOFFICIAL = {
     'OP18-004', 'OP18-018', 'OP18-020', 'OP18-027', 'OP18-040', 'OP18-058',
-    'OP18-070', 'OP18-083', 'OP18-088', 'OP18-094', 'OP18-103', 'OP18-110',
+    'OP18-059', 'OP18-070', 'OP18-083', 'OP18-088', 'OP18-094', 'OP18-103',
+    'OP18-110', 'OP18-116',
 }
 
 def get_json(url):
@@ -98,6 +103,19 @@ def fix_text(cid, effect, trigger):
             "[Main] You may return 1 of your Characters to its owner's hand: Place up to 1 Character "
             "with a cost of 4 or less at the bottom of its owner's deck."
         )
+    elif cid == 'OP18-059':
+        # Japanese reveal, 2026-11-04. No official English text yet.
+        effect = (
+            '[Main] You may rest 1 of your DON!! cards and trash 1 card with a type including "Baroque Works" from your hand: Draw 2 cards.\n'
+            '[Counter] You may trash 1 card from your hand: Up to 1 of your Leader or Character cards gains +3000 power during this battle.'
+        )
+        trigger = ''
+    elif cid == 'OP18-116':
+        effect = (
+            '[Counter] You may trash 1 card from your hand: Up to 1 of your Leader or Character cards gains +3000 power during this battle.\n'
+            '[Trigger] If your Leader has a type including "CP", rest up to 1 of your opponent\'s Characters.'
+        )
+        trigger = ''
     elif cid == 'OP18-075':
         # Same effect as OPDeckGuide, in the app's usual line breaks. OPlay's wording
         # ("Draw one card", "characters", "lower") is not how the card is phrased.
@@ -126,9 +144,14 @@ for cid in WANTED:
     if attr in ('?', '？', 'None'):
         attr = ''
     traits = [t.get('name') or '' for t in (o.get('traits') or [])]
-    if cid == 'OP18-094':
+    if cid == 'OP18-059':
+        # Printed order on the Japanese card: 王下七武海/B・W.
+        traits = ['The Seven Warlords of the Sea', 'Baroque Works']
+    elif cid == 'OP18-094':
         # Printed order, and the same string already used for this type line.
         traits = ['Elbaph', 'The Four Emperors', 'Straw Hat Crew']
+    elif cid == 'OP18-116':
+        traits = ['CP9']
     cards[cid] = {
         'id': cid,
         'name': NAME_OVERRIDES.get(cid, o.get('name') or cid),
