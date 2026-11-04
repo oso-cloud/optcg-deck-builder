@@ -3628,6 +3628,24 @@ window.CUSTOM_CARDS = (window.CUSTOM_CARDS || []).concat([
   "unofficial": true
  },
  {
+  "id": "OP18-059",
+  "name": "I Pray For Your Success!",
+  "text": "[Main] You may rest 1 of your DON!! cards and trash 1 card with a type including \"Baroque Works\" from your hand: Draw 2 cards.\n[Counter] You may trash 1 card from your hand: Up to 1 of your Leader or Character cards gains +3000 power during this battle.",
+  "set": "The Dominance of God",
+  "setId": "OP-18",
+  "rarity": "R",
+  "color": "Blue",
+  "type": "Event",
+  "life": null,
+  "cost": 0,
+  "power": null,
+  "subs": "The Seven Warlords of the Sea Baroque Works",
+  "counter": null,
+  "attr": "",
+  "img": "op18/OP18-059.webp",
+  "unofficial": true
+ },
+ {
   "id": "OP18-060",
   "name": "Saint Gunko",
   "text": "[Once Per Turn] When a Character is played from your trash, draw 2 cards and trash 1 card from your hand.\n[Activate: Main] [Once Per Turn] You may trash 1 card from your hand: If you have a Character with 8000 base power or more, add up to 1 DON!! card as active from your DON!! deck.",
@@ -4176,6 +4194,24 @@ window.CUSTOM_CARDS = (window.CUSTOM_CARDS || []).concat([
   "counter": null,
   "attr": "Strike",
   "img": "op18/OP18-113.webp"
+ },
+ {
+  "id": "OP18-116",
+  "name": "Iron Body Empty Tree",
+  "text": "[Counter] You may trash 1 card from your hand: Up to 1 of your Leader or Character cards gains +3000 power during this battle.\n[Trigger] If your Leader has a type including \"CP\", rest up to 1 of your opponent's Characters.",
+  "set": "The Dominance of God",
+  "setId": "OP-18",
+  "rarity": "C",
+  "color": "Yellow",
+  "type": "Event",
+  "life": null,
+  "cost": 0,
+  "power": null,
+  "subs": "CP9",
+  "counter": null,
+  "attr": "",
+  "img": "op18/OP18-116.webp",
+  "unofficial": true
  },
  {
   "id": "OP18-119",
