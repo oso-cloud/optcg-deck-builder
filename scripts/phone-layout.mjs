@@ -125,6 +125,17 @@ async function run(browserType, label, contextOpts, insets, shots) {
     };
   });
   check(newsBox.n === newsBox.expected && newsBox.n > 0 && newsBox.boxIn && newsBox.closeIn && newsBox.closeTop >= sat - 1 && newsBox.pad + 0.5 >= sab, `${label} announcement clears safe area`, newsBox);
+  const newsFit = await page.evaluate(() => {
+    const iw = innerWidth;
+    const bad = [];
+    for (const el of document.querySelectorAll('.nname, .nmeta, .newsbatch, #newsTitle, #newsSub, #newsbox, #newsList')) {
+      const r = el.getBoundingClientRect();
+      const wide = r.right > iw + 1 || r.left < -1 || el.scrollWidth > el.clientWidth + 2;
+      if (wide) bad.push((el.id || el.className) + ' ' + (el.textContent || '').trim().slice(0, 48));
+    }
+    return { bad, doc: document.documentElement.scrollWidth > iw + 1 };
+  });
+  check(!newsFit.doc && newsFit.bad.length === 0, `${label} news text fits`, newsFit);
   if (shots.news) await page.screenshot({ path: path.join(out, shots.news) });
 
   await page.click('#newsClose');
@@ -162,6 +173,63 @@ async function run(browserType, label, contextOpts, insets, shots) {
   if (shots.card) await page.screenshot({ path: path.join(out, shots.card) });
   await page.click('.modalclose');
   await page.click('#newsClose');
+
+  // Long effect text and a leader, opened the same way a News row opens a card.
+  for (const id of ['OP18-117', 'OP18-079']) {
+    const opened = await page.evaluate((cardId) => {
+      const c = byId.get(cardId);
+      if (!c) return null;
+      openModal(c, 'browse');
+      return c.type;
+    }, id);
+    check(!!opened, `${label} can open ${id}`);
+    if (!opened) continue;
+    await page.waitForFunction((cardId) => {
+      const img = document.querySelector('#modalbox img');
+      if (!img || document.getElementById('modalbox')?.dataset.cardId !== cardId) return false;
+      if (!img.complete || img.naturalWidth <= 0 || img.getBoundingClientRect().height < 80) return false;
+      return true;
+    }, id);
+    await page.evaluate(() => {
+      const img = document.querySelector('#modalbox img');
+      return img && img.decode ? img.decode().catch(() => {}) : null;
+    });
+    const detail = await page.evaluate(() => {
+      const iw = innerWidth;
+      const ih = innerHeight;
+      const box = document.getElementById('modalbox').getBoundingClientRect();
+      const info = document.getElementById('modalinfo');
+      const text = document.getElementById('modaltext');
+      const name = info.querySelector('h3');
+      const tags = [...info.querySelectorAll('.mtag')].map(t => t.textContent);
+      const sticksOut = (el) => {
+        const r = el.getBoundingClientRect();
+        return r.left < -1 || r.right > iw + 1 || el.scrollWidth > el.clientWidth + 2;
+      };
+      return {
+        id: document.getElementById('modalbox').dataset.cardId,
+        boxIn: box.left >= -1 && box.top >= -1 && box.right <= iw + 1 && box.bottom <= ih + 1,
+        doc: document.documentElement.scrollWidth > iw + 1,
+        info: sticksOut(info),
+        textWide: sticksOut(text),
+        nameWide: sticksOut(name),
+        tagWide: [...info.querySelectorAll('.mtag')].some(sticksOut),
+        tags,
+        text: text.textContent,
+        imgH: document.querySelector('#modalbox img').naturalHeight,
+        imgShown: document.querySelector('#modalbox img').getBoundingClientRect().height,
+      };
+    });
+    check(detail.boxIn && !detail.doc && !detail.info && !detail.textWide && !detail.nameWide && !detail.tagWide && detail.imgH > 400 && detail.imgShown > 80, `${label} ${id} fits`, detail);
+    if (id === 'OP18-117') {
+      check(detail.text.includes('[Spandam]') && detail.text.includes('{Vice Admiral}') && detail.tags.includes('Event') && detail.tags.some(t => t.includes('Unofficial English translation')), `${label} OP18-117 text`, { text: detail.text, tags: detail.tags });
+    }
+    if (id === 'OP18-079') {
+      check(detail.tags.includes('Leader') && detail.tags.includes('Life 4') && detail.text.includes('[Activate: Main]'), `${label} OP18-079 leader`, { text: detail.text, tags: detail.tags });
+    }
+    if (shots[id]) await page.screenshot({ path: path.join(out, shots[id]) });
+    await page.click('.modalclose');
+  }
 
   await page.evaluate(() => {
     const row = [...document.querySelectorAll('#decklist .drow')].find(r => r.querySelector('.dname')?.textContent.includes('Chopper'));
@@ -237,14 +305,27 @@ await run(webkit, 'webkit-iphone16', iphone(393, 852, 3), island, {
   main: 'webkit-iphone16-main.png',
   card: 'webkit-iphone16-card.png',
   deck: 'webkit-iphone16-deck.png',
+  'OP18-117': 'webkit-iphone16-op18-117.png',
+  'OP18-079': 'webkit-iphone16-op18-079.png',
 });
 await run(webkit, 'webkit-iphone15', { ...devices['iPhone 15'] }, island, {});
 await run(webkit, 'webkit-se', iphone(375, 667, 2), { top: 20, bottom: 0, left: 0, right: 0 }, {});
 await run(webkit, 'webkit-promax', iphone(430, 932, 3), island, {});
 const android = (w, h) => ({ viewport: { width: w, height: h }, deviceScaleFactor: 2, isMobile: true, hasTouch: true });
-await run(chromium, 'chromium-360', android(360, 740), null, {});
-await run(chromium, 'chromium-390', android(390, 844), null, { main: 'chromium-390-main.png' });
-await run(chromium, 'chromium-412', android(412, 915), null, {});
+await run(chromium, 'chromium-360', android(360, 740), null, {
+  news: 'chromium-360-news.png',
+  'OP18-117': 'chromium-360-op18-117.png',
+  'OP18-079': 'chromium-360-op18-079.png',
+});
+await run(chromium, 'chromium-390', android(390, 844), null, {
+  main: 'chromium-390-main.png',
+  news: 'chromium-390-news.png',
+  'OP18-117': 'chromium-390-op18-117.png',
+});
+await run(chromium, 'chromium-412', android(412, 915), null, {
+  'OP18-117': 'chromium-412-op18-117.png',
+  'OP18-079': 'chromium-412-op18-079.png',
+});
 
 console.log('FAILS', fails.length);
 fails.forEach(f => console.log(' -', f));
