@@ -304,18 +304,18 @@
     padding-top: var(--sat);
   }
   #news[hidden] { display: none; }
-  #newsbox { background: var(--bg2); border: 1px solid var(--border); border-radius: 16px 16px 0 0; width: min(480px, 100%); max-height: min(88vh, 760px); max-height: min(88dvh, 760px, calc(100dvh - var(--sat) - 12px)); display: flex; flex-direction: column; box-shadow: 0 -8px 32px rgba(0,0,0,.45); padding-bottom: max(8px, var(--sab)); }
+  #newsbox { background: var(--bg2); border: 1px solid var(--border); border-radius: 16px 16px 0 0; width: min(480px, 100%); min-width: 0; max-height: min(88vh, 760px); max-height: min(88dvh, 760px, calc(100dvh - var(--sat) - 12px)); display: flex; flex-direction: column; box-shadow: 0 -8px 32px rgba(0,0,0,.45); padding-bottom: max(8px, var(--sab)); }
   #newshead { display: flex; align-items: center; gap: 12px; padding: 14px 14px 8px; flex-shrink: 0; }
   #newshead h2 { font-size: 18px; }
   #newshead p { color: var(--text-dim); font-size: 13px; margin-top: 2px; }
   #newsClose { margin-left: auto; flex: none; min-height: 44px; padding: 0 16px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg3); color: var(--text); font-size: 15px; font-weight: 700; cursor: pointer; }
   #newsClose:hover, #newsClose:focus-visible { border-color: var(--accent); outline: none; }
-  #newsList { overflow-y: auto; overscroll-behavior: contain; padding: 0 8px 8px; }
-  .newsrow { width: 100%; text-align: left; background: transparent; border: none; border-bottom: 1px solid var(--border); color: inherit; font: inherit; padding: 11px 8px; min-height: 52px; cursor: pointer; display: flex; flex-direction: column; align-items: flex-start; gap: 2px; }
+  #newsList { overflow-x: hidden; overflow-y: auto; overscroll-behavior: contain; padding: 0 8px 8px; min-width: 0; }
+  .newsrow { width: 100%; min-width: 0; text-align: left; background: transparent; border: none; border-bottom: 1px solid var(--border); color: inherit; font: inherit; padding: 11px 8px; min-height: 52px; cursor: pointer; display: flex; flex-direction: column; align-items: stretch; gap: 2px; }
   .newsrow:hover, .newsrow:focus-visible { background: var(--bg3); outline: none; }
-  .newsrow .nname { font-weight: 700; font-size: 15px; }
-  .newsrow .nmeta { color: var(--text-dim); font-size: 13px; }
-  .newsbatch { display: flex; align-items: center; gap: 8px; padding: 12px 10px 4px; font-size: 12px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: var(--accent); }
+  .newsrow .nname { font-weight: 700; font-size: 15px; overflow-wrap: anywhere; }
+  .newsrow .nmeta { color: var(--text-dim); font-size: 13px; overflow-wrap: anywhere; }
+  .newsbatch { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; min-width: 0; padding: 12px 10px 4px; font-size: 12px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: var(--accent); overflow-wrap: anywhere; }
   .newsbatch .newtag { text-transform: none; letter-spacing: 0; font-size: 11px; background: var(--accent); color: #1a1a1a; border-radius: 8px; padding: 2px 7px; }
   .newsempty { padding: 24px 16px 32px; text-align: center; color: var(--text-dim); font-size: 15px; line-height: 1.45; }
   @media (min-width: 700px) {
