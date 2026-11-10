@@ -136,6 +136,16 @@ async function run(browserType, label, contextOpts, insets, shots) {
     return { bad, doc: document.documentElement.scrollWidth > iw + 1 };
   });
   check(!newsFit.doc && newsFit.bad.length === 0, `${label} news text fits`, newsFit);
+  const newsHas = await page.evaluate(() => {
+    const rows = [...document.querySelectorAll('#newsList .newsrow')];
+    const batch = (document.querySelector('#newsList .newsbatch')?.innerText || '').toLowerCase();
+    return {
+      first: rows[0]?.innerText || '',
+      batch,
+      has: rows.some(r => (r.innerText || '').includes('OP18-118')),
+    };
+  });
+  check(newsHas.has && newsHas.first.includes('OP18-118') && newsHas.first.includes('Monkey.D.Luffy') && newsHas.batch.includes('unofficial'), `${label} news lists OP18-118`, newsHas);
   if (shots.news) await page.screenshot({ path: path.join(out, shots.news) });
 
   await page.click('#newsClose');
@@ -175,7 +185,7 @@ async function run(browserType, label, contextOpts, insets, shots) {
   await page.click('#newsClose');
 
   // Long effect text and a leader, opened the same way a News row opens a card.
-  for (const id of ['OP18-117', 'OP18-079']) {
+  for (const id of ['OP18-118', 'OP18-117', 'OP18-079']) {
     const opened = await page.evaluate((cardId) => {
       const c = byId.get(cardId);
       if (!c) return null;
@@ -215,12 +225,16 @@ async function run(browserType, label, contextOpts, insets, shots) {
         nameWide: sticksOut(name),
         tagWide: [...info.querySelectorAll('.mtag')].some(sticksOut),
         tags,
+        types: (info.innerText.match(/Types: [^\n]+/) || [''])[0],
         text: text.textContent,
         imgH: document.querySelector('#modalbox img').naturalHeight,
         imgShown: document.querySelector('#modalbox img').getBoundingClientRect().height,
       };
     });
     check(detail.boxIn && !detail.doc && !detail.info && !detail.textWide && !detail.nameWide && !detail.tagWide && detail.imgH > 400 && detail.imgShown > 80, `${label} ${id} fits`, detail);
+    if (id === 'OP18-118') {
+      check(detail.text.includes('[On Play]') && detail.text.includes('3 of your DON!!') && detail.text.includes('{Water Seven}') && detail.text.includes('[End of Your Turn]') && detail.types.includes('Water Seven') && detail.types.includes('Straw Hat Crew') && detail.tags.includes('Character') && detail.tags.includes('Green') && detail.tags.includes('Cost 9') && detail.tags.includes('Power 10000') && detail.tags.includes('Strike') && detail.tags.includes('SEC') && !detail.tags.some(t => t.startsWith('Counter')) && detail.tags.some(t => t.includes('Unofficial English translation')), `${label} OP18-118 text`, { text: detail.text, tags: detail.tags, types: detail.types });
+    }
     if (id === 'OP18-117') {
       check(detail.text.includes('[Spandam]') && detail.text.includes('{Vice Admiral}') && detail.tags.includes('Event') && detail.tags.some(t => t.includes('Unofficial English translation')), `${label} OP18-117 text`, { text: detail.text, tags: detail.tags });
     }
@@ -305,6 +319,7 @@ await run(webkit, 'webkit-iphone16', iphone(393, 852, 3), island, {
   main: 'webkit-iphone16-main.png',
   card: 'webkit-iphone16-card.png',
   deck: 'webkit-iphone16-deck.png',
+  'OP18-118': 'webkit-iphone16-op18-118.png',
   'OP18-117': 'webkit-iphone16-op18-117.png',
   'OP18-079': 'webkit-iphone16-op18-079.png',
 });
@@ -314,15 +329,19 @@ await run(webkit, 'webkit-promax', iphone(430, 932, 3), island, {});
 const android = (w, h) => ({ viewport: { width: w, height: h }, deviceScaleFactor: 2, isMobile: true, hasTouch: true });
 await run(chromium, 'chromium-360', android(360, 740), null, {
   news: 'chromium-360-news.png',
+  'OP18-118': 'chromium-360-op18-118.png',
   'OP18-117': 'chromium-360-op18-117.png',
   'OP18-079': 'chromium-360-op18-079.png',
 });
 await run(chromium, 'chromium-390', android(390, 844), null, {
   main: 'chromium-390-main.png',
   news: 'chromium-390-news.png',
+  'OP18-118': 'chromium-390-op18-118.png',
   'OP18-117': 'chromium-390-op18-117.png',
 });
 await run(chromium, 'chromium-412', android(412, 915), null, {
+  news: 'chromium-412-news.png',
+  'OP18-118': 'chromium-412-op18-118.png',
   'OP18-117': 'chromium-412-op18-117.png',
   'OP18-079': 'chromium-412-op18-079.png',
 });

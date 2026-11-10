@@ -5060,6 +5060,24 @@ window.CUSTOM_CARDS = (window.CUSTOM_CARDS || []).concat([
   "unofficial": true
  },
  {
+  "id": "OP18-118",
+  "name": "Monkey.D.Luffy",
+  "text": "[On Play] Set up to 3 of your DON!! cards as active. Then, up to 1 of your opponent's Characters cannot be rested until the end of your opponent's next End Phase.\n[End of Your Turn] Set up to 1 of your {Water Seven} type cards as active.",
+  "set": "The Dominance of God",
+  "setId": "OP-18",
+  "rarity": "SEC",
+  "color": "Green",
+  "type": "Character",
+  "life": null,
+  "cost": 9,
+  "power": 10000,
+  "subs": "Water Seven Straw Hat Crew",
+  "counter": null,
+  "attr": "Strike",
+  "img": "op18/OP18-118.webp",
+  "unofficial": true
+ },
+ {
   "id": "OP18-119",
   "name": "Saint Shamrock",
   "text": "[On K.O.] You may trash 1 card from your hand: Play this Character card from your trash.\n[Activate: Main] [Once Per Turn] If this Character was played on this turn, play up to 1 {Holy Knights of God} type Character card with a cost of 6 or less from your trash.",
