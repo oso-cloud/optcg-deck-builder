@@ -142,10 +142,10 @@ async function run(browserType, label, contextOpts, insets, shots) {
     return {
       first: rows[0]?.innerText || '',
       batch,
-      has: rows.some(r => (r.innerText || '').includes('OP18-118')),
+      has: rows.some(r => (r.innerText || '').includes('OP18-006')),
     };
   });
-  check(newsHas.has && newsHas.first.includes('OP18-118') && newsHas.first.includes('Monkey.D.Luffy') && newsHas.batch.includes('unofficial'), `${label} news lists OP18-118`, newsHas);
+  check(newsHas.has && newsHas.first.includes('OP18-006') && newsHas.first.includes('Koza') && newsHas.batch.includes('unofficial'), `${label} news lists OP18-006`, newsHas);
   if (shots.news) await page.screenshot({ path: path.join(out, shots.news) });
 
   await page.click('#newsClose');
@@ -185,7 +185,7 @@ async function run(browserType, label, contextOpts, insets, shots) {
   await page.click('#newsClose');
 
   // Long effect text and a leader, opened the same way a News row opens a card.
-  for (const id of ['OP18-118', 'OP18-117', 'OP18-079']) {
+  for (const id of ['OP18-006', 'OP18-118', 'OP18-117', 'OP18-079']) {
     const opened = await page.evaluate((cardId) => {
       const c = byId.get(cardId);
       if (!c) return null;
@@ -227,11 +227,16 @@ async function run(browserType, label, contextOpts, insets, shots) {
         tags,
         types: (info.innerText.match(/Types: [^\n]+/) || [''])[0],
         text: text.textContent,
+        name: name.textContent,
+        imgSrc: document.querySelector('#modalbox img').getAttribute('src') || '',
         imgH: document.querySelector('#modalbox img').naturalHeight,
         imgShown: document.querySelector('#modalbox img').getBoundingClientRect().height,
       };
     });
     check(detail.boxIn && !detail.doc && !detail.info && !detail.textWide && !detail.nameWide && !detail.tagWide && detail.imgH > 400 && detail.imgShown > 80, `${label} ${id} fits`, detail);
+    if (id === 'OP18-006') {
+      check(detail.name === 'Koza' && detail.text === 'If you have [Nefertari Vivi], this Character gains [Rush] and +1000 power. (This card can attack on the turn in which it is played.)' && detail.types.includes('Alabasta') && detail.tags.includes('Character') && detail.tags.includes('Red') && detail.tags.includes('Cost 3') && detail.tags.includes('Power 4000') && detail.tags.includes('Counter +2000') && detail.tags.includes('Slash') && detail.tags.includes('C') && detail.tags.some(t => t.includes('Unofficial English translation')) && detail.imgSrc.includes('op18/OP18-006.webp'), `${label} OP18-006 text`, detail);
+    }
     if (id === 'OP18-118') {
       check(detail.text.includes('[On Play]') && detail.text.includes('3 of your DON!!') && detail.text.includes('{Water Seven}') && detail.text.includes('[End of Your Turn]') && detail.types.includes('Water Seven') && detail.types.includes('Straw Hat Crew') && detail.tags.includes('Character') && detail.tags.includes('Green') && detail.tags.includes('Cost 9') && detail.tags.includes('Power 10000') && detail.tags.includes('Strike') && detail.tags.includes('SEC') && !detail.tags.some(t => t.startsWith('Counter')) && detail.tags.some(t => t.includes('Unofficial English translation')), `${label} OP18-118 text`, { text: detail.text, tags: detail.tags, types: detail.types });
     }
@@ -244,6 +249,50 @@ async function run(browserType, label, contextOpts, insets, shots) {
     if (shots[id]) await page.screenshot({ path: path.join(out, shots[id]) });
     await page.click('.modalclose');
   }
+
+  // Search by name, open the card, add one copy, then put the seeded deck back.
+  const deckBefore = await page.evaluate(() => localStorage.getItem('optcg_decks_v2'));
+  await page.fill('#search', 'Koza');
+  await page.waitForFunction(() => {
+    const ids = [...document.querySelectorAll('#grid .card')].map(el => el.dataset.id);
+    return ids.length === 1 && ids[0] === 'OP18-006';
+  });
+  const searched = await page.evaluate(() => {
+    const el = document.querySelector('#grid .card');
+    return { id: el?.dataset.id, alt: el?.querySelector('img')?.alt, n: document.querySelectorAll('#grid .card').length };
+  });
+  check(searched.id === 'OP18-006' && searched.alt === 'Koza' && searched.n === 1, `${label} search finds Koza`, searched);
+  await page.click('#grid .card');
+  await page.waitForFunction(() => document.getElementById('modalbox')?.dataset.cardId === 'OP18-006');
+  await page.getByRole('button', { name: '+ Add to deck' }).click();
+  await page.waitForFunction(() => (document.getElementById('modalbtns')?.innerText || '').includes('In deck: 1 / 4'));
+  const added = await page.evaluate(() => {
+    const store = JSON.parse(localStorage.getItem('optcg_decks_v2'));
+    const d = store.decks[store.cur];
+    const row = [...document.querySelectorAll('#decklist .drow')].find(r => r.querySelector('.dname')?.textContent === 'Koza');
+    return {
+      qty: d.cards['OP18-006'],
+      leader: d.leader,
+      notes: d.notes,
+      name: d.name,
+      row: row ? row.innerText.replace(/\s+/g, ' ') : '',
+      inDeck: document.getElementById('modalbtns')?.innerText || '',
+    };
+  });
+  check(added.qty === 1 && added.leader === 'OP18-001' && added.notes === 'keep' && added.name === 'Phone Deck' && added.row.includes('Koza') && added.row.includes('×1') && added.inDeck.includes('In deck: 1 / 4'), `${label} add Koza to deck`, added);
+  await page.getByRole('button', { name: '− Remove' }).click();
+  await page.waitForFunction(() => (document.getElementById('modalbtns')?.innerText || '').includes('In deck: 0 / 4'));
+  const removed = await page.evaluate(() => {
+    const store = JSON.parse(localStorage.getItem('optcg_decks_v2'));
+    return {
+      qty: store.decks[store.cur].cards['OP18-006'] || 0,
+      row: [...document.querySelectorAll('#decklist .drow')].some(r => r.querySelector('.dname')?.textContent === 'Koza'),
+    };
+  });
+  check(removed.qty === 0 && !removed.row, `${label} remove Koza`, removed);
+  await page.evaluate((raw) => localStorage.setItem('optcg_decks_v2', raw), deckBefore);
+  await page.click('.modalclose');
+  await page.fill('#search', '');
 
   await page.evaluate(() => {
     const row = [...document.querySelectorAll('#decklist .drow')].find(r => r.querySelector('.dname')?.textContent.includes('Chopper'));
@@ -259,7 +308,11 @@ async function run(browserType, label, contextOpts, insets, shots) {
   await page.click('.modalclose');
 
   await page.click('#btnDeckPanel');
-  await page.waitForTimeout(280);
+  await page.waitForFunction(() => {
+    const panel = document.getElementById('deckpanel');
+    const r = panel.getBoundingClientRect();
+    return panel.classList.contains('open') && r.left < innerWidth - 20 && r.right <= innerWidth + 1;
+  }, null, { timeout: 3000 });
   const drawer = await page.evaluate(() => {
     const back = document.getElementById('btnDeckClose');
     const label = back.querySelector('.panelback-arrow').getBoundingClientRect();
@@ -319,6 +372,7 @@ await run(webkit, 'webkit-iphone16', iphone(393, 852, 3), island, {
   main: 'webkit-iphone16-main.png',
   card: 'webkit-iphone16-card.png',
   deck: 'webkit-iphone16-deck.png',
+  'OP18-006': 'webkit-iphone16-op18-006.png',
   'OP18-118': 'webkit-iphone16-op18-118.png',
   'OP18-117': 'webkit-iphone16-op18-117.png',
   'OP18-079': 'webkit-iphone16-op18-079.png',
@@ -329,6 +383,7 @@ await run(webkit, 'webkit-promax', iphone(430, 932, 3), island, {});
 const android = (w, h) => ({ viewport: { width: w, height: h }, deviceScaleFactor: 2, isMobile: true, hasTouch: true });
 await run(chromium, 'chromium-360', android(360, 740), null, {
   news: 'chromium-360-news.png',
+  'OP18-006': 'chromium-360-op18-006.png',
   'OP18-118': 'chromium-360-op18-118.png',
   'OP18-117': 'chromium-360-op18-117.png',
   'OP18-079': 'chromium-360-op18-079.png',
@@ -336,11 +391,13 @@ await run(chromium, 'chromium-360', android(360, 740), null, {
 await run(chromium, 'chromium-390', android(390, 844), null, {
   main: 'chromium-390-main.png',
   news: 'chromium-390-news.png',
+  'OP18-006': 'chromium-390-op18-006.png',
   'OP18-118': 'chromium-390-op18-118.png',
   'OP18-117': 'chromium-390-op18-117.png',
 });
 await run(chromium, 'chromium-412', android(412, 915), null, {
   news: 'chromium-412-news.png',
+  'OP18-006': 'chromium-412-op18-006.png',
   'OP18-118': 'chromium-412-op18-118.png',
   'OP18-117': 'chromium-412-op18-117.png',
   'OP18-079': 'chromium-412-op18-079.png',
