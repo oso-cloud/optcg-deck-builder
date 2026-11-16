@@ -3149,6 +3149,24 @@ window.CUSTOM_CARDS = (window.CUSTOM_CARDS || []).concat([
   "unofficial": true
  },
  {
+  "id": "OP18-006",
+  "name": "Koza",
+  "text": "If you have [Nefertari Vivi], this Character gains [Rush] and +1000 power. (This card can attack on the turn in which it is played.)",
+  "set": "The Dominance of God",
+  "setId": "OP-18",
+  "rarity": "C",
+  "color": "Red",
+  "type": "Character",
+  "life": null,
+  "cost": 3,
+  "power": 4000,
+  "subs": "Alabasta",
+  "counter": 2000,
+  "attr": "Slash",
+  "img": "op18/OP18-006.webp",
+  "unofficial": true
+ },
+ {
   "id": "OP18-007",
   "name": "Smoker",
   "text": "If your Leader has the {Navy} type, this Character gains [Banish] and +1000 power. (When this card deals damage, trash the card without activating its Trigger.)",
