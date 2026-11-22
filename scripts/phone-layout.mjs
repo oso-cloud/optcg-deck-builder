@@ -139,13 +139,15 @@ async function run(browserType, label, contextOpts, insets, shots) {
   const newsHas = await page.evaluate(() => {
     const rows = [...document.querySelectorAll('#newsList .newsrow')];
     const batch = (document.querySelector('#newsList .newsbatch')?.innerText || '').toLowerCase();
+    const text = rows.map(r => r.innerText || '');
+    const ids = ['ST37-001', 'ST37-006', 'ST37-007', 'ST37-015', 'ST38-001', 'ST38-004', 'ST38-008', 'ST38-015'];
     return {
-      first: rows[0]?.innerText || '',
+      first: text[0] || '',
       batch,
-      has: rows.some(r => (r.innerText || '').includes('OP18-006')),
+      ids: ids.filter(id => text.some(t => t.includes(id))),
     };
   });
-  check(newsHas.has && newsHas.first.includes('OP18-006') && newsHas.first.includes('Koza') && newsHas.batch.includes('unofficial'), `${label} news lists OP18-006`, newsHas);
+  check(newsHas.ids.length === 8 && newsHas.first.includes('ST37-001') && newsHas.first.includes('Monkey.D.Luffy') && newsHas.batch.includes('st-37') && newsHas.batch.includes('st-38') && newsHas.batch.includes('unofficial'), `${label} news lists ST37 and ST38`, newsHas);
   if (shots.news) await page.screenshot({ path: path.join(out, shots.news) });
 
   await page.click('#newsClose');
@@ -184,8 +186,8 @@ async function run(browserType, label, contextOpts, insets, shots) {
   await page.click('.modalclose');
   await page.click('#newsClose');
 
-  // Long effect text and a leader, opened the same way a News row opens a card.
-  for (const id of ['OP18-006', 'OP18-118', 'OP18-117', 'OP18-079']) {
+  // Long effect text, long names, and leaders, opened the same way a News row opens a card.
+  for (const id of ['ST37-001', 'ST37-006', 'ST37-007', 'ST37-015', 'ST38-001', 'ST38-004', 'ST38-008', 'ST38-015', 'OP18-006', 'OP18-118', 'OP18-117', 'OP18-079']) {
     const opened = await page.evaluate((cardId) => {
       const c = byId.get(cardId);
       if (!c) return null;
@@ -234,6 +236,30 @@ async function run(browserType, label, contextOpts, insets, shots) {
       };
     });
     check(detail.boxIn && !detail.doc && !detail.info && !detail.textWide && !detail.nameWide && !detail.tagWide && detail.imgH > 400 && detail.imgShown > 80, `${label} ${id} fits`, detail);
+    if (id === 'ST37-001') {
+      check(detail.name === 'Monkey.D.Luffy' && detail.text.includes('you may only include {Alabasta} type cards') && detail.text.includes('[When Attacking] Draw 2 cards') && detail.text.includes('7 cards in your hand') && detail.types.includes('Alabasta') && detail.types.includes('Straw Hat Crew') && detail.tags.includes('Leader') && detail.tags.includes('Red Blue') && detail.tags.includes('Life 3') && detail.tags.includes('Power 5000') && detail.tags.includes('Strike') && detail.tags.includes('L') && !detail.tags.some(t => t.startsWith('Cost')) && !detail.tags.some(t => t.startsWith('Counter')) && detail.tags.some(t => t.includes('Unofficial English translation')) && detail.imgSrc.includes('st37/ST37-001.webp'), `${label} ST37-001 text`, detail);
+    }
+    if (id === 'ST37-006') {
+      check(detail.name === 'Portgas.D.Ace' && detail.text.includes('[Blocker]') && detail.text.includes('[On Play]') && detail.text.includes('−3000 power') && detail.types.includes('Alabasta') && detail.types.includes('Whitebeard Pirates') && detail.tags.includes('Character') && detail.tags.includes('Red') && detail.tags.includes('Cost 8') && detail.tags.includes('Power 8000') && detail.tags.includes('Special') && detail.tags.includes('C') && !detail.tags.some(t => t.startsWith('Counter')) && detail.imgSrc.includes('st37/ST37-006.webp'), `${label} ST37-006 text`, detail);
+    }
+    if (id === 'ST37-007') {
+      check(detail.name === 'Monkey.D.Luffy' && detail.text.includes('[Rush]') && detail.text.includes('[Activate: Main] [Once Per Turn]') && detail.text.includes('10000 power or less') && detail.tags.includes('Character') && detail.tags.includes('Cost 7') && detail.tags.includes('Power 9000') && detail.tags.includes('Strike') && detail.tags.includes('SR') && !detail.tags.some(t => t.startsWith('Counter')), `${label} ST37-007 text`, detail);
+    }
+    if (id === 'ST37-015') {
+      check(detail.name === "Oh yeah?! You're the one who's a minnow!!" && detail.text.includes('[Counter]') && detail.text.includes('{Alabasta} type Characters') && detail.text.includes('+4000 power') && detail.text.includes('[Trigger]') && detail.text.includes('5000 power or less') && detail.tags.includes('Event') && detail.tags.includes('Red') && detail.tags.includes('Cost 1') && detail.tags.includes('C') && !detail.tags.some(t => t.startsWith('Power')) && detail.imgSrc.includes('st37/ST37-015.webp'), `${label} ST37-015 text`, detail);
+    }
+    if (id === 'ST38-001') {
+      check(detail.name === 'Mr.0 (Crocodile)' && detail.text.includes('[When Attacking]') && detail.text.includes('base cost of 3 or more') && detail.text.includes('"Baroque Works"') && detail.types.includes('The Seven Warlords of the Sea') && detail.types.includes('Baroque Works') && detail.tags.includes('Leader') && detail.tags.includes('Blue Black') && detail.tags.includes('Life 4') && detail.tags.includes('Power 5000') && detail.tags.includes('Special') && detail.imgSrc.includes('st38/ST38-001.webp'), `${label} ST38-001 text`, detail);
+    }
+    if (id === 'ST38-004') {
+      check(detail.name === 'Miss Goldenweek (Marianne)' && detail.text.includes('[On Play]/[On K.O.]') && detail.text.includes('cost of 2 or less') && detail.types === 'Types: Baroque Works' && detail.tags.includes('Character') && detail.tags.includes('Blue') && detail.tags.includes('Cost 4') && detail.tags.includes('Power 5000') && detail.tags.includes('Counter +1000') && detail.tags.includes('Wisdom') && detail.tags.includes('C') && detail.imgSrc.includes('st38/ST38-004.webp'), `${label} ST38-004 text`, detail);
+    }
+    if (id === 'ST38-008') {
+      check(detail.name === 'Mr.0 (Crocodile)' && detail.text.includes('Choose one:') && detail.text.includes('from your trash') && detail.text.includes('cost of 5 or less') && detail.tags.includes('Character') && detail.tags.includes('Black') && detail.tags.includes('Cost 7') && detail.tags.includes('Power 7000') && detail.tags.includes('Special') && detail.tags.includes('SR') && !detail.tags.some(t => t.startsWith('Counter')) && detail.imgSrc.includes('st38/ST38-008.webp'), `${label} ST38-008 text`, detail);
+    }
+    if (id === 'ST38-015') {
+      check(detail.name === "Don't Be So Full of Yourself, Fishbait" && detail.text.includes('[Main]') && detail.text.includes("Leader's type includes \"Baroque Works\"") && detail.text.includes('[Counter] Your Leader gains +3000 power') && detail.tags.includes('Event') && detail.tags.includes('Blue') && detail.tags.includes('Cost 1') && !detail.tags.some(t => t.startsWith('Power')) && detail.types.includes('The Seven Warlords of the Sea') && detail.types.includes('Baroque Works') && detail.imgSrc.includes('st38/ST38-015.webp'), `${label} ST38-015 text`, detail);
+    }
     if (id === 'OP18-006') {
       check(detail.name === 'Koza' && detail.text === 'If you have [Nefertari Vivi], this Character gains [Rush] and +1000 power. (This card can attack on the turn in which it is played.)' && detail.types.includes('Alabasta') && detail.tags.includes('Character') && detail.tags.includes('Red') && detail.tags.includes('Cost 3') && detail.tags.includes('Power 4000') && detail.tags.includes('Counter +2000') && detail.tags.includes('Slash') && detail.tags.includes('C') && detail.tags.some(t => t.includes('Unofficial English translation')) && detail.imgSrc.includes('op18/OP18-006.webp'), `${label} OP18-006 text`, detail);
     }
@@ -372,6 +398,14 @@ await run(webkit, 'webkit-iphone16', iphone(393, 852, 3), island, {
   main: 'webkit-iphone16-main.png',
   card: 'webkit-iphone16-card.png',
   deck: 'webkit-iphone16-deck.png',
+  'ST37-001': 'webkit-iphone16-st37-001.png',
+  'ST37-006': 'webkit-iphone16-st37-006.png',
+  'ST37-007': 'webkit-iphone16-st37-007.png',
+  'ST37-015': 'webkit-iphone16-st37-015.png',
+  'ST38-001': 'webkit-iphone16-st38-001.png',
+  'ST38-004': 'webkit-iphone16-st38-004.png',
+  'ST38-008': 'webkit-iphone16-st38-008.png',
+  'ST38-015': 'webkit-iphone16-st38-015.png',
   'OP18-006': 'webkit-iphone16-op18-006.png',
   'OP18-118': 'webkit-iphone16-op18-118.png',
   'OP18-117': 'webkit-iphone16-op18-117.png',
@@ -383,6 +417,11 @@ await run(webkit, 'webkit-promax', iphone(430, 932, 3), island, {});
 const android = (w, h) => ({ viewport: { width: w, height: h }, deviceScaleFactor: 2, isMobile: true, hasTouch: true });
 await run(chromium, 'chromium-360', android(360, 740), null, {
   news: 'chromium-360-news.png',
+  'ST37-001': 'chromium-360-st37-001.png',
+  'ST37-015': 'chromium-360-st37-015.png',
+  'ST38-001': 'chromium-360-st38-001.png',
+  'ST38-004': 'chromium-360-st38-004.png',
+  'ST38-015': 'chromium-360-st38-015.png',
   'OP18-006': 'chromium-360-op18-006.png',
   'OP18-118': 'chromium-360-op18-118.png',
   'OP18-117': 'chromium-360-op18-117.png',
@@ -391,12 +430,19 @@ await run(chromium, 'chromium-360', android(360, 740), null, {
 await run(chromium, 'chromium-390', android(390, 844), null, {
   main: 'chromium-390-main.png',
   news: 'chromium-390-news.png',
+  'ST37-015': 'chromium-390-st37-015.png',
+  'ST38-008': 'chromium-390-st38-008.png',
+  'ST38-015': 'chromium-390-st38-015.png',
   'OP18-006': 'chromium-390-op18-006.png',
   'OP18-118': 'chromium-390-op18-118.png',
   'OP18-117': 'chromium-390-op18-117.png',
 });
 await run(chromium, 'chromium-412', android(412, 915), null, {
   news: 'chromium-412-news.png',
+  'ST37-001': 'chromium-412-st37-001.png',
+  'ST37-015': 'chromium-412-st37-015.png',
+  'ST38-001': 'chromium-412-st38-001.png',
+  'ST38-015': 'chromium-412-st38-015.png',
   'OP18-006': 'chromium-412-op18-006.png',
   'OP18-118': 'chromium-412-op18-118.png',
   'OP18-117': 'chromium-412-op18-117.png',

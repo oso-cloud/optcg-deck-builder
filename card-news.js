@@ -161,5 +161,10 @@ window.CARD_NEWS = [
     id: "2026-11-16-op18",
     title: "New OP18 cards (unofficial English)",
     ids: ["OP18-006"]
+  },
+  {
+    id: "2026-11-22-st37-st38",
+    title: "ST-37 & ST-38 starter deck reveals (unofficial English)",
+    ids: ["ST37-001", "ST37-006", "ST37-007", "ST37-015", "ST38-001", "ST38-004", "ST38-008", "ST38-015"]
   }
 ];
