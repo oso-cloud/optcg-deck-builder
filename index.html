@@ -6,7 +6,7 @@
 <title>OPTCG Deck Builder</title>
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'unsafe-inline'; img-src 'self' https://optcgapi.com https://static.dotgg.gg data: blob:; connect-src 'self' https://optcgapi.com; manifest-src 'self'; base-uri 'none'; form-action 'none'; object-src 'none'; frame-src 'none'">
 <!-- app-version must match version.json. Stamped on push to main; see README. -->
-<meta name="app-version" content="65294bb6351fd77f4ea6f5cc783922d0cdceb299">
+<meta name="app-version" content="5d4e9a4e7c4eb31e5719d18baf943ed03e90c0c5">
 <meta name="referrer" content="no-referrer">
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="icon-192.png">
@@ -837,8 +837,8 @@
   </div>
 </div>
 
-<script src="custom-cards.js?v=65294bb6351fd77f4ea6f5cc783922d0cdceb299"></script>
-<script src="card-news.js?v=65294bb6351fd77f4ea6f5cc783922d0cdceb299"></script>
+<script src="custom-cards.js?v=5d4e9a4e7c4eb31e5719d18baf943ed03e90c0c5"></script>
+<script src="card-news.js?v=5d4e9a4e7c4eb31e5719d18baf943ed03e90c0c5"></script>
 <script>
 'use strict';
 const API = 'https://optcgapi.com/api/';
@@ -2141,6 +2141,6 @@ loadCards().catch(err => {
   document.getElementById('loadState').innerHTML = '⚠ Failed to load card data from optcgapi.com.<br><small>' + esc(err.message) + '</small><br><br><button class="btn btn-gold" onclick="location.reload()">Retry</button>';
 });
 </script>
-<script src="don-sim.js?v=65294bb6351fd77f4ea6f5cc783922d0cdceb299"></script>
+<script src="don-sim.js?v=5d4e9a4e7c4eb31e5719d18baf943ed03e90c0c5"></script>
 </body>
 </html>
