@@ -68,10 +68,11 @@ async function layout(page) {
     const sort = document.getElementById('sort').getBoundingClientRect();
     const filters = document.getElementById('btnFilters').getBoundingClientRect();
     const deckBtn = document.getElementById('btnDeckPanel').getBoundingClientRect();
+    const donBtn = document.getElementById('btnDonSim').getBoundingClientRect();
     const bar = document.getElementById('topbar');
     const barPad = parseFloat(getComputedStyle(bar).paddingTop);
     const gridPad = parseFloat(getComputedStyle(document.getElementById('grid')).paddingBottom);
-    const kids = [search, news, refresh, sort, filters, deckBtn];
+    const kids = [search, news, refresh, sort, filters, deckBtn, donBtn];
     return {
       iw, ih, sat, sab, barPad, gridPad,
       searchTop: Math.round(search.top),
@@ -378,10 +379,297 @@ async function run(browserType, label, contextOpts, insets, shots) {
   });
   check(banner.top >= sat - 1 && banner.bottom <= banner.ih - sab + 1 && banner.right <= banner.iw + 1, `${label} update banner`, banner);
 
+  await simTurn(page, label, shots, sat, sab);
+
   const decks = await page.evaluate(() => localStorage.getItem('optcg_decks_v2'));
   check(decks === JSON.stringify(deck), `${label} decks untouched`);
+  check(!errors.length, `${label} no page errors after DON sim`, errors);
 
   await browser.close();
+}
+
+async function setNum(page, dec, inc, read, target) {
+  for (let i = 0; i < 14; i++) {
+    const v = Number(await page.locator(read).innerText());
+    if (v === target) return v;
+    await page.click(v < target ? inc : dec);
+  }
+  return Number(await page.locator(read).innerText());
+}
+async function donNow(page) {
+  return page.evaluate(() => {
+    const n = id => Number(document.getElementById(id).textContent);
+    const deckN = n('nDonDeck'), active = n('nDonActive'), rested = n('nDonRested'), attached = n('nDonAttached');
+    return {
+      deck: deckN, active, rested, attached,
+      sum: deckN + active + rested + attached,
+      text: document.getElementById('simDonSum').textContent,
+    };
+  });
+}
+async function assertDon(page, label, exp) {
+  const d = await donNow(page);
+  check(d.sum === 10 && d.deck === exp.deck && d.active === exp.active && d.rested === exp.rested && d.attached === exp.attached, `${label} DON`, d);
+}
+async function simFit(page, label, sat, sab) {
+  return page.evaluate(() => {
+    const iw = innerWidth;
+    const close = document.getElementById('simClose').getBoundingClientRect();
+    const scroll = document.getElementById('simScroll');
+    const pad = parseFloat(getComputedStyle(scroll).paddingBottom) || 0;
+    const bad = [];
+    for (const el of document.querySelectorAll('#sim button, #sim select, #sim input, #sim .simcount, #sim .simrow, #sim .simpick')) {
+      if (el.closest('[hidden]')) continue;
+      const r = el.getBoundingClientRect();
+      if (r.width < 1 && r.height < 1) continue;
+      if (r.left < -1 || r.right > iw + 1) bad.push((el.id || el.className || el.tagName) + ' ' + Math.round(r.left) + '-' + Math.round(r.right));
+    }
+    const sheet = document.getElementById('simSheet');
+    let sheetBox = null;
+    if (sheet && !sheet.hidden) {
+      const box = document.getElementById('simSheetBox').getBoundingClientRect();
+      const boxPad = parseFloat(getComputedStyle(document.getElementById('simSheetBox')).paddingBottom) || 0;
+      sheetBox = {
+        in: box.left >= -1 && box.right <= iw + 1 && box.bottom <= innerHeight + 1,
+        pad: boxPad,
+        top: Math.round(box.top),
+      };
+    }
+    return {
+      closeTop: Math.round(close.top),
+      closeH: Math.round(close.height),
+      pad,
+      bad: bad.slice(0, 6),
+      doc: document.documentElement.scrollWidth > iw + 1,
+      sheetBox,
+    };
+  }).then(fit => {
+    check(fit.closeTop >= sat - 1 && fit.closeH >= 44 && fit.pad + 0.5 >= sab && !fit.doc && fit.bad.length === 0, `${label} sim fits`, fit);
+    return fit;
+  });
+}
+async function openRow(page, sel) {
+  await page.locator(sel).click();
+  await page.waitForSelector('#simSheet:not([hidden])');
+}
+async function sheetAct(page, act) {
+  await page.locator(`#simSheet [data-act="${act}"]`).click();
+  await page.waitForSelector('#simSheet', { state: 'hidden' });
+}
+
+async function simTurn(page, label, shots, sat, sab) {
+  const decksBefore = await page.evaluate(() => localStorage.getItem('optcg_decks_v2'));
+  await page.evaluate(() => {
+    deck.cards['OP18-003'] = 4;
+    deck.cards['OP18-020'] = 1;
+    deck.cards['OP17-057'] = 1;
+  });
+  await page.click('#btnDonSim');
+  await page.waitForSelector('#sim:not([hidden]) #simDeck');
+  await page.waitForFunction(() => {
+    const sel = document.getElementById('simDeck');
+    const leader = document.getElementById('simLeaderPreview').innerText || '';
+    return sel && sel.value === 'd1' && leader.includes('Karoo');
+  });
+  const field = await setNum(page, '#simDonFieldDec', '#simDonFieldInc', '#simDonField', 6);
+  const rested = await setNum(page, '#simDonRestedDec', '#simDonRestedInc', '#simDonRested', 2);
+  const preview = await page.locator('#simDonPreview').innerText();
+  check(field === 6 && rested === 2 && preview.includes('Active 4') && preview.includes('Rested 2') && preview.includes('DON deck 4'), `${label} DON setup`, { field, rested, preview });
+
+  await page.click('#simPick .simpick[data-id="EB05-001"] .sim-add');
+  check(await page.locator('#simPick .simpick[data-id="EB05-001"] .simqty').innerText() === '1', `${label} copy limit`);
+  check(await page.locator('#simPick .simpick[data-id="EB05-001"] .sim-add').isDisabled(), `${label} second copy disabled`);
+  for (let i = 0; i < 4; i++) await page.click('#simPick .simpick[data-id="OP18-003"] .sim-add');
+  await page.click('#simPick .simpick[data-id="OP18-010"] .sim-add');
+  await page.click('#simPick .simpick[data-id="OP18-020"] .sim-add');
+  check(await page.locator('#simHandCount').innerText() === '7 / 7', `${label} hand cap count`);
+  check(await page.locator('#simPick .simpick[data-id="OP17-057"] .sim-add').isDisabled(), `${label} seventh card blocks another`);
+  check(await page.locator('#simPick .simpick[data-id="OP18-003"] .sim-add').isDisabled(), `${label} sea cat add stops at the cap`);
+  for (let i = 0; i < 3; i++) await page.click('#simPick .simpick[data-id="OP18-003"] .sim-rem');
+  await page.click('#simPick .simpick[data-id="OP17-057"] .sim-add');
+  const handCount = await page.locator('#simHandCount').innerText();
+  check(handCount === '5 / 7', `${label} hand trimmed to five`, handCount);
+  const fitSetup = await simFit(page, label + ' setup', sat, sab);
+  check(fitSetup.closeTop >= sat - 1, `${label} sim setup below status bar`, fitSetup);
+  if (shots.simSetup) {
+    await page.evaluate(() => { document.getElementById('simScroll').scrollTop = 0; });
+    await page.screenshot({ path: path.join(out, shots.simSetup) });
+  }
+  if (shots.simPick) {
+    await page.locator('#simPick .simpick').first().scrollIntoViewIfNeeded();
+    await page.screenshot({ path: path.join(out, shots.simPick) });
+  }
+
+  await page.click('#simStart');
+  await page.waitForSelector('#simPlay:not([hidden]) #simLeaderCard');
+  await assertDon(page, `${label} start`, { deck: 4, active: 4, rested: 2, attached: 0 });
+  const leader0 = await page.locator('#simLeaderCard').evaluate(el => ({
+    text: el.innerText, power: el.dataset.power, id: el.dataset.id,
+  }));
+  check(leader0.id === 'OP18-001' && leader0.text.includes('Karoo') && leader0.power === '5000', `${label} leader on board`, leader0);
+
+  await openRow(page, '#simLeaderCard');
+  const leaderSheet = await page.evaluate(() => ({
+    text: document.getElementById('simSheetText').textContent,
+    meta: document.getElementById('simSheetMeta').textContent,
+    name: document.getElementById('simSheetName').textContent,
+  }));
+  check(leaderSheet.name === 'Karoo' && leaderSheet.meta.includes('Power 5000') && leaderSheet.meta.includes('Life 4') && leaderSheet.text.includes('draw 1 card'), `${label} leader text`, leaderSheet);
+  const fitSheet = await simFit(page, label + ' sheet', sat, sab);
+  check(fitSheet.sheetBox && fitSheet.sheetBox.in && fitSheet.sheetBox.pad + 0.5 >= sab, `${label} action sheet`, fitSheet.sheetBox);
+  if (shots.simSheet) await page.screenshot({ path: path.join(out, shots.simSheet) });
+  await page.click('#simSheet [data-act="open-card"]');
+  await page.waitForFunction(() => document.getElementById('modalbox')?.dataset.cardId === 'OP18-001');
+  await page.click('.modalclose');
+  await page.waitForFunction(() => !document.getElementById('modal').classList.contains('open'));
+  check(await page.locator('#simSheet').isHidden() === false, `${label} sheet stays under the card dialog`);
+  await sheetAct(page, 'close');
+
+  await openRow(page, '#simHand .simrow[data-id="OP18-003"]');
+  const short = await page.locator('#simSheetWarn').innerText();
+  const playLabel = await page.locator('#simSheet [data-act="play-override"]').innerText();
+  check(short.includes('Only 4 active DON') && short.includes('Cost is 5') && playLabel.includes('Play anyway'), `${label} cost warning`, { short, playLabel });
+  await sheetAct(page, 'play-override');
+  await assertDon(page, `${label} play short`, { deck: 4, active: 0, rested: 6, attached: 0 });
+  check(await page.locator('#simChars .simrow[data-id="OP18-003"]').count() === 1, `${label} character on field`);
+  check(await page.locator('#simRestDon').isDisabled(), `${label} cannot rest with no active DON`);
+
+  await page.click('#simAddActive');
+  await assertDon(page, `${label} add active`, { deck: 3, active: 1, rested: 6, attached: 0 });
+  await openRow(page, '#simChars .simrow[data-id="OP18-003"]');
+  await sheetAct(page, 'attach');
+  await assertDon(page, `${label} attach character`, { deck: 3, active: 0, rested: 6, attached: 1 });
+  const sea = await page.locator('#simChars .simrow[data-id="OP18-003"]').evaluate(el => ({ power: el.dataset.power, attached: el.dataset.attached, text: el.innerText }));
+  check(sea.power === '7000' && sea.attached === '1' && sea.text.includes('7000'), `${label} attached power`, sea);
+
+  await page.click('#simAddActive');
+  await openRow(page, '#simLeaderCard');
+  await sheetAct(page, 'attach');
+  await assertDon(page, `${label} attach leader`, { deck: 2, active: 0, rested: 6, attached: 2 });
+  check((await page.locator('#simLeaderCard').getAttribute('data-power')) === '6000', `${label} leader power 6000`);
+  const fitPlay = await simFit(page, label + ' play', sat, sab);
+  check(!fitPlay.doc && fitPlay.bad.length === 0, `${label} play layout`, fitPlay);
+  if (shots.simPlay) {
+    await page.waitForFunction(() => {
+      const img = document.querySelector('#simLeaderCard img');
+      return img && img.complete && img.naturalWidth > 0;
+    });
+    await page.screenshot({ path: path.join(out, shots.simPlay) });
+  }
+
+  await openRow(page, '#simLeaderCard');
+  await sheetAct(page, 'rest');
+  check((await page.locator('#simLeaderCard').getAttribute('data-rested')) === '1', `${label} leader rested`);
+  await openRow(page, '#simLeaderCard');
+  await sheetAct(page, 'stand');
+  check((await page.locator('#simLeaderCard').getAttribute('data-rested')) === '0', `${label} leader re-stood`);
+
+  await page.click('#simStandDon');
+  await assertDon(page, `${label} re-stand DON`, { deck: 2, active: 1, rested: 5, attached: 2 });
+  await page.click('#simRestDon');
+  await assertDon(page, `${label} rest DON`, { deck: 2, active: 0, rested: 6, attached: 2 });
+
+  await openRow(page, '#simLeaderCard');
+  await sheetAct(page, 'minus-attached');
+  await assertDon(page, `${label} DON minus attached`, { deck: 3, active: 0, rested: 6, attached: 1 });
+  check((await page.locator('#simLeaderCard').getAttribute('data-power')) === '5000', `${label} leader power back`);
+  await page.click('#simMinusRested');
+  await assertDon(page, `${label} DON minus rested`, { deck: 4, active: 0, rested: 5, attached: 1 });
+
+  await openRow(page, '#simChars .simrow[data-id="OP18-003"]');
+  await sheetAct(page, 'ko');
+  await assertDon(page, `${label} K.O. releases DON`, { deck: 4, active: 0, rested: 6, attached: 0 });
+  check(await page.locator('#simChars .simrow').count() === 0, `${label} character left the field`);
+  check(await page.locator('#simTrash .simrow[data-id="OP18-003"]').count() === 1, `${label} character in trash`);
+  await openRow(page, '#simTrash .simrow[data-id="OP18-003"]');
+  await sheetAct(page, 'to-hand');
+  check(await page.locator('#simHand .simrow[data-id="OP18-003"]').count() === 1, `${label} returned to hand`);
+  check(await page.locator('#simTrash .simrow').count() === 0, `${label} trash cleared`);
+
+  await openRow(page, '#simHand .simrow[data-id="OP18-010"]');
+  await sheetAct(page, 'play-override');
+  await openRow(page, '#simChars .simrow[data-id="OP18-010"]');
+  await sheetAct(page, 'rest');
+  check((await page.locator('#simChars .simrow[data-id="OP18-010"]').getAttribute('data-rested')) === '1', `${label} character rested`);
+  await openRow(page, '#simChars .simrow[data-id="OP18-010"]');
+  await sheetAct(page, 'stand');
+  await openRow(page, '#simChars .simrow[data-id="OP18-010"]');
+  await sheetAct(page, 'to-hand');
+  check(await page.locator('#simChars .simrow').count() === 0, `${label} character returned`);
+
+  await openRow(page, '#simHand .simrow[data-id="OP18-020"]');
+  const eventMeta = await page.locator('#simSheetMeta').innerText();
+  check(eventMeta.includes('Event') && eventMeta.includes('Cost 1'), `${label} event details`, eventMeta);
+  await sheetAct(page, 'play-override');
+  check(await page.locator('#simTrash .simrow[data-id="OP18-020"]').count() === 1, `${label} event trashed`);
+  check(await page.locator('#simHand .simrow[data-id="OP18-020"]').count() === 0, `${label} event left hand`);
+
+  await openRow(page, '#simHand .simrow[data-id="OP17-057"]');
+  await sheetAct(page, 'play-override');
+  check(await page.locator('#simStages .simrow[data-id="OP17-057"]').count() === 1, `${label} stage played`);
+  await openRow(page, '#simStages .simrow[data-id="OP17-057"]');
+  await sheetAct(page, 'rest');
+  check((await page.locator('#simStages .simrow[data-id="OP17-057"]').getAttribute('data-rested')) === '1', `${label} stage rested`);
+  await openRow(page, '#simStages .simrow[data-id="OP17-057"]');
+  await sheetAct(page, 'stand');
+  await openRow(page, '#simStages .simrow[data-id="OP17-057"]');
+  await sheetAct(page, 'trash');
+  check(await page.locator('#simStages .simrow').count() === 0, `${label} stage trashed`);
+
+  const beforeDraw = await page.evaluate(() => ({
+    hand: document.querySelectorAll('#simHand .simrow').length,
+    next: document.getElementById('simDeckInfo').textContent,
+  }));
+  check(beforeDraw.next.includes('Sea Cat'), `${label} next draw named`, beforeDraw);
+  await page.click('#simDraw');
+  const afterDraw = await page.locator('#simHand .simrow').count();
+  check(afterDraw === beforeDraw.hand + 1, `${label} drew a card`, { before: beforeDraw.hand, after: afterDraw });
+  await page.click('#simUndo');
+  check(await page.locator('#simHand .simrow').count() === beforeDraw.hand, `${label} undo draw`);
+
+  await page.click('#simDrawPick');
+  await page.waitForSelector('#simSheet:not([hidden]) [data-act="draw-one"]');
+  await sheetAct(page, 'draw-one');
+  check(await page.locator('#simHand .simrow').count() === beforeDraw.hand + 1, `${label} chose a draw`);
+  await page.click('#simUndo');
+
+  await page.click('#simReset');
+  await assertDon(page, `${label} reset`, { deck: 4, active: 4, rested: 2, attached: 0 });
+  const resetHand = await page.evaluate(() => [...document.querySelectorAll('#simHand .simrow')].map(el => el.dataset.id).sort());
+  check(resetHand.join() === ['EB05-001', 'OP17-057', 'OP18-003', 'OP18-010', 'OP18-020'].sort().join(), `${label} reset hand`, resetHand);
+  check(await page.locator('#simChars .simrow').count() === 0 && await page.locator('#simTrash .simrow').count() === 0, `${label} reset board`);
+  check(await page.locator('#simUndo').isDisabled(), `${label} undo cleared by reset`);
+
+  await page.click('#simEditSetup');
+  await page.waitForSelector('#simSetup:not([hidden])');
+  await page.fill('#simScenarioName', 'Phone line');
+  await page.click('#simSave');
+  await page.waitForFunction(() => (document.getElementById('simScenarios').innerText || '').includes('Phone line'));
+  await setNum(page, '#simDonFieldDec', '#simDonFieldInc', '#simDonField', 8);
+  await page.click('#simScenarios .sim-load');
+  await page.waitForFunction(() => document.getElementById('simDonField').textContent === '6' && document.getElementById('simDonRested').textContent === '2');
+  check((await page.locator('#simHandCount').innerText()) === '5 / 7', `${label} loaded scenario hand`);
+  await page.click('#simScenarios .sim-del');
+  await page.waitForFunction(() => !(document.getElementById('simScenarios').innerText || '').includes('Phone line'));
+
+  await page.click('#simResume');
+  await page.waitForSelector('#simPlay:not([hidden])');
+  await assertDon(page, `${label} resume`, { deck: 4, active: 4, rested: 2, attached: 0 });
+
+  const fitEnd = await simFit(page, label + ' end', sat, sab);
+  check(!fitEnd.doc && fitEnd.bad.length === 0 && fitEnd.closeTop >= sat - 1, `${label} sim still fits`, fitEnd);
+  await page.click('#simClose');
+  await page.waitForSelector('#sim', { state: 'hidden' });
+  const closed = await page.evaluate(() => ({
+    hidden: document.getElementById('sim').hidden,
+    overflow: document.documentElement.scrollWidth > innerWidth + 1,
+    decks: localStorage.getItem('optcg_decks_v2'),
+  }));
+  check(closed.hidden && !closed.overflow && closed.decks === decksBefore, `${label} sim closed without saving decks`, { hidden: closed.hidden, overflow: closed.overflow });
+
+  await page.click('#btnNews');
+  await page.waitForSelector('#newsList .newsrow');
+  await page.click('#newsClose');
 }
 
 const iphone = (w, h, dsf) => ({
@@ -398,6 +686,10 @@ await run(webkit, 'webkit-iphone16', iphone(393, 852, 3), island, {
   main: 'webkit-iphone16-main.png',
   card: 'webkit-iphone16-card.png',
   deck: 'webkit-iphone16-deck.png',
+  simSetup: 'webkit-iphone16-don-setup.png',
+  simPick: 'webkit-iphone16-don-hand.png',
+  simPlay: 'webkit-iphone16-don-play.png',
+  simSheet: 'webkit-iphone16-don-sheet.png',
   'ST37-001': 'webkit-iphone16-st37-001.png',
   'ST37-006': 'webkit-iphone16-st37-006.png',
   'ST37-007': 'webkit-iphone16-st37-007.png',
@@ -417,6 +709,9 @@ await run(webkit, 'webkit-promax', iphone(430, 932, 3), island, {});
 const android = (w, h) => ({ viewport: { width: w, height: h }, deviceScaleFactor: 2, isMobile: true, hasTouch: true });
 await run(chromium, 'chromium-360', android(360, 740), null, {
   news: 'chromium-360-news.png',
+  simSetup: 'chromium-360-don-setup.png',
+  simPick: 'chromium-360-don-hand.png',
+  simPlay: 'chromium-360-don-play.png',
   'ST37-001': 'chromium-360-st37-001.png',
   'ST37-015': 'chromium-360-st37-015.png',
   'ST38-001': 'chromium-360-st38-001.png',
@@ -429,6 +724,7 @@ await run(chromium, 'chromium-360', android(360, 740), null, {
 });
 await run(chromium, 'chromium-390', android(390, 844), null, {
   main: 'chromium-390-main.png',
+  simPlay: 'chromium-390-don-play.png',
   news: 'chromium-390-news.png',
   'ST37-015': 'chromium-390-st37-015.png',
   'ST38-008': 'chromium-390-st38-008.png',
@@ -439,6 +735,8 @@ await run(chromium, 'chromium-390', android(390, 844), null, {
 });
 await run(chromium, 'chromium-412', android(412, 915), null, {
   news: 'chromium-412-news.png',
+  simSetup: 'chromium-412-don-setup.png',
+  simPlay: 'chromium-412-don-play.png',
   'ST37-001': 'chromium-412-st37-001.png',
   'ST37-015': 'chromium-412-st37-015.png',
   'ST38-001': 'chromium-412-st38-001.png',

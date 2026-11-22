@@ -97,6 +97,10 @@
   #btnNews { flex: none; background: var(--bg3); border: 1px solid var(--accent); color: var(--accent); border-radius: 7px; min-height: 44px; padding: 0 12px; font-size: 14px; font-weight: 700; cursor: pointer; white-space: nowrap; }
   #btnNews:hover, #btnNews:focus-visible { filter: brightness(1.08); outline: none; }
   #btnNews:active { background: var(--border); }
+  #btnDonSim { flex: none; background: var(--bg3); border: 1px solid var(--border); color: var(--text); border-radius: 7px; min-height: 44px; padding: 0 12px; font-size: 14px; font-weight: 700; cursor: pointer; white-space: nowrap; }
+  #btnDonSim:hover, #btnDonSim:focus-visible { border-color: var(--accent); outline: none; }
+  #btnDonSim:active { background: var(--border); }
+  #btnDonSim[aria-pressed="true"] { border-color: var(--accent); color: var(--accent); }
   #updateBanner { position: fixed; z-index: 70; left: max(12px, var(--sal)); right: max(12px, var(--sar)); bottom: max(12px, var(--sab)); display: flex; align-items: center; gap: 12px; padding: 12px 14px; background: var(--bg2); border: 1px solid var(--accent); border-radius: 12px; box-shadow: 0 10px 32px rgba(0,0,0,.5); }
   #updateBanner[hidden] { display: none; }
   #updateBanner p { flex: 1; font-size: 15px; font-weight: 700; line-height: 1.3; }
@@ -414,6 +418,7 @@
     .btn, #deckactions button { min-height: 44px; }
     #btnFilters { order: 1; }
     #search { order: 2; flex: 1 1 0; width: auto; min-width: 0; max-width: none; }
+    #btnDonSim { order: 3; }
     #btnDeckPanel { order: 3; }
     #topbreak { display: block; order: 4; flex-basis: 100%; height: 0; }
     #sort { order: 5; flex: 1 1 0; width: 0; min-width: 0; }
@@ -423,6 +428,149 @@
     #count { display: none; }
     .card .add-bar { display: flex; opacity: .95; }
   }
+
+  /* ===== DON turn simulator ===== */
+  #sim {
+    position: fixed; inset: 0; z-index: 55;
+    display: flex; flex-direction: column;
+    background: var(--bg); color: var(--text);
+    height: 100vh; height: 100dvh; max-width: 100%;
+    min-width: 0; overflow: hidden;
+    padding-left: var(--sal); padding-right: var(--sar);
+  }
+  #sim[hidden], #simPlay[hidden], #simSetup[hidden], #simResumeWrap[hidden] { display: none; }
+  #simbar {
+    flex: 0 0 auto; display: flex; align-items: center; gap: 8px;
+    min-width: 0; padding: 8px 10px;
+    padding-top: max(8px, var(--sat));
+    background: var(--bg2); border-bottom: 1px solid var(--border);
+  }
+  #simClose {
+    flex: none; min-height: 44px; padding: 0 12px;
+    background: var(--bg3); border: 1px solid var(--border); border-radius: 8px;
+    color: var(--text); font-size: 15px; font-weight: 700; cursor: pointer;
+  }
+  #simClose:hover, #simClose:focus-visible { border-color: var(--accent); outline: none; }
+  #simTitle { flex: 1; min-width: 0; font-size: 16px; font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  #simScroll {
+    flex: 1 1 auto; min-height: 0; min-width: 0;
+    overflow-x: hidden; overflow-y: auto; overscroll-behavior: contain;
+    padding: 12px;
+    padding-bottom: max(16px, var(--sab));
+  }
+  #simScroll > * { max-width: 720px; margin-left: auto; margin-right: auto; width: 100%; }
+  .simlead, .simhint, .simnote { color: var(--text-dim); font-size: 13px; line-height: 1.45; }
+  .simlead { margin-bottom: 12px; }
+  .simnote { color: #ffb35c; font-weight: 700; margin-bottom: 8px; }
+  .simnote:empty, .simnote[hidden] { display: none; }
+  .simblock { margin-bottom: 14px; min-width: 0; }
+  .simh, .simblock h3 {
+    font-size: 11px; text-transform: uppercase; letter-spacing: 1px;
+    color: var(--text-dim); margin: 12px 0 8px; font-weight: 700;
+  }
+  .simblock h3 span { color: var(--accent); letter-spacing: 0; text-transform: none; font-size: 13px; }
+  .simstep { display: flex; align-items: center; gap: 8px; }
+  .simstep button, .simqtybtn {
+    flex: none; width: 44px; height: 44px; border-radius: 8px;
+    border: 1px solid var(--border); background: var(--bg3); color: var(--text);
+    font-size: 22px; line-height: 1; cursor: pointer; font-weight: 700;
+  }
+  .simstep button:disabled, .simqtybtn:disabled { opacity: .35; }
+  .simstep .simnum { min-width: 2ch; text-align: center; font-size: 22px; font-weight: 700; color: var(--accent); }
+  #simLeaderPreview { display: flex; gap: 10px; align-items: center; background: var(--bg3); border: 1px dashed var(--border); border-radius: 8px; padding: 8px; min-height: 74px; margin-top: 8px; cursor: pointer; min-width: 0; }
+  #simLeaderPreview img { width: 48px; border-radius: 4px; flex: none; }
+  #simScenarioName { width: auto; flex: 1; min-width: 0; }
+  .simsave { display: flex; gap: 6px; align-items: center; min-width: 0; }
+  .simsave button, .simscen button { flex: none; }
+  .simpick { display: flex; align-items: center; gap: 6px; margin: 0 0 6px; min-width: 0; background: var(--bg2); border: 1px solid var(--border); border-radius: 10px; padding: 4px 6px; }
+  .simpick-open {
+    flex: 1; min-width: 0; display: flex; gap: 8px; align-items: center;
+    background: none; border: none; color: inherit; text-align: left;
+    padding: 4px 0; cursor: pointer; min-height: 44px; font: inherit;
+  }
+  .simpick img, .simrow img { width: 48px; height: 67px; object-fit: cover; border-radius: 4px; background: var(--bg3); flex: none; }
+  .siminfo { flex: 1; min-width: 0; overflow: hidden; }
+  .simname { display: block; font-weight: 700; font-size: 14px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .simsub, .simflags { display: block; color: var(--text-dim); font-size: 12px; margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .simflags { color: var(--accent); font-weight: 700; }
+  .simtext {
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+    overflow: hidden; color: var(--text-dim); font-size: 12px; line-height: 1.35;
+    margin-top: 3px; overflow-wrap: anywhere; white-space: normal;
+  }
+  .simqty { flex: none; min-width: 1.5ch; text-align: center; font-weight: 700; color: var(--accent); font-size: 16px; }
+  .simrow {
+    display: flex; align-items: center; gap: 8px; width: 100%;
+    min-height: 72px; padding: 6px; margin-bottom: 6px;
+    background: var(--bg2); border: 1px solid var(--border); border-radius: 10px;
+    color: inherit; font: inherit; text-align: left; cursor: pointer; min-width: 0;
+  }
+  .simrow.rested { box-shadow: inset 0 0 0 1px var(--accent); }
+  .simempty { color: var(--text-dim); font-size: 13px; padding: 4px 2px 10px; }
+  #simDonBar {
+    flex: 0 0 auto; background: #141922; border-bottom: 1px solid var(--border);
+    padding: 8px 10px 10px; min-width: 0;
+  }
+  #simDonBar[hidden] { display: none; }
+  .simcounts { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; }
+  .simcount { background: var(--bg3); border: 1px solid var(--border); border-radius: 8px; padding: 6px 2px; text-align: center; min-width: 0; }
+  .simcount b { display: block; font-size: 18px; color: var(--accent); line-height: 1.1; }
+  .simcount span { display: block; font-size: 10px; color: var(--text-dim); text-transform: uppercase; letter-spacing: .3px; margin-top: 2px; overflow-wrap: anywhere; }
+  .simdonacts, .simturnacts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; margin-top: 8px; }
+  .simturnacts { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .simdonacts button, .simturnacts button, .simwide, .simbtn, .simsave button, .simscen button {
+    min-height: 44px; padding: 6px 8px; border-radius: 8px;
+    border: 1px solid var(--border); background: var(--bg3); color: var(--text);
+    font-size: 13px; font-weight: 700; line-height: 1.15; cursor: pointer; min-width: 0;
+  }
+  .simdonacts button:disabled, .simturnacts button:disabled, .simwide:disabled, .simbtn:disabled { opacity: .38; }
+  .simwide { display: block; width: 100%; margin: 8px 0; font-size: 15px; }
+  #simStart, .simbtn.gold { background: var(--accent); color: #1a1a1a; border-color: var(--accent); }
+  .simbtn.warn { border-color: #ffb35c; color: #ffb35c; }
+  .simbtn.danger { border-color: #d64545; color: #ffb4b4; }
+  #simDonNote, #simDonSum { font-size: 12px; color: var(--text-dim); margin-top: 6px; }
+  #simDonSum.bad { color: #ff6b6b; font-weight: 700; }
+  .simtools { display: flex; gap: 6px; margin: 8px 0; min-width: 0; }
+  .simtools button { flex: 1; }
+  .simscen { display: flex; align-items: center; gap: 6px; padding: 6px 0; border-bottom: 1px solid var(--border); min-width: 0; }
+  .simscen .siminfo { flex: 1; }
+  #simSheet {
+    position: absolute; inset: 0; z-index: 2;
+    display: flex; flex-direction: column; justify-content: flex-end;
+    background: rgba(0,0,0,.55); min-width: 0;
+  }
+  #simSheet[hidden] { display: none; }
+  #simSheetScrim { flex: 1 1 auto; min-height: 28px; border: none; background: transparent; cursor: pointer; }
+  #simSheetBox {
+    flex: 0 1 auto; min-height: 0; min-width: 0;
+    max-height: min(82dvh, calc(100dvh - var(--sat) - 8px));
+    overflow: hidden; display: flex; flex-direction: column;
+    background: var(--bg2); border-top: 1px solid var(--border);
+    border-radius: 16px 16px 0 0;
+    padding: 12px 12px max(12px, var(--sab));
+  }
+  #simSheetCard { display: flex; gap: 10px; min-width: 0; flex: 0 0 auto; }
+  #simSheetCard[hidden] { display: none; }
+  #simSheetCard img { width: 72px; height: 100px; object-fit: cover; border-radius: 6px; background: var(--bg3); flex: none; }
+  #simSheetName { font-size: 17px; overflow-wrap: anywhere; }
+  #simSheetMeta { color: var(--text-dim); font-size: 13px; margin-top: 4px; overflow-wrap: anywhere; }
+  #simSheetText {
+    flex: 0 1 auto; min-height: 0; max-height: 28dvh; margin-top: 10px;
+    overflow: auto; overscroll-behavior: contain;
+    color: #cdd6e4; font-size: 14px; line-height: 1.45;
+    white-space: pre-wrap; overflow-wrap: anywhere;
+  }
+  #simSheetText:empty { display: none; }
+  #simSheetWarn { color: #ffb35c; font-size: 14px; font-weight: 700; margin-top: 8px; overflow-wrap: anywhere; }
+  #simSheetWarn:empty { display: none; }
+  #simSheetActs {
+    display: flex; flex-direction: column; gap: 6px; margin-top: 10px;
+    overflow: auto; min-height: 0; overscroll-behavior: contain;
+  }
+  #simSheetActs .simbtn { width: 100%; flex: 0 0 auto; font-size: 15px; }
+  #simLog { list-style: none; font-size: 12.5px; color: var(--text-dim); min-width: 0; }
+  #simLog li { padding: 4px 0; border-bottom: 1px solid var(--border); overflow-wrap: anywhere; }
+  #simLog li:first-child { color: var(--text); }
 
   ::-webkit-scrollbar { width: 9px; }
   ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 5px; }
@@ -463,6 +611,7 @@
       <span id="topbreak"></span>
       <button type="button" id="btnRefresh" title="Clear cached app files and reload the latest version. Saved decks, notes, and records stay.">↻ Refresh</button>
       <button type="button" id="btnNews" title="New cards">📢 News</button>
+      <button type="button" id="btnDonSim" title="DON turn simulator" aria-pressed="false">DON</button>
       <button id="btnDeckPanel" class="paneltoggle" title="Deck">🃏 <span id="deckMini">0</span></button>
     </div>
     <div id="grid"><div id="loadState"><span class="spinner"></span>Loading card database…</div></div>
@@ -508,6 +657,116 @@
     </div>
   </div>
 
+</div>
+
+<div id="sim" hidden>
+  <div id="simbar">
+    <button type="button" id="simClose">← Cards</button>
+    <h2 id="simTitle">DON turn</h2>
+  </div>
+  <div id="simDonBar" hidden>
+    <div class="simcounts">
+      <div class="simcount"><b id="nDonDeck">0</b><span>DON deck</span></div>
+      <div class="simcount"><b id="nDonActive">0</b><span>Active</span></div>
+      <div class="simcount"><b id="nDonRested">0</b><span>Rested</span></div>
+      <div class="simcount"><b id="nDonAttached">0</b><span>Attached</span></div>
+    </div>
+    <div class="simdonacts">
+      <button type="button" id="simRestDon" aria-label="Rest one active DON">Rest DON</button>
+      <button type="button" id="simStandDon" aria-label="Re-stand one rested DON">Stand DON</button>
+      <button type="button" id="simAddActive" aria-label="Add one DON from the DON deck as active">+ Active</button>
+      <button type="button" id="simAddRested" aria-label="Add one DON from the DON deck as rested">+ Rested</button>
+      <button type="button" id="simMinusActive" aria-label="Return one active DON to the DON deck">− Active</button>
+      <button type="button" id="simMinusRested" aria-label="Return one rested DON to the DON deck">− Rested</button>
+    </div>
+    <p id="simDonNote">Attached DON is +1000 power on your turn. DON!! − returns cards to the DON deck.</p>
+    <p id="simDonSum"></p>
+    <div class="simturnacts">
+      <button type="button" id="simUndo">Undo</button>
+      <button type="button" id="simReset">Reset</button>
+    </div>
+  </div>
+  <div id="simScroll">
+    <p id="simNote" class="simnote" role="status" hidden></p>
+    <div id="simSetup">
+      <p class="simlead">Set up one turn from a saved deck. Choose how much DON!! is on the field and up to 7 cards in hand. Card text is not automated — you resolve it.</p>
+      <div class="simblock">
+        <h3>Deck</h3>
+        <select id="simDeck"></select>
+        <div id="simLeaderPreview"></div>
+      </div>
+      <div class="simblock">
+        <h3>DON!! on the field</h3>
+        <div class="simstep">
+          <button type="button" id="simDonFieldDec" aria-label="Fewer DON on the field">−</button>
+          <span class="simnum" id="simDonField">0</span>
+          <button type="button" id="simDonFieldInc" aria-label="More DON on the field">+</button>
+        </div>
+        <p class="simhint">Out of 10. The rest stay in the DON deck.</p>
+      </div>
+      <div class="simblock">
+        <h3>Starting rested</h3>
+        <div class="simstep">
+          <button type="button" id="simDonRestedDec" aria-label="Fewer rested DON">−</button>
+          <span class="simnum" id="simDonRested">0</span>
+          <button type="button" id="simDonRestedInc" aria-label="More rested DON">+</button>
+        </div>
+        <p class="simhint" id="simDonPreview"></p>
+      </div>
+      <div class="simblock">
+        <h3>Hand <span id="simHandCount">0 / 7</span></h3>
+        <div id="simPick"></div>
+      </div>
+      <button type="button" class="simwide" id="simStart">Start turn</button>
+      <div id="simResumeWrap" hidden>
+        <button type="button" class="simwide" id="simResume">Resume turn</button>
+      </div>
+      <div class="simblock">
+        <h3>Saved scenarios</h3>
+        <p class="simhint">Saves the deck, DON split, and hand on this device.</p>
+        <div class="simsave">
+          <input type="text" id="simScenarioName" placeholder="Scenario name" maxlength="60" autocomplete="off">
+          <button type="button" id="simSave">Save</button>
+        </div>
+        <div id="simScenarios"></div>
+      </div>
+    </div>
+    <div id="simPlay" hidden>
+      <h3 class="simh" id="simHLeader">Leader</h3>
+      <div id="simLeader"></div>
+      <h3 class="simh" id="simHChars">Characters</h3>
+      <div id="simChars"></div>
+      <h3 class="simh" id="simHStage">Stage</h3>
+      <div id="simStages"></div>
+      <h3 class="simh" id="simHHand">Hand</h3>
+      <div id="simHand"></div>
+      <h3 class="simh">Deck and trash</h3>
+      <p id="simDeckInfo" class="simhint"></p>
+      <div class="simtools">
+        <button type="button" id="simDraw">Draw next</button>
+        <button type="button" id="simDrawPick">Choose draw</button>
+      </div>
+      <div id="simTrash"></div>
+      <h3 class="simh">Log</h3>
+      <ol id="simLog"></ol>
+      <button type="button" class="simwide" id="simEditSetup">Edit setup</button>
+    </div>
+  </div>
+  <div id="simSheet" hidden>
+    <button type="button" id="simSheetScrim" aria-label="Close"></button>
+    <div id="simSheetBox" role="dialog" aria-modal="true" aria-labelledby="simSheetName">
+      <div id="simSheetCard">
+        <img id="simSheetImg" alt="">
+        <div class="siminfo">
+          <h3 id="simSheetName"></h3>
+          <div id="simSheetMeta"></div>
+        </div>
+      </div>
+      <div id="simSheetText"></div>
+      <div id="simSheetWarn"></div>
+      <div id="simSheetActs"></div>
+    </div>
+  </div>
 </div>
 
 <div id="scrim"></div>
@@ -667,6 +926,7 @@ function finishLoad(list) {
   applyFilters();
   renderDeck();
   showCardNews();
+  if (window.refreshDonSim) window.refreshDonSim();
 }
 
 /* ================= filters UI ================= */
@@ -1881,5 +2141,6 @@ loadCards().catch(err => {
   document.getElementById('loadState').innerHTML = '⚠ Failed to load card data from optcgapi.com.<br><small>' + esc(err.message) + '</small><br><br><button class="btn btn-gold" onclick="location.reload()">Retry</button>';
 });
 </script>
+<script src="don-sim.js?v=65294bb6351fd77f4ea6f5cc783922d0cdceb299"></script>
 </body>
 </html>
