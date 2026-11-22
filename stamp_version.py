@@ -55,8 +55,16 @@ def main():
         html,
         count=1,
     )
-    if n_meta != 1 or n_script != 1 or n_news != 1:
-        raise SystemExit(f"could not stamp index.html (meta={n_meta}, script={n_script}, news={n_news})")
+    html, n_sim = re.subn(
+        r'(<script src="don-sim\.js\?v=)[^"]*(")',
+        script,
+        html,
+        count=1,
+    )
+    if n_meta != 1 or n_script != 1 or n_news != 1 or n_sim != 1:
+        raise SystemExit(
+            f"could not stamp index.html (meta={n_meta}, script={n_script}, news={n_news}, sim={n_sim})"
+        )
     html_path.write_text(html)
     (ROOT / "version.json").write_text(json.dumps({"version": version}, indent=2) + "\n")
     print(version)
