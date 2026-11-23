@@ -326,6 +326,16 @@ function readScenarios() {
   } catch (err) { return []; }
 }
 function writeScenarios(list) {
+  let raw = null;
+  try { raw = localStorage.getItem(SCENARIO_KEY); }
+  catch (err) { throw err; }
+  if (raw != null && raw !== '') {
+    try {
+      if (!Array.isArray(JSON.parse(raw))) throw new Error('unreadable');
+    } catch (err) {
+      throw new Error('Saved DON scenarios could not be read.');
+    }
+  }
   localStorage.setItem(SCENARIO_KEY, JSON.stringify(list.slice(0, 30)));
 }
 function saveScenario() {
@@ -954,4 +964,5 @@ function initDonSim() {
     else renderSetup();
   };
 }
-initDonSim();
+try { initDonSim(); }
+catch (err) { /* the builder still opens if the simulator cannot bind */ }

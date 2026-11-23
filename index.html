@@ -119,6 +119,9 @@
   .add-bar .b-rem { background: #444c5c; color: #fff; }
   .card.illegal img { filter: grayscale(.85) brightness(.55); }
   #loadState { padding: 40px; text-align: center; color: var(--text-dim); grid-column: 1/-1; font-size: 14px; }
+  #loadState .btn { display: inline-block; flex: none; margin-top: 4px; padding: 10px 18px; }
+  #bootWarn { flex: none; padding: 10px 14px; padding-left: max(14px, var(--sal)); padding-right: max(14px, var(--sar)); background: #3a2a12; color: #ffd59a; font-size: 13px; line-height: 1.35; overflow-wrap: anywhere; }
+  #bootWarn[hidden] { display: none; }
   .gridhead { grid-column: 1/-1; font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 2px; padding: 10px 2px 2px; border-bottom: 2px solid var(--border); margin-bottom: 2px; }
   .gh-Red { color: var(--red); border-color: var(--red); }
   .gh-Green { color: var(--green); border-color: var(--green); }
@@ -614,6 +617,7 @@
       <button type="button" id="btnDonSim" title="DON turn simulator" aria-pressed="false">DON</button>
       <button id="btnDeckPanel" class="paneltoggle" title="Deck">🃏 <span id="deckMini">0</span></button>
     </div>
+    <div id="bootWarn" hidden role="alert"></div>
     <div id="grid"><div id="loadState"><span class="spinner"></span>Loading card database…</div></div>
   </div>
 
@@ -841,9 +845,12 @@
 <script src="card-news.js?v=5d4e9a4e7c4eb31e5719d18baf943ed03e90c0c5"></script>
 <script>
 'use strict';
+window.__optcgBoot = true;
+installBootGuards();
 const API = 'https://optcgapi.com/api/';
 const CACHE_KEY = 'optcg_cards_v2'; // v2: includes TCGPlayer prices
-const CACHE_TTL = 24 * 3600 * 1000; // refresh daily
+const CACHE_TTL = 24 * 3600 * 1000; // prefer a copy newer than this; older copies still open the app
+const CARD_FETCH_MS = 20000;
 const DECK_KEY = 'optcg_deck_v1';        // legacy single-deck key (migrated)
 const STORE_KEY = 'optcg_decks_v2';      // multi-deck store
 
@@ -864,35 +871,129 @@ const RENDER_BATCH = 80;
 // deck state: store holds all saved decks; `deck` points at the current one
 let store = { decks: {}, cur: null };
 let deck = { name: 'My Deck', leader: null, cards: {} }; // cards: { id: qty }
+let persistDecks = true; // false when the saved store can't be read; never overwrite it
 
 // filter state
 const F = { colors: new Set(), types: new Set(), costs: new Set(), kws: new Set(), attrs: new Set(), counters: new Set(), rarities: new Set(), sub: '', set: '', q: '', legalOnly: false };
 
 /* ================= data loading ================= */
-async function loadCards() {
-  // try cache
-  try {
-    const raw = localStorage.getItem(CACHE_KEY);
-    if (raw) {
-      const c = JSON.parse(raw);
-      if (Date.now() - c.t < CACHE_TTL && Array.isArray(c.d) && c.d.length) { finishLoad(c.d); return; }
-    }
-  } catch (e) {}
-  const [setCards, stCards] = await Promise.all([
-    fetch(API + 'allSetCards/').then(r => r.json()),
-    fetch(API + 'allSTCards/').then(r => r.json()),
-  ]);
-  const all = [...setCards, ...stCards];
-  // dedupe: keep base printing (image id === card id), else first seen
-  const map = new Map();
-  for (const c of all) {
-    const id = c.card_set_id;
-    if (!id) continue;
-    const isBase = c.card_image_id === id;
-    if (!map.has(id) || (isBase && map.get(id).card_image_id !== id)) map.set(id, c);
+// A saved database opens the app even past the 24h refresh window. The network
+// fetch has a deadline and skips the HTTP cache, so a stalled download or a
+// wedged cached response cannot leave the spinner up. Refresh and a force-close
+// do not clear localStorage or the optcgapi.com HTTP cache, which is why a
+// hang survived both.
+function installBootGuards() {
+  window.addEventListener('error', e => {
+    if (window.__optcgReady) return;
+    const file = String((e && e.filename) || '');
+    if (file.indexOf('don-sim.js') !== -1) return;
+    const err = e && e.error;
+    showLoadError(err || new Error((e && e.message) || 'This page hit a script error before it could start.'));
+  });
+  window.addEventListener('unhandledrejection', e => {
+    if (window.__optcgReady) return;
+    const reason = e && e.reason;
+    showLoadError(reason instanceof Error ? reason : new Error(reason ? String(reason) : 'This page hit a script error before it could start.'));
+  });
+}
+function warnBoot(msg) {
+  const el = document.getElementById('bootWarn');
+  if (!el || !msg) return;
+  const prev = el.dataset.msg || '';
+  if (prev.indexOf(msg) !== -1) return;
+  const next = prev ? prev + ' ' + msg : msg;
+  el.dataset.msg = next;
+  el.textContent = next;
+  el.hidden = false;
+}
+function showLoadError(err) {
+  if (window.__optcgReady) return;
+  window.__optcgReady = true;
+  const host = document.getElementById('grid');
+  if (!host) return;
+  let el = document.getElementById('loadState');
+  if (!el || !host.contains(el)) {
+    host.innerHTML = '<div id="loadState"></div>';
+    el = document.getElementById('loadState');
   }
-  // slim objects for cache
-  const slim = [...map.values()].map(c => ({
+  const msg = err && err.message ? String(err.message) : 'Could not load the card database.';
+  el.innerHTML = '⚠ Failed to load card data from optcgapi.com.<br><small>' + esc(msg) + '</small><br><small>Saved decks, notes, and records were not changed.</small><br><br><button class="btn btn-gold" type="button" onclick="location.reload()">Retry</button>';
+}
+function storageRaw(key) {
+  try { return { raw: localStorage.getItem(key), threw: false }; }
+  catch (e) { return { raw: null, threw: true }; }
+}
+function readCardCache() {
+  const got = storageRaw(CACHE_KEY);
+  if (got.threw || !got.raw) return null;
+  try {
+    const c = JSON.parse(got.raw);
+    if (!c || !Array.isArray(c.d) || !c.d.length) return null;
+    const at = Number(c.t);
+    return { at: Number.isFinite(at) ? at : 0, list: c.d };
+  } catch (e) { return null; }
+}
+function numOrNull(v) {
+  if (v == null || v === '' || !Number.isFinite(+v)) return null;
+  return +v;
+}
+function prepareCards(list) {
+  const out = [];
+  const seen = new Set();
+  if (!Array.isArray(list)) return out;
+  for (const raw of list) {
+    if (!raw || typeof raw !== 'object') continue;
+    const id = raw.id != null ? String(raw.id) : '';
+    if (!id || seen.has(id)) continue;
+    seen.add(id);
+    const card = {
+      id,
+      name: raw.name != null ? String(raw.name) : id,
+      text: raw.text != null ? String(raw.text) : '',
+      set: raw.set != null ? String(raw.set) : '',
+      setId: raw.setId != null ? String(raw.setId) : '',
+      rarity: raw.rarity != null ? String(raw.rarity) : '',
+      color: raw.color != null ? String(raw.color) : '',
+      type: raw.type != null ? String(raw.type) : '',
+      life: raw.life == null || raw.life === '' ? null : raw.life,
+      cost: numOrNull(raw.cost),
+      power: numOrNull(raw.power),
+      subs: raw.subs != null ? String(raw.subs) : '',
+      counter: numOrNull(raw.counter),
+      attr: raw.attr != null ? String(raw.attr) : '',
+      img: raw.img != null ? String(raw.img) : '',
+      mp: numOrNull(raw.mp),
+      ip: numOrNull(raw.ip),
+    };
+    if (raw.custom) card.custom = true;
+    if (raw.unofficial) card.unofficial = true;
+    if (raw.spoiler) card.spoiler = true;
+    if (raw.numTBA) card.numTBA = true;
+    out.push(card);
+  }
+  return out;
+}
+function ingestList(list) {
+  const prepared = prepareCards(list);
+  if (!prepared.length) throw new Error('Card list was empty.');
+  const have = new Set(prepared.map(c => c.id));
+  if (Array.isArray(window.CUSTOM_CARDS)) {
+    for (const raw of window.CUSTOM_CARDS) {
+      const n = prepareCards([raw])[0];
+      if (n && !have.has(n.id)) { n.custom = true; prepared.push(n); have.add(n.id); }
+    }
+  }
+  cards = prepared;
+  byId = new Map(cards.map(c => [c.id, c]));
+  for (const c of cards) {
+    c.colors = String(c.color || '').split(/[\s\/]+/).map(s => s.trim()).filter(col => COLORS.includes(col));
+    if (!c.attr || c.attr === 'NULL' || c.attr === '?') c.attr = '';
+    c.kws = KEYWORDS.filter(k => String(c.text || '').includes('[' + k + ']'));
+    c.search = (c.name + ' ' + c.text + ' ' + c.subs + ' ' + c.id).toLowerCase();
+  }
+}
+function slimFromApi(c) {
+  return {
     id: c.card_set_id, name: c.card_name, text: c.card_text || '', set: c.set_name, setId: c.set_id,
     rarity: c.rarity, color: c.card_color || '', type: c.card_type, life: c.life,
     cost: c.card_cost != null ? +c.card_cost : null, power: c.card_power != null ? +c.card_power : null,
@@ -900,33 +1001,96 @@ async function loadCards() {
     attr: c.attribute || '', img: c.card_image,
     mp: c.market_price != null ? +c.market_price : null,
     ip: c.inventory_price != null ? +c.inventory_price : null
-  }));
-  slim.sort((a, b) => a.id.localeCompare(b.id, undefined, { numeric: true }));
-  try { localStorage.setItem(CACHE_KEY, JSON.stringify({ t: Date.now(), d: slim })); } catch (e) {}
-  finishLoad(slim);
+  };
 }
-
+function slimCards(setCards, stCards) {
+  if (!Array.isArray(setCards) || !Array.isArray(stCards)) throw new Error('Card database returned an unexpected response.');
+  const map = new Map();
+  for (const c of setCards.concat(stCards)) {
+    if (!c || typeof c !== 'object') continue;
+    const id = c.card_set_id;
+    if (!id) continue;
+    const isBase = c.card_image_id === id;
+    if (!map.has(id) || (isBase && map.get(id).card_image_id !== id)) map.set(id, c);
+  }
+  const slim = [...map.values()].map(slimFromApi);
+  slim.sort((a, b) => String(a.id).localeCompare(String(b.id), undefined, { numeric: true }));
+  return slim;
+}
+async function fetchJson(url, ctrl) {
+  const opts = { cache: 'no-store' };
+  if (ctrl) opts.signal = ctrl.signal;
+  let res;
+  try { res = await fetch(url, opts); }
+  catch (err) {
+    if (err && err.name === 'AbortError') throw new Error('The card database request timed out.');
+    throw err;
+  }
+  if (!res || !res.ok) throw new Error('Card database responded ' + (res ? res.status : 'with no status') + '.');
+  try { return await res.json(); }
+  catch (err) {
+    if (err && err.name === 'AbortError') throw new Error('The card database request timed out.');
+    throw new Error('Card database returned an unreadable response.');
+  }
+}
+async function fetchCardList() {
+  const ctrl = typeof AbortController === 'function' ? new AbortController() : null;
+  let timer = 0;
+  const timeout = new Promise((_, reject) => {
+    timer = setTimeout(() => {
+      if (ctrl) { try { ctrl.abort(); } catch (e) {} }
+      reject(new Error('The card database request timed out.'));
+    }, CARD_FETCH_MS);
+  });
+  const run = Promise.all([
+    fetchJson(API + 'allSetCards/', ctrl),
+    fetchJson(API + 'allSTCards/', ctrl),
+  ]).then(([setCards, stCards]) => {
+    const slim = slimCards(setCards, stCards);
+    if (!slim.length) throw new Error('Card database returned no cards.');
+    try { localStorage.setItem(CACHE_KEY, JSON.stringify({ t: Date.now(), d: slim })); } catch (e) {}
+    return slim;
+  });
+  run.catch(() => {});
+  timeout.catch(() => {});
+  try { return await Promise.race([run, timeout]); }
+  finally { clearTimeout(timer); }
+}
+async function loadCards() {
+  auditSavedData();
+  const cached = readCardCache();
+  let showedCache = false;
+  if (cached) {
+    try { finishLoad(cached.list); showedCache = true; }
+    catch (e) { showedCache = false; }
+  }
+  const fresh = showedCache && cached && (Date.now() - cached.at < CACHE_TTL);
+  if (fresh) return;
+  try {
+    const list = await fetchCardList();
+    if (showedCache) replaceCards(list);
+    else finishLoad(list);
+  } catch (err) {
+    if (!window.__optcgReady) showLoadError(err);
+  }
+}
 function finishLoad(list) {
-  cards = list;
-  // merge custom/spoiler cards (custom-cards.js) not already in the API data
-  if (Array.isArray(window.CUSTOM_CARDS)) {
-    const have = new Set(cards.map(c => c.id));
-    for (const c of window.CUSTOM_CARDS) if (!have.has(c.id)) { c.custom = true; cards.push(c); }
-  }
-  byId = new Map(cards.map(c => [c.id, c]));
-  for (const c of cards) {
-    c.colors = c.color.split(/[\s\/]+/).map(s => s.trim()).filter(col => COLORS.includes(col));
-    if (!c.attr || c.attr === 'NULL' || c.attr === '?') c.attr = '';
-    c.kws = KEYWORDS.filter(k => c.text.includes('[' + k + ']'));
-    c.search = (c.name + ' ' + c.text + ' ' + c.subs + ' ' + c.id).toLowerCase();
-  }
+  ingestList(list);
   buildFilterOptions();
   populateLeaderList();
   loadDeck();
   applyFilters();
   renderDeck();
   showCardNews();
-  if (window.refreshDonSim) window.refreshDonSim();
+  try { if (window.refreshDonSim) window.refreshDonSim(); } catch (e) {}
+  window.__optcgReady = true;
+}
+function replaceCards(list) {
+  ingestList(list);
+  populateLeaderList();
+  applyFilters();
+  renderDeck();
+  try { if (window.refreshDonSim) window.refreshDonSim(); } catch (e) {}
 }
 
 /* ================= filters UI ================= */
@@ -956,7 +1120,7 @@ function buildFilterOptions() {
   // Word-boundary matching keeps truncated junk entries ("Straw Hat Cre") from eating real types,
   // and single-use prefixes of longer atoms are dropped as data typos.
   const counts = new Map();
-  for (const c of cards) { const s = c.subs.trim(); if (s) counts.set(s, (counts.get(s) || 0) + 1); }
+  for (const c of cards) { const s = String(c.subs || '').trim(); if (s) counts.set(s, (counts.get(s) || 0) + 1); }
   const fulls = [...counts.keys()];
   let atoms = fulls.filter(s => !fulls.some(t => t !== s && phraseIn(s, t)));
   atoms = atoms.filter(s => !(counts.get(s) <= 1 && atoms.some(t => t !== s && t.startsWith(s))));
@@ -1124,8 +1288,21 @@ function refreshCardBadges() {
 }
 
 /* ================= deck logic ================= */
-function qtyOf(id) { return deck.cards[id] || 0; }
-function deckSize() { return Object.values(deck.cards).reduce((a,b) => a+b, 0); }
+function deckCardMap(src) {
+  const cardsMap = src ? src.cards : (deck && deck.cards);
+  if (!cardsMap || typeof cardsMap !== 'object' || Array.isArray(cardsMap)) return {};
+  return cardsMap;
+}
+function qtyFrom(q) {
+  const n = Number(q);
+  return Number.isFinite(n) && n > 0 ? n : 0;
+}
+function qtyOf(id) { return qtyFrom(deckCardMap()[id]); }
+function deckSize() {
+  let n = 0;
+  for (const q of Object.values(deckCardMap())) n += qtyFrom(q);
+  return n;
+}
 
 function setLeader(id) {
   deck.leader = deck.leader === id ? null : id;
@@ -1148,24 +1325,90 @@ function removeCard(id) {
 }
 function genId() { return 'd' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
 function saveDeck() {
+  if (!persistDecks) return;
   deck.updated = Date.now();
   try { localStorage.setItem(STORE_KEY, JSON.stringify(store)); } catch(e){}
 }
+function deckStoreUsable(s) {
+  if (!s || typeof s !== 'object' || Array.isArray(s)) return false;
+  if (!s.decks || typeof s.decks !== 'object' || Array.isArray(s.decks)) return false;
+  for (const d of Object.values(s.decks)) {
+    if (!d || typeof d !== 'object' || Array.isArray(d)) return false;
+    if (d.name != null && typeof d.name !== 'string') return false;
+    if (d.leader != null && typeof d.leader !== 'string') return false;
+    if (d.notes != null && typeof d.notes !== 'string') return false;
+    if (d.matches != null && !Array.isArray(d.matches)) return false;
+    if (d.cards != null && (typeof d.cards !== 'object' || Array.isArray(d.cards))) return false;
+    if (d.cards) {
+      for (const q of Object.values(d.cards)) {
+        if (q != null && typeof q === 'object') return false;
+      }
+    }
+  }
+  return true;
+}
+const DECK_READ_WARN = 'Saved decks could not be read. They were not deleted, and new edits will not overwrite them.';
+function useMemoryDeck() {
+  const id = genId();
+  store = { decks: {}, cur: id };
+  store.decks[id] = { name: 'My Deck', leader: null, cards: {}, updated: Date.now() };
+  deck = store.decks[id];
+}
+function auditSavedData() {
+  const decks = storageRaw(STORE_KEY);
+  if (decks.threw) warnBoot(DECK_READ_WARN);
+  else if (decks.raw) {
+    try { if (!deckStoreUsable(JSON.parse(decks.raw))) warnBoot(DECK_READ_WARN); }
+    catch (e) { warnBoot(DECK_READ_WARN); }
+  }
+  noteBadStorage(NEWS_KEY, 'Saved news could not be read. It was not deleted.', v => Array.isArray(v));
+  // Same key as don-sim.js SCENARIO_KEY. Startup never rewrites it.
+  noteBadStorage('optcg_don_scenarios_v1', 'Saved DON scenarios could not be read. They were not deleted.', v => Array.isArray(v));
+}
+function noteBadStorage(key, msg, ok) {
+  const got = storageRaw(key);
+  if (got.threw) { warnBoot(msg); return; }
+  if (got.raw == null || got.raw === '') return;
+  try { if (!ok(JSON.parse(got.raw))) warnBoot(msg); }
+  catch (e) { warnBoot(msg); }
+}
 function loadDeck() {
-  try {
-    const s = JSON.parse(localStorage.getItem(STORE_KEY));
-    if (s && s.decks && typeof s.decks === 'object') store = s;
-  } catch(e){}
+  persistDecks = true;
+  const got = storageRaw(STORE_KEY);
+  if (got.threw) {
+    persistDecks = false;
+    warnBoot(DECK_READ_WARN);
+    useMemoryDeck();
+    return;
+  }
+  if (got.raw) {
+    let parsed = null;
+    let ok = false;
+    try { parsed = JSON.parse(got.raw); ok = deckStoreUsable(parsed); }
+    catch (e) { ok = false; }
+    if (!ok) {
+      persistDecks = false;
+      warnBoot(DECK_READ_WARN);
+      useMemoryDeck();
+      return;
+    }
+    store = parsed;
+  }
   if (!Object.keys(store.decks).length) {
     // first run: migrate the old single-deck save if present
     let old = null;
-    try { old = JSON.parse(localStorage.getItem(DECK_KEY)); } catch(e){}
+    try {
+      const legacy = localStorage.getItem(DECK_KEY);
+      if (legacy) old = JSON.parse(legacy);
+    } catch (e) {}
     const id = genId();
-    store.decks[id] = { name: 'My Deck', leader: old?.leader || null, cards: old?.cards || {}, updated: Date.now() };
+    const oldCards = old && old.cards && typeof old.cards === 'object' && !Array.isArray(old.cards) ? old.cards : {};
+    store.decks[id] = { name: 'My Deck', leader: old && typeof old.leader === 'string' ? old.leader : null, cards: oldCards, updated: Date.now() };
     store.cur = id;
   }
   if (!store.cur || !store.decks[store.cur]) store.cur = Object.keys(store.decks)[0];
   deck = store.decks[store.cur];
+  if (!deck.cards) deck.cards = {};
 }
 
 function switchDeck(id) {
@@ -1183,13 +1426,14 @@ function createDeck(name) {
 function renderDeckSel() {
   const sel = document.getElementById('deckSel');
   sel.innerHTML = '';
-  const entries = Object.entries(store.decks).sort((a,b) => a[1].name.localeCompare(b[1].name));
+  const entries = Object.entries(store.decks).filter(([, d]) => d && typeof d === 'object' && !Array.isArray(d));
+  entries.sort((a, b) => String(a[1].name || '').localeCompare(String(b[1].name || '')));
   for (const [id, d] of entries) {
     const o = document.createElement('option');
     const L = d.leader && byId.get(d.leader);
-    const n = Object.values(d.cards).reduce((s,q) => s+q, 0);
+    const n = Object.values(deckCardMap(d)).reduce((s, q) => s + qtyFrom(q), 0);
     o.value = id;
-    o.textContent = d.name + '  (' + (L ? L.name.replace(/\s*\(.*\)$/, '') + ', ' : '') + n + '/50)';
+    o.textContent = (d.name || 'Deck') + '  (' + (L ? L.name.replace(/\s*\(.*\)$/, '') + ', ' : '') + n + '/50)';
     if (id === store.cur) o.selected = true;
     sel.appendChild(o);
   }
@@ -1228,7 +1472,7 @@ function renderWarns() {
   if (n > 50) probs.push('Deck is over 50 cards');
   const lc = leaderColors();
   if (lc.length) {
-    const bad = Object.keys(deck.cards).filter(id => { const c = byId.get(id); return c && c.colors.length && !c.colors.some(col => lc.includes(col)); });
+    const bad = Object.keys(deckCardMap()).filter(id => { const c = byId.get(id); return c && c.colors.length && !c.colors.some(col => lc.includes(col)); });
     if (bad.length) probs.push('Off-color for leader: ' + bad.join(', '));
   }
   w.textContent = probs.length ? '⚠ ' + probs.join(' · ') : '✔ Deck is legal — ready to export!';
@@ -1244,7 +1488,7 @@ function renderDeck() {
     ? '📊 Record ' + rec.w + '–' + rec.l + ' (' + Math.round(rec.w / games * 100) + '%)'
     : '📊 Record & Notes';
   document.getElementById('statsBtnHint').textContent =
-    (deck.notes && deck.notes.trim() ? '📝 ' : '') + (games ? 'View ›' : 'Log W/L ›');
+    (typeof deck.notes === 'string' && deck.notes.trim() ? '📝 ' : '') + (games ? 'View ›' : 'Log W/L ›');
   const n = deckSize();
   document.getElementById('deckMini').textContent = n;
   const dc = document.getElementById('deckcount');
@@ -1270,9 +1514,10 @@ function renderDeck() {
   let value = 0, unpriced = 0;
   const priceOf = id => { const c = byId.get(id); return c && c.mp != null ? c.mp : null; };
   if (deck.leader) { const p = priceOf(deck.leader); p != null ? value += p : unpriced++; }
-  for (const [id, q] of Object.entries(deck.cards)) {
+  for (const [id, q] of Object.entries(deckCardMap())) {
     const p = priceOf(id);
-    p != null ? value += p * q : unpriced += q;
+    const nq = qtyFrom(q);
+    p != null ? value += p * nq : unpriced += nq;
   }
   document.getElementById('deckvalue').innerHTML = (n || deck.leader)
     ? 'Deck value: <b>$' + value.toFixed(2) + '</b> <span title="TCGPlayer market prices">ⓘ</span>' +
@@ -1283,9 +1528,9 @@ function renderDeck() {
   const curve = document.getElementById('curve');
   curve.innerHTML = '';
   const buckets = Array(11).fill(0);
-  for (const [id, q] of Object.entries(deck.cards)) {
+  for (const [id, q] of Object.entries(deckCardMap())) {
     const c = byId.get(id); if (!c) continue;
-    buckets[Math.min(c.cost ?? 0, 10)] += q;
+    buckets[Math.min(c.cost ?? 0, 10)] += qtyFrom(q);
   }
   const max = Math.max(...buckets, 1);
   buckets.forEach((v, i) => {
@@ -1323,7 +1568,7 @@ function renderDeck() {
 // Extra types follow in the order they show up. The leader is not a list row.
 function deckCardsInListOrder() {
   const groups = { Character: [], Event: [], Stage: [] };
-  for (const id of Object.keys(deck.cards)) {
+  for (const id of Object.keys(deckCardMap())) {
     const c = byId.get(id);
     if (c) (groups[c.type] || (groups[c.type] = [])).push(c);
   }
@@ -1523,10 +1768,17 @@ function newsSections() {
   }
   return sections;
 }
+function newsStoreWritable() {
+  const got = storageRaw(NEWS_KEY);
+  if (got.threw) return false;
+  if (got.raw == null || got.raw === '') return true;
+  try { return Array.isArray(JSON.parse(got.raw)); }
+  catch (e) { return false; }
+}
 function dismissCardNews() {
   const news = document.getElementById('news');
   const ids = (news.dataset.batches || '').split(',').filter(Boolean);
-  if (ids.length) {
+  if (ids.length && newsStoreWritable()) {
     const seen = seenNewsBatches();
     ids.forEach(id => seen.add(id));
     try { localStorage.setItem(NEWS_KEY, JSON.stringify([...seen])); } catch (e) {}
@@ -1580,6 +1832,8 @@ function openCardNews() {
 function showCardNews() {
   if (newsAutoShown) return;
   newsAutoShown = true;
+  const warn = document.getElementById('bootWarn');
+  if (warn && !warn.hidden) return;
   if (!newsSections().length) return;
   openCardNews();
 }
@@ -1716,8 +1970,14 @@ const oppInput = document.getElementById('oppInput');
 
 function deckMatches() { return deck.matches || (deck.matches = []); }
 function recordOf(d) {
-  const m = d.matches || [];
-  return { w: m.filter(x => x.win).length, l: m.filter(x => !x.win).length };
+  const m = d && Array.isArray(d.matches) ? d.matches : [];
+  let w = 0, l = 0;
+  for (const x of m) {
+    if (!x || typeof x !== 'object') continue;
+    if (x.win) w++;
+    else l++;
+  }
+  return { w, l };
 }
 function oppLabel(opp) {
   const c = byId.get(opp);
@@ -2030,10 +2290,12 @@ window.addEventListener('popstate', () => {
   document.getElementById('deckpanel').classList.remove('open');
   if (!document.getElementById('sidebar').classList.contains('open')) scrim.classList.remove('on');
 });
-drawerMq.addEventListener('change', e => {
+function onDrawerChange(e) {
   // Leaving the overlay layout: drop the history entry the drawer pushed.
   if (!e.matches) consumeDeckHistoryEntry();
-});
+}
+if (typeof drawerMq.addEventListener === 'function') drawerMq.addEventListener('change', onDrawerChange);
+else if (typeof drawerMq.addListener === 'function') drawerMq.addListener(onDrawerChange);
 document.getElementById('btnFilters').onclick = () => togglePanel('sidebar');
 document.getElementById('btnDeckPanel').onclick = () => togglePanel('deckpanel');
 document.getElementById('btnDeckClose').onclick = closePanels;
@@ -2091,22 +2353,45 @@ async function refreshApp() {
   refreshInFlight = true;
   const buttons = [document.getElementById('btnRefresh'), document.getElementById('btnApplyUpdate')];
   for (const btn of buttons) if (btn) btn.disabled = true;
-  try {
-    if (navigator.serviceWorker) {
-      const regs = await navigator.serviceWorker.getRegistrations();
-      await Promise.all(regs.map(async reg => {
-        try { await reg.update(); } catch (e) {}
-        try { await reg.unregister(); } catch (e) {}
-      }));
-    }
-    if (window.caches) {
-      const keys = await caches.keys();
-      await Promise.all(keys.map(key => caches.delete(key)));
-    }
-  } catch (e) {}
+  // update() and getRegistrations() can hang forever on a broken worker.
+  // Reload anyway so a stuck worker cannot pin the spinner in place.
+  const cleanup = (async () => {
+    try {
+      const sw = navigator.serviceWorker;
+      if (sw && typeof sw.getRegistrations === 'function') {
+        const regs = await sw.getRegistrations();
+        await Promise.all((regs || []).map(reg => reg.unregister().catch(() => {})));
+      }
+    } catch (e) {}
+    try {
+      if (window.caches && typeof caches.keys === 'function') {
+        const keys = await caches.keys();
+        await Promise.all(keys.map(key => caches.delete(key).catch(() => false)));
+      }
+    } catch (e) {}
+  })();
+  cleanup.catch(() => {});
+  await Promise.race([cleanup, new Promise(resolve => setTimeout(resolve, 3000))]);
   const url = new URL(location.href);
   url.searchParams.set('refresh', String(Date.now()));
   location.replace(url.href);
+}
+function dropStuckServiceWorker() {
+  let sw = null;
+  try { sw = navigator.serviceWorker; } catch (e) { return; }
+  if (!sw || typeof sw.getRegistrations !== 'function') return;
+  let controlled = false;
+  try { controlled = !!sw.controller; } catch (e) { controlled = false; }
+  sw.getRegistrations().then(regs => {
+    return Promise.all((regs || []).map(reg => reg.unregister().catch(() => {})));
+  }).then(() => {
+    if (!controlled) return;
+    try {
+      if (sessionStorage.getItem('optcg_sw_reload') === '1') return;
+      sessionStorage.setItem('optcg_sw_reload', '1');
+    } catch (e) { return; }
+    location.reload();
+  }).catch(() => {});
 }
 
 let updateCheck = null;
@@ -2137,10 +2422,28 @@ window.addEventListener('pageshow', e => { if (e.persisted) checkForAppUpdate();
 window.addEventListener('focus', () => checkForAppUpdate());
 
 /* ================= boot ================= */
-loadCards().catch(err => {
-  document.getElementById('loadState').innerHTML = '⚠ Failed to load card data from optcgapi.com.<br><small>' + esc(err.message) + '</small><br><br><button class="btn btn-gold" onclick="location.reload()">Retry</button>';
-});
+dropStuckServiceWorker();
+window.__optcgLoadCalled = true;
+try {
+  loadCards().catch(err => { if (!window.__optcgReady) showLoadError(err); });
+} catch (err) {
+  showLoadError(err);
+}
 </script>
 <script src="don-sim.js?v=5d4e9a4e7c4eb31e5719d18baf943ed03e90c0c5"></script>
+<script>
+// ES5 on purpose: if the main script fails to parse, this still runs.
+(function () {
+  function show() {
+    if (window.__optcgReady) return;
+    var el = document.getElementById('loadState');
+    if (!el || !el.textContent || el.textContent.indexOf('Loading card database') === -1) return;
+    window.__optcgReady = true;
+    el.innerHTML = '⚠ The app did not finish starting.<br><small>Saved decks, notes, and records were not changed.</small><br><br><button class="btn btn-gold" type="button" onclick="location.reload()">Retry</button>';
+  }
+  if (!window.__optcgBoot || !window.__optcgLoadCalled) show();
+  else if (!window.__optcgReady) setTimeout(show, 25000);
+})();
+</script>
 </body>
 </html>
