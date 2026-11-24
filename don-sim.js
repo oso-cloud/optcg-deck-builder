@@ -34,6 +34,13 @@ function cardOf(id) {
   if (c) return c;
   return { id: id, name: id, text: '', type: 'Character', cost: null, power: null, img: '', colors: [], counter: null, life: null };
 }
+function cardImg(card, alt) {
+  const img = document.createElement('img');
+  img.alt = alt != null ? alt : ((card && card.name) || '');
+  if (card && typeof attachCardImage === 'function') attachCardImage(img, card);
+  else if (card && card.img) img.src = card.img;
+  return img;
+}
 function cname(id) {
   const c = byId.get(id);
   return c && c.name ? c.name : id;
@@ -422,9 +429,7 @@ function renderLeaderPreview() {
     return;
   }
   const c = byId.get(d.leader);
-  const img = document.createElement('img');
-  img.src = c.img;
-  img.alt = c.name;
+  const img = cardImg(c);
   const info = make('div', 'siminfo');
   info.appendChild(make('div', 'simname', c.name));
   const bits = [c.color || '', c.power != null ? 'Power ' + c.power : '', c.life != null && c.life !== '' ? 'Life ' + c.life : ''].filter(Boolean);
@@ -461,9 +466,7 @@ function pickRow(id, qty, card) {
   const open = document.createElement('button');
   open.type = 'button';
   open.className = 'simpick-open';
-  const img = document.createElement('img');
-  img.alt = '';
-  if (card.img) img.src = card.img;
+  const img = cardImg(card);
   const info = make('span', 'siminfo');
   info.appendChild(make('span', 'simname', card.name || id));
   const cost = cardCost(card);
@@ -599,9 +602,7 @@ function boardRow(item, zone) {
   const cost = cardCost(card);
   if (cost.known) btn.dataset.cost = String(cost.cost);
   btn.style.borderLeft = '4px solid ' + colorOf(card);
-  const img = document.createElement('img');
-  img.alt = card.name || item.id;
-  if (card.img) img.src = card.img;
+  const img = cardImg(card, card.name || item.id);
   const info = make('span', 'siminfo');
   info.appendChild(make('span', 'simname', card.name || item.id));
   const sub = [];
@@ -701,7 +702,8 @@ function fillSheet(card, zone, uid, inst) {
   document.getElementById('simSheetCard').hidden = false;
   const img = document.getElementById('simSheetImg');
   img.alt = card.name || '';
-  if (card.img) img.src = card.img;
+  if (typeof attachCardImage === 'function') attachCardImage(img, card);
+  else if (card.img) img.src = card.img;
   else img.removeAttribute('src');
   document.getElementById('simSheetName').textContent = card.name || card.id || 'Card';
   document.getElementById('simSheetMeta').textContent = metaLine(card, inst);
@@ -781,9 +783,7 @@ function openDrawSheet() {
     b.className = 'simrow';
     b.dataset.act = 'draw-one';
     b.dataset.id = id;
-    const img = document.createElement('img');
-    img.alt = '';
-    if (c.img) img.src = c.img;
+    const img = cardImg(c);
     const info = make('span', 'siminfo');
     info.appendChild(make('span', 'simname', c.name || id));
     info.appendChild(make('span', 'simsub', (c.type || 'Card') + (n > 1 ? ' · ×' + n + ' left' : '') + ' · ' + id));

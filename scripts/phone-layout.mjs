@@ -12,6 +12,20 @@ import { chromium, webkit, devices } from 'playwright';
 import fs from 'fs';
 import path from 'path';
 
+// The page CSP blocks eval. Playwright's waitForFunction polls with eval in
+// the page, so a condition that is not already true throws. Poll with evaluate.
+function useDirectPoll(page) {
+  page.waitForFunction = async (fn, arg, options) => {
+    const timeout = options && typeof options.timeout === 'number' ? options.timeout : 30000;
+    const deadline = Date.now() + timeout;
+    while (Date.now() < deadline) {
+      if (await page.evaluate(fn, arg)) return;
+      await page.waitForTimeout(30);
+    }
+    throw new Error('waitForFunction timed out');
+  };
+}
+
 const out = path.resolve('phone-shots');
 fs.mkdirSync(out, { recursive: true });
 
@@ -96,6 +110,7 @@ async function run(browserType, label, contextOpts, insets, shots) {
   const context = await browser.newContext(contextOpts);
   await context.addInitScript(seed(insets));
   const page = await context.newPage();
+  useDirectPoll(page);
   const errors = [];
   page.on('pageerror', e => errors.push(String(e)));
   await page.goto('http://127.0.0.1:8765/index.html', { waitUntil: 'domcontentloaded' });

@@ -1,6 +1,9 @@
 // Startup resilience: a hung or failed optcgapi.com must not spin forever,
 // a stale card cache must still open the app, and corrupt saved data must
-// not brick the page or be overwritten.
+// not brick the page or be overwritten. Blocked image hosts fall back to
+// static.dotgg.gg, and a tile with no art still shows its name, id, and cost.
+// With no usable cache, cards-fallback.json opens the app and a short notice
+// says the list is offline. Saved decks are left as they were.
 //
 //   NODE_PATH=/tmp/playwright-run/node_modules node scripts/load-resilience.mjs
 //
@@ -60,13 +63,36 @@ function init(entries, extra) {
   if (extra) lines.push(extra);
   return lines.join('\n');
 }
-function hangRoute() {
-  // Never continue, fulfill, or abort, so the page's own timeout has to fire.
-  return new Promise(() => {});
+function hangRoute(route) {
+  // API calls stay open so the page's own timeout has to fire.
+  // Image requests are aborted; a pending route per tile stalls the browser.
+  const url = route.request().url();
+  if (url.includes('/api/')) return new Promise(() => {});
+  return route.abort();
 }
 function failRoute(route) {
   return route.fulfill({ status: 500, contentType: 'text/plain', body: 'nope' });
 }
+function blockBundle(route) {
+  return route.fulfill({ status: 500, contentType: 'text/plain', body: 'no' });
+}
+const ZORO = {
+  id: 'OP01-001', name: 'Roronoa Zoro', text: 'leader', set: 'Romance Dawn', setId: 'OP-01',
+  rarity: 'L', color: 'Red', type: 'Leader', life: 5, cost: null, power: 5000,
+  subs: 'Straw Hat Crew', counter: null, attr: 'Slash',
+  img: 'https://optcgapi.com/media/static/Card_Images/OP01-001.jpg',
+};
+const GAP = {
+  id: 'OP01-077', name: 'Image Gap', text: 'gap', set: 'Romance Dawn', setId: 'OP-01',
+  rarity: 'C', color: 'Red', type: 'Character', life: null, cost: 2, power: 3000,
+  subs: '', counter: null, attr: 'Special', img: '',
+};
+const PLACE = {
+  id: 'ZZ-PLACE', name: 'Placeholder Pia', text: 'none', set: 'Test', setId: 'ZZ',
+  rarity: 'C', color: 'Red', type: 'Character', life: null, cost: 3, power: 1000,
+  subs: '', counter: 1000, attr: 'Strike',
+  img: 'https://optcgapi.com/media/static/Card_Images/ZZ-PLACE.jpg',
+};
 function apiBody(id, name) {
   return {
     card_set_id: id, card_name: name, card_text: 'Hello', set_name: 'Romance Dawn', set_id: 'OP-01',
@@ -95,7 +121,7 @@ async function ensureServer() {
   throw new Error('local server did not start');
 }
 
-async function open(browser, { script, route, width, height, ua }) {
+async function open(browser, { script, route, routes, width, height, ua }) {
   const context = await browser.newContext({
     viewport: { width: width || 390, height: height || 844 },
     isMobile: true,
@@ -107,14 +133,53 @@ async function open(browser, { script, route, width, height, ua }) {
   const errors = [];
   page.on('pageerror', err => errors.push(String(err)));
   if (route) await page.route(/optcgapi\.com/, route);
+  if (routes) {
+    for (const [re, handler] of routes) await page.route(re, handler);
+  }
   const hits = [];
   page.on('request', req => { if (req.url().includes('optcgapi.com')) hits.push(req.url()); });
   await page.goto('http://127.0.0.1:8765/index.html', { waitUntil: 'domcontentloaded' });
   return { context, page, errors, hits };
 }
+function hideNews(page) {
+  return page.evaluate(() => {
+    const news = document.getElementById('news');
+    if (news) news.hidden = true;
+  });
+}
 
 async function ready(page, ms) {
-  await page.waitForFunction(() => window.__optcgReady === true, null, { timeout: ms || 5000 });
+  const deadline = Date.now() + (ms || 5000);
+  let last = null;
+  while (Date.now() < deadline) {
+    try {
+      if (await page.evaluate(() => window.__optcgReady === true)) return;
+    } catch (e) {
+      last = String(e);
+    }
+    await page.waitForTimeout(40);
+  }
+  try {
+    last = await page.evaluate(() => ({
+      ready: window.__optcgReady === true,
+      text: (document.getElementById('loadState') || {}).innerText || '',
+      notice: (document.getElementById('dataNotice') || {}).innerText || '',
+      cards: document.querySelectorAll('#grid .card').length,
+    }));
+  } catch (e) {
+    last = String(e);
+  }
+  throw new Error('not ready ' + JSON.stringify(last));
+}
+async function poll(page, read, ms) {
+  const deadline = Date.now() + (ms || 5000);
+  while (Date.now() < deadline) {
+    try {
+      if (await read()) return;
+    } catch (e) {}
+    await page.waitForTimeout(50);
+  }
+  throw new Error('timed out');
 }
 async function seeHero(page) {
   await page.evaluate(() => {
@@ -122,10 +187,10 @@ async function seeHero(page) {
     if (news) news.hidden = true;
   });
   await page.fill('#search', 'Cached Hero');
-  await page.waitForFunction(() => {
+  await poll(page, () => page.evaluate(() => {
     const ids = [...document.querySelectorAll('#grid .card')].map(el => el.dataset.id);
     return ids.length === 1 && ids[0] === 'ZZ-CACHE';
-  }, null, { timeout: 4000 });
+  }), 4000);
 }
 function storage(page) {
   return page.evaluate(() => ({
@@ -211,7 +276,7 @@ async function runSuite(browser, label) {
     await context.close();
   }
 
-  // No cache + HTTP 500, then Retry. Saved decks stay.
+  // No cache + HTTP 500: the bundled list opens the app. Try again does not clear storage.
   {
     const { context, page, errors } = await open(browser, {
       ua,
@@ -220,15 +285,58 @@ async function runSuite(browser, label) {
       script: init({ optcg_decks_v2: DECK }),
       route: failRoute,
     });
-    await page.waitForFunction(() => {
-      const t = document.getElementById('loadState')?.innerText || '';
-      return t.includes('Failed to load') && t.includes('Retry') && t.includes('not changed');
-    }, null, { timeout: 8000 });
+    await ready(page, 8000);
+    await poll(page, () => page.evaluate(() => {
+      const el = document.getElementById('dataNotice');
+      const t = el ? el.innerText : '';
+      return t.indexOf("Couldn't reach optcgapi.com") !== -1 && t.indexOf('included with this version') !== -1 && t.indexOf('were not changed') !== -1;
+    }), 4000);
+    const saved = await storage(page);
+    check(saved.deck === DECK, `${label} failed load keeps decks`);
+    await hideNews(page);
+    await page.evaluate(() => localStorage.setItem('optcg_sentinel', 'keep-me'));
+    await page.click('#btnRetryData');
+    await poll(page, () => page.evaluate(() => {
+      const btn = document.getElementById('btnRetryData');
+      return !!(btn && !btn.disabled);
+    }), 8000);
+    const after = await page.evaluate(() => ({
+      sentinel: localStorage.getItem('optcg_sentinel'),
+      deck: localStorage.getItem('optcg_decks_v2'),
+      wide: document.documentElement.scrollWidth > innerWidth + 1,
+    }));
+    check(after.sentinel === 'keep-me' && after.deck === DECK, `${label} Try again does not clear storage`, after);
+    check(!after.wide, `${label} offline notice does not scroll sideways`);
+    check(!errors.length, `${label} bundled fallback has no page errors`, errors);
+    await context.close();
+  }
+
+  // No cache, no bundled list, HTTP 500, then Retry. Saved decks stay.
+  {
+    const { context, page, errors } = await open(browser, {
+      ua,
+      width: 360,
+      height: 740,
+      script: init({ optcg_decks_v2: DECK }),
+      route: failRoute,
+      routes: [[/cards-fallback\.json/, blockBundle]],
+    });
+    await poll(page, () => page.evaluate(() => {
+      const el = document.getElementById('loadState');
+      const t = el ? el.innerText : '';
+      return t.indexOf('Failed to load') !== -1 && t.indexOf('Retry') !== -1 && t.indexOf('not changed') !== -1;
+    }), 8000);
     const saved = await storage(page);
     check(saved.deck === DECK, `${label} failed load keeps decks`);
     await page.evaluate(() => localStorage.setItem('optcg_sentinel', 'keep-me'));
-    await page.getByRole('button', { name: 'Retry' }).click();
-    await page.waitForFunction(() => (document.getElementById('loadState')?.innerText || '').includes('Failed to load'), null, { timeout: 8000 });
+    await Promise.all([
+      page.waitForEvent('load'),
+      page.getByRole('button', { name: 'Retry' }).click(),
+    ]);
+    await poll(page, () => page.evaluate(() => {
+      const el = document.getElementById('loadState');
+      return !!(el && el.textContent.indexOf('Failed to load') !== -1);
+    }), 8000);
     const after = await page.evaluate(() => localStorage.getItem('optcg_sentinel'));
     check(after === 'keep-me', `${label} Retry does not clear storage`, { after });
     const wide = await page.evaluate(() => document.documentElement.scrollWidth > innerWidth + 1);
@@ -238,7 +346,7 @@ async function runSuite(browser, label) {
     await context.close();
   }
 
-  // No cache + hung API: the spinner must become the error before the watchdog.
+  // No cache + hung API: the bundled list opens without waiting out the timeout.
   {
     const started = Date.now();
     const { context, page, errors } = await open(browser, {
@@ -246,10 +354,31 @@ async function runSuite(browser, label) {
       script: init({ optcg_decks_v2: DECK }),
       route: hangRoute,
     });
-    await page.waitForFunction(() => {
-      const t = document.getElementById('loadState')?.innerText || '';
-      return t.includes('timed out') && t.includes('Retry');
-    }, null, { timeout: 26000 });
+    await ready(page, 10000);
+    const noticeOn = await page.evaluate(() => (document.getElementById('dataNotice') && document.getElementById('dataNotice').innerText) || '');
+    check(noticeOn.includes("Couldn't reach optcgapi.com"), `${label} hung fetch explains the offline list`, noticeOn);
+    const elapsed = Date.now() - started;
+    check(elapsed < 10000, `${label} hung fetch opens the bundled list`, { elapsed });
+    const saved = await storage(page);
+    check(saved.deck === DECK, `${label} hung fetch keeps decks`);
+    check(!errors.length, `${label} hung fetch has no page errors`, errors);
+    await context.close();
+  }
+
+  // No cache, no bundled list, hung API: the spinner must become the error before the watchdog.
+  {
+    const started = Date.now();
+    const { context, page, errors } = await open(browser, {
+      ua,
+      script: init({ optcg_decks_v2: DECK }),
+      route: hangRoute,
+      routes: [[/cards-fallback\.json/, blockBundle]],
+    });
+    await poll(page, () => page.evaluate(() => {
+      const el = document.getElementById('loadState');
+      const t = el ? el.innerText : '';
+      return t.indexOf('timed out') !== -1 && t.indexOf('Retry') !== -1;
+    }), 26000);
     const elapsed = Date.now() - started;
     check(elapsed < 24000, `${label} hung fetch shows the timeout error`, { elapsed });
     const saved = await storage(page);
@@ -259,16 +388,18 @@ async function runSuite(browser, label) {
     await context.close();
   }
 
-  // Unreadable card cache + failed network.
+  // Unreadable card cache + failed network. The bundled list opens and the bad bytes stay.
   {
-    const { context, page } = await open(browser, {
+    const { context, page, errors } = await open(browser, {
       ua,
       script: init({ optcg_cards_v2: '{', optcg_decks_v2: DECK }),
       route: failRoute,
     });
-    await page.waitForFunction(() => (document.getElementById('loadState')?.innerText || '').includes('Failed to load'), null, { timeout: 8000 });
+    await ready(page, 8000);
     const saved = await storage(page);
-    check(saved.deck === DECK && saved.cache === '{', `${label} corrupt card cache is not required to boot and decks stay`, { cache: saved.cache, deckOk: saved.deck === DECK });
+    const notice = await page.evaluate(() => document.getElementById('dataNotice')?.innerText || '');
+    check(saved.deck === DECK && saved.cache === '{' && notice.includes("Couldn't reach optcgapi.com"), `${label} corrupt card cache is not required to boot and decks stay`, { cache: saved.cache, deckOk: saved.deck === DECK, notice });
+    check(!errors.length, `${label} corrupt card cache has no page errors`, errors);
     await context.close();
   }
 
@@ -423,7 +554,7 @@ async function runSuite(browser, label) {
     });
     const started = Date.now();
     await page.click('#btnRefresh');
-    await page.waitForFunction(() => Number(sessionStorage.getItem('optcg_boots')) >= 2, null, { timeout: 8000 });
+    await poll(page, () => page.evaluate(() => Number(sessionStorage.getItem('optcg_boots')) >= 2), 8000);
     const elapsed = Date.now() - started;
     const info = await page.evaluate(() => ({
       boots: sessionStorage.getItem('optcg_boots'),
@@ -450,14 +581,200 @@ async function runSuite(browser, label) {
     await ready(page, 8000);
     await page.evaluate(() => { document.getElementById('news').hidden = true; });
     await page.fill('#search', 'Network Hero');
-    await page.waitForFunction(() => {
+    await poll(page, () => page.evaluate(() => {
       const ids = [...document.querySelectorAll('#grid .card')].map(el => el.dataset.id);
       return ids.length === 1 && ids[0] === 'ZZ-NET';
-    });
+    }), 8000);
     const saved = await storage(page);
     const cachedNet = saved.cache && saved.cache.includes('ZZ-NET');
     check(saved.deck === DECK && cachedNet, `${label} network load stores cards and keeps decks`, { deckOk: saved.deck === DECK, cachedNet });
     check(!errors.length, `${label} network load has no page errors`, errors);
+    await context.close();
+  }
+
+  // Stale cache, every optcgapi.com request blocked. Art comes from dotgg.
+  {
+    const { context, page, errors } = await open(browser, {
+      ua,
+      width: 360,
+      height: 740,
+      script: init({
+        optcg_cards_v2: cacheRaw(48 * 3600 * 1000, ZORO),
+        optcg_decks_v2: DECK,
+      }),
+      route: route => route.abort(),
+    });
+    await ready(page, 8000);
+    await hideNews(page);
+    await poll(page, () => page.evaluate(() => {
+      const img = document.querySelector('#grid .card[data-id="OP01-001"] img');
+      const noticeEl = document.getElementById('dataNotice');
+      const notice = noticeEl ? noticeEl.innerText : '';
+      const dotgg = [...document.querySelectorAll('#grid .card img')].filter(node => node.naturalWidth > 100 && (node.currentSrc || '').indexOf('static.dotgg.gg') !== -1).length;
+      return !!(img && img.naturalWidth > 100 && (img.currentSrc || '').indexOf('static.dotgg.gg/onepiece/card/OP01-001.webp') !== -1
+        && dotgg >= 6
+        && notice.indexOf("Couldn't reach optcgapi.com") !== -1 && notice.indexOf('saved on this device') !== -1);
+    }), 20000);
+    const tile = await page.evaluate(() => {
+      const el = document.querySelector('#grid .card[data-id="OP01-001"]');
+      const c = byId.get('OP01-001');
+      const imgs = [...document.querySelectorAll('#grid .card img')].filter(img => img.naturalWidth > 100 && (img.currentSrc || '').includes('static.dotgg.gg'));
+      return {
+        name: el.querySelector('.cf-name').textContent,
+        id: el.querySelector('.cf-id').textContent,
+        cost: el.querySelector('.cf-cost').textContent,
+        expect: c.name,
+        expectCost: c.cost != null && c.cost !== '' ? 'Cost ' + c.cost : 'Cost —',
+        shown: getComputedStyle(el.querySelector('img')).opacity === '1',
+        dotgg: imgs.length,
+        wide: document.documentElement.scrollWidth > innerWidth + 1,
+      };
+    });
+    check(tile.dotgg >= 6 && tile.shown && tile.name === tile.expect && tile.id === 'OP01-001' && tile.cost === tile.expectCost && !tile.wide, `${label} blocked optcgapi shows dotgg art`, tile);
+    const saved = await storage(page);
+    check(saved.deck === DECK, `${label} image fallback keeps decks`);
+    check(!errors.length, `${label} image fallback has no page errors`, errors);
+    if (label === 'chromium') await page.screenshot({ path: path.join(shots, 'offline-dotgg-images.png') });
+    await context.close();
+  }
+
+  // No cache, optcgapi.com blocked. The bundled list supplies the cards and dotgg supplies the art.
+  {
+    const { context, page, errors } = await open(browser, {
+      ua,
+      width: 360,
+      height: 740,
+      script: init({ optcg_decks_v2: DECK }),
+      route: route => route.abort(),
+    });
+    await ready(page, 10000);
+    await hideNews(page);
+    await poll(page, () => page.evaluate(() => {
+      const img = document.querySelector('#grid .card[data-id="OP01-001"] img');
+      const noticeEl = document.getElementById('dataNotice');
+      const notice = noticeEl ? noticeEl.innerText : '';
+      return !!(img && img.naturalWidth > 100 && (img.currentSrc || '').indexOf('static.dotgg.gg/onepiece/card/OP01-001.webp') !== -1
+        && notice.indexOf('included with this version') !== -1);
+    }), 20000);
+    const saved = await storage(page);
+    check(saved.deck === DECK, `${label} bundled cards keep decks`);
+    check(!errors.length, `${label} bundled images have no page errors`, errors);
+    await context.close();
+  }
+
+  // A cache that lost img must not call optcgapi.com just to discover the picture.
+  {
+    let hits = 0;
+    const { context, page, errors } = await open(browser, {
+      ua,
+      script: init({
+        optcg_cards_v2: cacheRaw(0, GAP),
+        optcg_decks_v2: DECK,
+      }),
+      route: route => { hits++; return route.abort(); },
+    });
+    await ready(page, 4000);
+    await hideNews(page);
+    await page.fill('#search', 'OP01-077');
+    await poll(page, () => page.evaluate(() => {
+      const img = document.querySelector('#grid .card[data-id="OP01-077"] img');
+      return !!(img && img.naturalWidth > 100 && (img.currentSrc || '').indexOf('static.dotgg.gg/onepiece/card/OP01-077.webp') !== -1);
+    }), 15000);
+    const face = await page.evaluate(() => {
+      const el = document.querySelector('#grid .card[data-id="OP01-077"]');
+      return {
+        name: el.querySelector('.cf-name').textContent,
+        id: el.querySelector('.cf-id').textContent,
+        cost: el.querySelector('.cf-cost').textContent,
+      };
+    });
+    check(hits === 0 && face.name === 'Image Gap' && face.id === 'OP01-077' && face.cost === 'Cost 2', `${label} missing img uses dotgg without calling optcgapi`, { hits, face });
+    const saved = await storage(page);
+    check(saved.deck === DECK, `${label} missing img keeps decks`);
+    check(!errors.length, `${label} missing img has no page errors`, errors);
+    await context.close();
+  }
+
+  // Cache present, optcgapi.com and dotgg both blocked. The tile shows name, id, and cost.
+  {
+    const { context, page, errors } = await open(browser, {
+      ua,
+      width: 360,
+      height: 740,
+      script: init({
+        optcg_cards_v2: cacheRaw(0, PLACE),
+        optcg_decks_v2: DECK,
+      }),
+      route: route => route.abort(),
+      routes: [[/static\.dotgg\.gg/, route => route.abort()]],
+    });
+    await ready(page, 4000);
+    await hideNews(page);
+    await page.fill('#search', 'Placeholder Pia');
+    await poll(page, () => page.evaluate(() => {
+      const img = document.querySelector('#grid .card[data-id="ZZ-PLACE"] img');
+      return !!(img && img.classList.contains('is-broken'));
+    }), 8000);
+    const tile = await page.evaluate(() => {
+      const el = document.querySelector('#grid .card[data-id="ZZ-PLACE"]');
+      const img = el.querySelector('img');
+      const face = el.querySelector('.card-fallback');
+      const fr = face.getBoundingClientRect();
+      const cs = getComputedStyle(img);
+      return {
+        name: face.querySelector('.cf-name').textContent,
+        id: face.querySelector('.cf-id').textContent,
+        cost: face.querySelector('.cf-cost').textContent,
+        hidden: cs.display === 'none' || cs.opacity === '0',
+        faceH: fr.height,
+        faceW: fr.width,
+        text: face.innerText.replace(/\s+/g, ' '),
+      };
+    });
+    check(tile.name === 'Placeholder Pia' && tile.id === 'ZZ-PLACE' && tile.cost === 'Cost 3' && tile.hidden && tile.faceH > 40 && tile.faceW > 40, `${label} failed art shows name, id, and cost`, tile);
+    const saved = await storage(page);
+    check(saved.deck === DECK, `${label} placeholder keeps decks`);
+    check(!errors.length, `${label} placeholder has no page errors`, errors);
+    if (label === 'chromium') await page.screenshot({ path: path.join(shots, 'offline-text-placeholder.png') });
+    await context.close();
+  }
+
+  // No cache, both image hosts blocked. Bundled card data still fills the tile.
+  {
+    const { context, page, errors } = await open(browser, {
+      ua,
+      width: 360,
+      height: 740,
+      script: init({ optcg_decks_v2: DECK }),
+      route: route => route.abort(),
+      routes: [[/static\.dotgg\.gg/, route => route.abort()]],
+    });
+    await ready(page, 10000);
+    await hideNews(page);
+    await page.fill('#search', 'OP01-001');
+    await poll(page, () => page.evaluate(() => {
+      const img = document.querySelector('#grid .card[data-id="OP01-001"] img');
+      const noticeEl = document.getElementById('dataNotice');
+      const notice = noticeEl ? noticeEl.innerText : '';
+      return !!(img && img.classList.contains('is-broken') && notice.indexOf("Couldn't reach optcgapi.com") !== -1);
+    }), 8000);
+    const tile = await page.evaluate(() => {
+      const el = document.querySelector('#grid .card[data-id="OP01-001"]');
+      const c = byId.get('OP01-001');
+      const face = el.querySelector('.card-fallback');
+      return {
+        name: face.querySelector('.cf-name').textContent,
+        id: face.querySelector('.cf-id').textContent,
+        cost: face.querySelector('.cf-cost').textContent,
+        expect: c.name,
+        expectCost: c.cost != null && c.cost !== '' ? 'Cost ' + c.cost : 'Cost —',
+        hidden: getComputedStyle(el.querySelector('img')).display === 'none',
+      };
+    });
+    check(tile.name === tile.expect && tile.id === 'OP01-001' && tile.cost === tile.expectCost && tile.hidden && tile.name.length > 1, `${label} bundled tile shows text when art is blocked`, tile);
+    const saved = await storage(page);
+    check(saved.deck === DECK, `${label} bundled placeholder keeps decks`);
+    check(!errors.length, `${label} bundled placeholder has no page errors`, errors);
     await context.close();
   }
 }
@@ -472,4 +789,5 @@ finally { await kit.close(); }
 
 console.log('FAILS', fails.length);
 fails.forEach(f => console.log(' -', f));
+if (server) server.kill();
 if (fails.length) process.exit(1);
