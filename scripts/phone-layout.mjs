@@ -105,6 +105,146 @@ async function layout(page) {
   });
 }
 
+async function gridTiles(page, label, shots) {
+  await page.waitForFunction(() => document.querySelectorAll('#grid .card .add-bar button').length >= 6);
+  const imgDeadline = Date.now() + 8000;
+  while (Date.now() < imgDeadline) {
+    const loaded = await page.evaluate(() => [...document.querySelectorAll('#grid .card img')].slice(0, 9).filter(img => img.classList.contains('is-loaded') && img.naturalWidth > 0).length);
+    if (loaded >= 3) break;
+    await page.waitForTimeout(80);
+  }
+  const geom = await page.evaluate(() => {
+    const cards = [...document.querySelectorAll('#grid .card')];
+    const sample = cards.slice(0, 12);
+    const groups = new Map();
+    for (const el of sample) {
+      const top = Math.round(el.getBoundingClientRect().top);
+      const key = [...groups.keys()].find(k => Math.abs(k - top) < 4);
+      groups.set(key == null ? top : key, (groups.get(key == null ? top : key) || 0) + 1);
+    }
+    const cols = groups.size ? Math.max(...groups.values()) : 0;
+    const tiles = cards.slice(0, 24).map(el => {
+      const art = el.querySelector('.card-art');
+      const img = el.querySelector('img');
+      const bar = el.querySelector('.add-bar');
+      const btn = bar && bar.querySelector('button');
+      const name = el.querySelector('.cf-name');
+      const ar = art.getBoundingClientRect();
+      const br = bar.getBoundingClientRect();
+      const ir = img.getBoundingClientRect();
+      const nr = name.getBoundingClientRect();
+      const bt = btn.getBoundingClientRect();
+      const overlaps = (a, b) => a.height > 1 && b.height > 1 && a.bottom > b.top + 1 && a.top < b.bottom - 1 && a.right > b.left + 1 && a.left < b.right - 1;
+      const buttons = [...bar.querySelectorAll('button')].map(b => {
+        const r = b.getBoundingClientRect();
+        return { w: Math.round(r.width), h: Math.round(r.height), text: (b.textContent || '').trim() };
+      });
+      return {
+        id: el.dataset.id,
+        name: name.textContent,
+        artH: Math.round(ar.height),
+        artW: Math.round(ar.width),
+        tileH: Math.round(el.getBoundingClientRect().height),
+        barTop: Math.round(br.top),
+        artBottom: Math.round(ar.bottom),
+        artCovered: overlaps(ar, br),
+        imgCovered: ir.height > 2 && overlaps(ir, br),
+        nameCovered: overlaps(nr, br),
+        ratio: ar.width > 0 ? ar.height / ar.width : 0,
+        buttons,
+        inView: bt.width > 0 && el.getBoundingClientRect().right <= innerWidth + 1 && el.getBoundingClientRect().left >= -1,
+      };
+    });
+    return { cols, n: cards.length, tiles };
+  });
+  check(geom.cols === 3 && geom.n >= 6, `${label} grid stays 3 columns`, { cols: geom.cols, n: geom.n });
+  const bad = geom.tiles.filter(t =>
+    t.artCovered || t.imgCovered || t.nameCovered ||
+    t.barTop + 1 < t.artBottom ||
+    t.ratio < 1.3 || t.ratio > 1.5 ||
+    t.tileH > t.artH + 56 ||
+    t.buttons.length < 1 ||
+    t.buttons.some(b => b.h < 34 || b.w < 40)
+  );
+  check(bad.length === 0, `${label} controls sit below the card art`, bad.slice(0, 4));
+  const wide = geom.tiles.filter(t => t.inView && t.buttons.length === 1 && t.buttons[0].w < t.artW * 0.7);
+  check(wide.length === 0, `${label} leader control stays wide enough to tap`, wide.slice(0, 3));
+  if (shots.tiles) await page.screenshot({ path: path.join(out, shots.tiles) });
+
+  const saved = await page.evaluate(() => localStorage.getItem('optcg_decks_v2'));
+  try {
+    await page.fill('#search', 'OP18-003');
+    await page.waitForFunction(() => {
+      const el = document.querySelector('#grid .card[data-id="OP18-003"]');
+      return !!(el && el.querySelector('.b-add') && el.querySelector('.b-rem'));
+    });
+    await page.click('#grid .card[data-id="OP18-003"] .b-add');
+    await page.waitForFunction(() => {
+      const store = JSON.parse(localStorage.getItem('optcg_decks_v2'));
+      const badge = document.querySelector('#grid .card[data-id="OP18-003"] .qty-badge');
+      return store.decks[store.cur].cards['OP18-003'] === 3 && badge && badge.textContent === '3';
+    });
+    const added = await page.evaluate(() => ({
+      modal: document.getElementById('modal').classList.contains('open'),
+      qty: JSON.parse(localStorage.getItem('optcg_decks_v2')).decks.d1.cards['OP18-003'],
+    }));
+    check(added.qty === 3 && !added.modal, `${label} tile + adds a copy`, added);
+    await page.click('#grid .card[data-id="OP18-003"] .b-rem');
+    await page.waitForFunction(() => {
+      const store = JSON.parse(localStorage.getItem('optcg_decks_v2'));
+      const badge = document.querySelector('#grid .card[data-id="OP18-003"] .qty-badge');
+      return store.decks[store.cur].cards['OP18-003'] === 2 && badge && badge.textContent === '2';
+    });
+    check(true, `${label} tile − removes a copy`);
+
+    await page.fill('#search', 'OP18-001');
+    await page.waitForFunction(() => {
+      const el = document.querySelector('#grid .card[data-id="OP18-001"]');
+      return !!(el && el.querySelector('.add-bar .b-add'));
+    });
+    await page.click('#grid .card[data-id="OP18-001"] .add-bar .b-add');
+    await page.waitForFunction(() => {
+      const store = JSON.parse(localStorage.getItem('optcg_decks_v2'));
+      return store.decks[store.cur].leader == null && !document.querySelector('#grid .card[data-id="OP18-001"] .qty-badge');
+    });
+    check(true, `${label} tile clears the leader`);
+    await page.click('#grid .card[data-id="OP18-001"] .add-bar .b-add');
+    await page.waitForFunction(() => {
+      const store = JSON.parse(localStorage.getItem('optcg_decks_v2'));
+      const badge = document.querySelector('#grid .card[data-id="OP18-001"] .qty-badge');
+      return store.decks[store.cur].leader === 'OP18-001' && badge && badge.textContent === 'L';
+    });
+    check(true, `${label} tile sets the leader`);
+
+    await page.fill('#search', 'OP18-006');
+    await page.waitForFunction(() => !!document.querySelector('#grid .card[data-id="OP18-006"] .card-art'));
+    await page.click('#grid .card[data-id="OP18-006"] .card-art');
+    await page.waitForFunction(() => document.getElementById('modalbox')?.dataset.cardId === 'OP18-006');
+    check(true, `${label} tile art still opens the card`);
+    await page.click('.modalclose');
+    await page.waitForFunction(() => !document.getElementById('modal').classList.contains('open'));
+  } finally {
+    await page.evaluate((raw) => {
+      document.getElementById('modal')?.classList.remove('open');
+      if (raw) {
+        localStorage.setItem('optcg_decks_v2', raw);
+        const savedStore = JSON.parse(raw);
+        const d = savedStore.decks[savedStore.cur];
+        deck.leader = d.leader ?? null;
+        deck.cards = d.cards || {};
+        deck.name = d.name;
+        deck.notes = d.notes || '';
+        deck.matches = d.matches || [];
+        deck.updated = d.updated;
+      }
+      const search = document.getElementById('search');
+      search.value = '';
+      search.oninput({ target: search });
+      renderDeck();
+    }, saved);
+  }
+}
+
 async function run(browserType, label, contextOpts, insets, shots) {
   const browser = await browserType.launch();
   const context = await browser.newContext(contextOpts);
@@ -177,6 +317,8 @@ async function run(browserType, label, contextOpts, insets, shots) {
   check(parseFloat(main.searchFont) >= 16 && parseFloat(main.sortFont) >= 16 && parseFloat(main.taFont) >= 16, `${label} inputs at least 16px`, main);
   if (shots.main) await page.screenshot({ path: path.join(out, shots.main) });
   console.log(label, 'searchTop', main.searchTop, 'barPad', main.barPad, 'gridPad', main.gridPad, 'fonts', main.searchFont);
+
+  await gridTiles(page, label, shots);
 
   await page.click('#btnNews');
   await page.waitForSelector('#newsList .newsrow');
@@ -699,6 +841,7 @@ const island = { top: 59, bottom: 34, left: 0, right: 0 };
 await run(webkit, 'webkit-iphone16', iphone(393, 852, 3), island, {
   news: 'webkit-iphone16-news.png',
   main: 'webkit-iphone16-main.png',
+  tiles: 'webkit-iphone16-tiles.png',
   card: 'webkit-iphone16-card.png',
   deck: 'webkit-iphone16-deck.png',
   simSetup: 'webkit-iphone16-don-setup.png',
@@ -724,6 +867,7 @@ await run(webkit, 'webkit-promax', iphone(430, 932, 3), island, {});
 const android = (w, h) => ({ viewport: { width: w, height: h }, deviceScaleFactor: 2, isMobile: true, hasTouch: true });
 await run(chromium, 'chromium-360', android(360, 740), null, {
   news: 'chromium-360-news.png',
+  tiles: 'chromium-360-tiles.png',
   simSetup: 'chromium-360-don-setup.png',
   simPick: 'chromium-360-don-hand.png',
   simPlay: 'chromium-360-don-play.png',
@@ -739,6 +883,7 @@ await run(chromium, 'chromium-360', android(360, 740), null, {
 });
 await run(chromium, 'chromium-390', android(390, 844), null, {
   main: 'chromium-390-main.png',
+  tiles: 'chromium-390-tiles.png',
   simPlay: 'chromium-390-don-play.png',
   news: 'chromium-390-news.png',
   'ST37-015': 'chromium-390-st37-015.png',
@@ -750,6 +895,7 @@ await run(chromium, 'chromium-390', android(390, 844), null, {
 });
 await run(chromium, 'chromium-412', android(412, 915), null, {
   news: 'chromium-412-news.png',
+  tiles: 'chromium-412-tiles.png',
   simSetup: 'chromium-412-don-setup.png',
   simPlay: 'chromium-412-don-play.png',
   'ST37-001': 'chromium-412-st37-001.png',
@@ -761,6 +907,53 @@ await run(chromium, 'chromium-412', android(412, 915), null, {
   'OP18-117': 'chromium-412-op18-117.png',
   'OP18-079': 'chromium-412-op18-079.png',
 });
+
+async function desktopTiles() {
+  const browser = await chromium.launch();
+  const context = await browser.newContext({ viewport: { width: 1280, height: 800 } });
+  await context.addInitScript(seed(null));
+  const page = await context.newPage();
+  useDirectPoll(page);
+  const errors = [];
+  page.on('pageerror', e => errors.push(String(e)));
+  await page.goto('http://127.0.0.1:8765/index.html', { waitUntil: 'domcontentloaded' });
+  await page.waitForFunction(() => document.querySelectorAll('#newsList .newsrow').length > 50, { timeout: 20000 });
+  await page.click('#newsClose');
+  await page.waitForFunction(() => document.querySelectorAll('#grid .card').length >= 6);
+  const rest = await page.evaluate(() => {
+    const cards = [...document.querySelectorAll('#grid .card')].slice(0, 12);
+    const tops = cards.map(el => Math.round(el.getBoundingClientRect().top));
+    const cols = tops.filter(t => Math.abs(t - tops[0]) < 4).length;
+    const shown = cards.filter(el => getComputedStyle(el.querySelector('.add-bar')).display !== 'none');
+    const covered = cards.filter(el => {
+      const art = el.querySelector('.card-art').getBoundingClientRect();
+      const bar = el.querySelector('.add-bar').getBoundingClientRect();
+      return bar.height > 1 && bar.top < art.bottom - 1;
+    });
+    const tile = cards[0].getBoundingClientRect().height;
+    const art = cards[0].querySelector('.card-art').getBoundingClientRect().height;
+    return { cols, shown: shown.length, covered: covered.length, tile: Math.round(tile), art: Math.round(art) };
+  });
+  check(!errors.length && rest.cols >= 4 && rest.shown === 0 && rest.covered === 0 && rest.tile <= rest.art + 2, 'desktop controls stay hidden until hover', rest);
+  await page.screenshot({ path: path.join(out, 'desktop-grid.png') });
+  const saved = await page.evaluate(() => localStorage.getItem('optcg_decks_v2'));
+  try {
+    await page.fill('#search', 'OP18-003');
+    await page.waitForFunction(() => !!document.querySelector('#grid .card[data-id="OP18-003"] .b-add'));
+    await page.hover('#grid .card[data-id="OP18-003"]');
+    const hover = await page.evaluate(() => getComputedStyle(document.querySelector('#grid .card[data-id="OP18-003"] .add-bar')).display);
+    check(hover === 'flex', 'desktop hover shows the controls', hover);
+    await page.click('#grid .card[data-id="OP18-003"] .b-add');
+    await page.waitForFunction(() => JSON.parse(localStorage.getItem('optcg_decks_v2')).decks.d1.cards['OP18-003'] === 3);
+    await page.click('#grid .card[data-id="OP18-003"] .b-rem');
+    await page.waitForFunction(() => JSON.parse(localStorage.getItem('optcg_decks_v2')).decks.d1.cards['OP18-003'] === 2);
+    check(true, 'desktop tile +/− still changes the count');
+  } finally {
+    await page.evaluate((raw) => { if (raw) localStorage.setItem('optcg_decks_v2', raw); }, saved);
+  }
+  await browser.close();
+}
+await desktopTiles();
 
 console.log('FAILS', fails.length);
 fails.forEach(f => console.log(' -', f));
